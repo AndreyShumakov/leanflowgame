@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ITIL 4 Games - Интерактивные игры</title>
+    <link href="https://fonts.googleapis.com/css2?family=Russo+One&family=Exo+2:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0a0e17;
+            --bg-card: #141b2d;
+            --text-primary: #e8e8e8;
+            --text-secondary: #8892a0;
+            --accent-1: #00d9a5;
+            --accent-2: #3498db;
+            --accent-3: #9b59b6;
+            --accent-4: #e74c3c;
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Exo 2', sans-serif;
+            background: var(--bg-dark);
+            background-image: 
+                radial-gradient(ellipse at 10% 20%, rgba(0, 217, 165, 0.1) 0%, transparent 50%),
+                radial-gradient(ellipse at 90% 80%, rgba(155, 89, 182, 0.1) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 50%, rgba(52, 152, 219, 0.05) 0%, transparent 70%);
+            min-height: 100vh;
+            color: var(--text-primary);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+        
+        .logo {
+            font-size: 4em;
+            margin-bottom: 10px;
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .title {
+            font-family: 'Russo One', sans-serif;
+            font-size: 3em;
+            background: linear-gradient(135deg, var(--accent-1) 0%, var(--accent-2) 50%, var(--accent-3) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 1.3em;
+            font-weight: 300;
+        }
+        
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            max-width: 1200px;
+            width: 100%;
+        }
+        
+        .game-card {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid rgba(255,255,255,0.05);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+        
+        .game-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent-1), var(--accent-2), var(--accent-3));
+        }
+        
+        .game-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+            border-color: rgba(52, 152, 219, 0.3);
+        }
+        
+        .game-card:hover .game-icon {
+            transform: scale(1.1) rotate(5deg);
+        }
+        
+        .game-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+            display: block;
+            transition: transform 0.3s ease;
+        }
+        
+        .game-title {
+            font-family: 'Russo One', sans-serif;
+            font-size: 1.5em;
+            margin-bottom: 10px;
+            color: var(--text-primary);
+        }
+        
+        .game-description {
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        
+        .game-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .tag {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: 600;
+        }
+        
+        .tag-incident { background: rgba(231, 76, 60, 0.2); color: #e74c3c; }
+        .tag-problem { background: rgba(155, 89, 182, 0.2); color: #9b59b6; }
+        .tag-change { background: rgba(52, 152, 219, 0.2); color: #3498db; }
+        .tag-knowledge { background: rgba(39, 174, 96, 0.2); color: #27ae60; }
+        .tag-interactive { background: rgba(241, 196, 15, 0.2); color: #f1c40f; }
+        
+        .play-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 25px;
+            background: linear-gradient(135deg, var(--accent-1) 0%, var(--accent-2) 100%);
+            border-radius: 30px;
+            font-weight: 600;
+            color: white;
+            transition: all 0.3s ease;
+        }
+        
+        .game-card:hover .play-btn {
+            box-shadow: 0 5px 20px rgba(0, 217, 165, 0.4);
+        }
+        
+        .coming-soon {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+        
+        .coming-soon .play-btn {
+            background: linear-gradient(135deg, #34495e 0%, #5d6d7e 100%);
+        }
+        
+        .badge-new {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, var(--accent-4) 0%, #c0392b 100%);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: 600;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        .footer {
+            margin-top: 60px;
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.9em;
+        }
+        
+        .footer a {
+            color: var(--accent-2);
+            text-decoration: none;
+        }
+        
+        @media (max-width: 768px) {
+            .title { font-size: 2em; }
+            .games-grid { grid-template-columns: 1fr; }
+            .logo { font-size: 3em; }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo">🎮</div>
+        <h1 class="title">ITIL 4 Games</h1>
+        <p class="subtitle">Интерактивные бизнес-игры для изучения ITSM</p>
+    </header>
+    
+    <main class="games-grid">
+        <a href="itsm_board_game.html" class="game-card">
+            <span class="badge-new">NEW</span>
+            <span class="game-icon">🎯</span>
+            <h2 class="game-title">ITSM Operations</h2>
+            <p class="game-description">
+                Настольная бизнес-игра для эмуляции процессов управления инцидентами, 
+                проблемами, изменениями и базой знаний. Создавайте связи между процессами!
+            </p>
+            <div class="game-tags">
+                <span class="tag tag-incident">Инциденты</span>
+                <span class="tag tag-problem">Проблемы</span>
+                <span class="tag tag-change">Изменения</span>
+                <span class="tag tag-knowledge">База знаний</span>
+            </div>
+            <div class="play-btn">
+                <span>▶</span>
+                <span>Играть</span>
+            </div>
+        </a>
+        
+        <a href="interactive_viewer.html" class="game-card">
+            <span class="game-icon">🃏</span>
+            <h2 class="game-title">Интерактивные карточки</h2>
+            <p class="game-description">
+                Коллекция карточных игр по темам ITIL 4: Memory, Domino, True/False, 
+                Matching, Puzzle, Bingo, Quiz и другие форматы обучения.
+            </p>
+            <div class="game-tags">
+                <span class="tag tag-interactive">15+ игр</span>
+                <span class="tag tag-knowledge">3 темы</span>
+            </div>
+            <div class="play-btn">
+                <span>▶</span>
+                <span>Открыть</span>
+            </div>
+        </a>
+        
+        <a href="lean_flow_game.html" class="game-card">
+            <span class="badge-new">NEW</span>
+            <span class="game-icon">🏭</span>
+            <h2 class="game-title">Lean Flow Master</h2>
+            <p class="game-description">
+                Симулятор бережливого производства с Kanban-доской. Устраняйте 8 видов потерь (MUDA), 
+                применяйте Kaizen и 5S, изучая связь Lean с ITIL 4.
+            </p>
+            <div class="game-tags">
+                <span class="tag tag-change">Lean</span>
+                <span class="tag tag-problem">8 MUDA</span>
+                <span class="tag tag-knowledge">Kanban</span>
+                <span class="tag tag-incident">Kaizen</span>
+            </div>
+            <div class="play-btn">
+                <span>▶</span>
+                <span>Играть</span>
+            </div>
+        </a>
+        
+        <div class="game-card coming-soon">
+            <span class="game-icon">🏢</span>
+            <h2 class="game-title">Service Value Chain</h2>
+            <p class="game-description">
+                Симулятор цепочки создания ценности. Управляйте потоками работ 
+                через Plan, Improve, Engage, Design, Obtain, Deliver.
+            </p>
+            <div class="game-tags">
+                <span class="tag tag-change">SVS</span>
+                <span class="tag tag-problem">Value Streams</span>
+            </div>
+            <div class="play-btn">
+                <span>🔒</span>
+                <span>Скоро</span>
+            </div>
+        </div>
+        
+        <div class="game-card coming-soon">
+            <span class="game-icon">⚖️</span>
+            <h2 class="game-title">7 Guiding Principles</h2>
+            <p class="game-description">
+                Интерактивный тренажёр по 7 руководящим принципам ITIL 4. 
+                Решайте кейсы, применяя правильные принципы.
+            </p>
+            <div class="game-tags">
+                <span class="tag tag-knowledge">Принципы</span>
+                <span class="tag tag-interactive">Кейсы</span>
+            </div>
+            <div class="play-btn">
+                <span>🔒</span>
+                <span>Скоро</span>
+            </div>
+        </div>
+    </main>
+    
+    <footer class="footer">
+        <p>ITIL 4 Games © 2025 | Обучающие материалы по ITSM</p>
+        <p style="margin-top: 10px;">
+            <a href="https://www.axelos.com/certifications/itil-service-management" target="_blank">О стандарте ITIL 4</a>
+        </p>
+    </footer>
+</body>
+</html>
+
