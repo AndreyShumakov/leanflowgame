@@ -1,0 +1,1760 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevOps Dice - Командная игра на кубиках</title>
+    <link href="https://fonts.googleapis.com/css2?family=Russo+One&family=Exo+2:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0a0e17;
+            --bg-card: #141b2d;
+            --bg-panel: #1a2332;
+            --text-primary: #e8e8e8;
+            --text-secondary: #8892a0;
+            --yellow: #f1c40f;
+            --green: #2ecc71;
+            --red: #e74c3c;
+            --purple: #9b59b6;
+            --blue: #3498db;
+            --cyan: #00d9a5;
+            --orange: #e67e22;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Exo 2', sans-serif;
+            background: var(--bg-dark);
+            background-image:
+                radial-gradient(ellipse at 20% 20%, rgba(241,196,15,0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(46,204,113,0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 50%, rgba(231,76,60,0.05) 0%, transparent 70%);
+            min-height: 100vh;
+            color: var(--text-primary);
+            padding: 15px;
+        }
+        .container { max-width: 1400px; margin: 0 auto; }
+
+        /* Header */
+        .header { text-align: center; margin-bottom: 20px; }
+        .title {
+            font-family: 'Russo One', sans-serif;
+            font-size: 2.5em;
+            background: linear-gradient(135deg, var(--yellow), var(--green), var(--red));
+            background-clip: text; -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .subtitle { color: var(--text-secondary); font-size: 1.1em; }
+
+        /* Layout */
+        .layout { display: grid; grid-template-columns: 280px 1fr 330px; gap: 15px; }
+        .panel { background: var(--bg-card); border-radius: 12px; padding: 15px;
+            border: 1px solid rgba(255,255,255,0.05); }
+        .panel-title { font-family: 'Russo One', sans-serif; font-size: 1em; margin-bottom: 12px;
+            display: flex; align-items: center; gap: 8px; }
+
+        /* Stats */
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 15px; }
+        .stat-box { background: rgba(0,0,0,0.3); border-radius: 8px; padding: 10px; text-align: center; }
+        .stat-value { font-size: 1.5em; font-weight: 700; }
+        .stat-label { font-size: 0.75em; color: var(--text-secondary); }
+
+        /* Buttons */
+        .btn { padding: 12px 20px; border: none; border-radius: 8px; cursor: pointer;
+            font-family: 'Exo 2', sans-serif; font-weight: 600; transition: all 0.3s; width: 100%; margin-bottom: 8px; }
+        .btn:hover:not(:disabled) { transform: translateY(-2px); }
+        .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        .btn-start { background: linear-gradient(135deg, var(--green), #1abc9c); color: white; }
+        .btn-roll { background: linear-gradient(135deg, var(--blue), #2980b9); color: white; }
+        .btn-next { background: linear-gradient(135deg, var(--purple), #8e44ad); color: white; }
+        .btn-reset { background: linear-gradient(135deg, var(--red), #c0392b); color: white; }
+        .btn-rules { background: linear-gradient(135deg, var(--orange), #d35400); color: white; }
+
+        /* Main Board */
+        .board { min-height: 500px; }
+
+        /* Players Area */
+        .players-area { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .player-card {
+            background: var(--bg-panel);
+            border-radius: 12px;
+            padding: 15px;
+            border: 2px solid transparent;
+            transition: all 0.3s;
+        }
+        .player-card.active {
+            border-color: var(--cyan);
+            box-shadow: 0 0 20px rgba(0,217,165,0.3);
+        }
+        .player-card.selecting {
+            border-color: var(--yellow);
+            box-shadow: 0 0 30px rgba(241,196,15,0.5);
+            animation: select-pulse 1s infinite;
+        }
+        @keyframes select-pulse {
+            0%, 100% { box-shadow: 0 0 20px rgba(241,196,15,0.3); }
+            50% { box-shadow: 0 0 40px rgba(241,196,15,0.6); }
+        }
+        .player-card.winner {
+            border-color: var(--yellow);
+            box-shadow: 0 0 30px rgba(241,196,15,0.5);
+        }
+        .player-card.leader {
+            border-color: var(--cyan);
+            background: linear-gradient(135deg, var(--bg-panel), rgba(0,217,165,0.1));
+        }
+        .player-card.leader::after {
+            content: '👑';
+            position: absolute;
+            top: -10px;
+            right: 10px;
+            font-size: 1.5em;
+            animation: crown-bounce 1s infinite;
+        }
+        @keyframes crown-bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+        .player-card { position: relative; }
+        .player-name { font-weight: 700; font-size: 1.1em; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+        .player-score { color: var(--cyan); font-size: 0.9em; display: flex; align-items: center; gap: 10px; }
+        .player-rank {
+            background: rgba(0,217,165,0.2);
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.8em;
+            color: var(--cyan);
+        }
+        .player-rank.first { background: rgba(241,196,15,0.3); color: var(--yellow); }
+        .player-rank.second { background: rgba(192,192,192,0.3); color: #c0c0c0; }
+        .player-rank.third { background: rgba(205,127,50,0.3); color: #cd7f32; }
+
+        /* Progress Bar */
+        .player-progress { margin-top: 8px; }
+        .progress-bar {
+            height: 6px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 4px;
+        }
+        .progress-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.5s ease;
+            background: linear-gradient(90deg, var(--cyan), var(--green));
+        }
+        .progress-label {
+            font-size: 0.7em;
+            color: var(--text-secondary);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .player-dice { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+        .player-artifacts { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 5px; }
+        .player-stats-mini {
+            display: flex;
+            gap: 10px;
+            margin-top: 8px;
+            font-size: 0.75em;
+            color: var(--text-secondary);
+        }
+        .player-stats-mini span { display: flex; align-items: center; gap: 3px; }
+
+        /* Points Budget */
+        .player-budget {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 5px;
+            margin-top: 10px;
+            padding: 8px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 8px;
+        }
+        .budget-item {
+            text-align: center;
+            padding: 4px;
+        }
+        .budget-value {
+            font-size: 1.1em;
+            font-weight: 700;
+        }
+        .budget-label {
+            font-size: 0.65em;
+            color: var(--text-secondary);
+        }
+        .budget-earned .budget-value { color: var(--green); }
+        .budget-spent .budget-value { color: var(--orange); }
+        .budget-available .budget-value { color: var(--cyan); }
+
+        /* Current Player Budget Panel */
+        .current-budget {
+            background: linear-gradient(135deg, rgba(0,217,165,0.15), rgba(52,152,219,0.15));
+            border: 1px solid rgba(0,217,165,0.3);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            display: none;
+        }
+        .current-budget.active { display: block; }
+        .current-budget-title {
+            font-family: 'Russo One', sans-serif;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .current-budget-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+        .current-budget-item {
+            text-align: center;
+            padding: 10px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 8px;
+        }
+        .current-budget-value {
+            font-size: 1.5em;
+            font-weight: 700;
+        }
+        .current-budget-label {
+            font-size: 0.75em;
+            color: var(--text-secondary);
+        }
+        .artifact-badge {
+            background: rgba(155,89,182,0.3);
+            padding: 3px 8px;
+            border-radius: 5px;
+            font-size: 0.7em;
+            color: var(--purple);
+            cursor: pointer;
+        }
+
+        /* Dice */
+        .dice {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            font-weight: 700;
+            color: #1a1a2e;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            user-select: none;
+        }
+        .dice:hover:not(.taken):not(.disabled) { transform: scale(1.15); box-shadow: 0 0 20px rgba(255,255,255,0.5); }
+        .dice.yellow { background: linear-gradient(135deg, var(--yellow), #f39c12); }
+        .dice.green { background: linear-gradient(135deg, var(--green), #27ae60); }
+        .dice.red { background: linear-gradient(135deg, var(--red), #c0392b); }
+        .dice.rolling { animation: roll 0.5s ease-in-out; }
+        .dice.selected { box-shadow: 0 0 20px rgba(255,255,255,0.9); transform: scale(1.15); border: 3px solid white; }
+        .dice.taken { opacity: 0.3; cursor: not-allowed; transform: scale(0.9); }
+        .dice.disabled { cursor: not-allowed; opacity: 0.5; }
+        @keyframes roll {
+            0% { transform: rotate(0deg) scale(1); }
+            25% { transform: rotate(90deg) scale(1.2); }
+            50% { transform: rotate(180deg) scale(1); }
+            75% { transform: rotate(270deg) scale(1.2); }
+            100% { transform: rotate(360deg) scale(1); }
+        }
+        .dice-small {
+            width: 35px;
+            height: 35px;
+            font-size: 1.1em;
+            border-radius: 6px;
+        }
+
+        /* Dice Pool */
+        .dice-pool {
+            background: rgba(0,0,0,0.3);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .dice-pool-title { font-weight: 600; margin-bottom: 15px; color: var(--text-secondary); display: flex; justify-content: space-between; align-items: center; }
+        .dice-pool-grid { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
+
+        /* Selection Timer */
+        .selection-timer {
+            background: linear-gradient(135deg, var(--orange), var(--red));
+            padding: 15px 25px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 2em;
+            font-weight: 700;
+            display: none;
+        }
+        .selection-timer.active { display: block; animation: timer-pulse 1s infinite; }
+        @keyframes timer-pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        .selection-info {
+            background: rgba(241,196,15,0.2);
+            border: 2px solid var(--yellow);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            text-align: center;
+            display: none;
+        }
+        .selection-info.active { display: block; }
+        .selection-info h3 { color: var(--yellow); margin-bottom: 5px; }
+
+        /* Leaderboard */
+        .leaderboard {
+            background: rgba(0,0,0,0.3);
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 15px;
+        }
+        .leaderboard-title {
+            font-family: 'Russo One', sans-serif;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .leaderboard-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px;
+            margin-bottom: 5px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        .leaderboard-item.top { background: rgba(241,196,15,0.15); border: 1px solid rgba(241,196,15,0.3); }
+        .leaderboard-rank { font-size: 1.2em; width: 25px; text-align: center; }
+        .leaderboard-name { flex: 1; font-weight: 600; font-size: 0.9em; }
+        .leaderboard-score { font-weight: 700; color: var(--cyan); }
+        .leaderboard-bar {
+            width: 100%;
+            height: 4px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 2px;
+            margin-top: 5px;
+            overflow: hidden;
+        }
+        .leaderboard-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--cyan), var(--yellow));
+            transition: width 0.5s ease;
+        }
+
+        /* Game Progress */
+        .game-progress {
+            background: linear-gradient(135deg, rgba(0,217,165,0.1), rgba(52,152,219,0.1));
+            border: 1px solid rgba(0,217,165,0.3);
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 15px;
+        }
+        .game-progress-title {
+            font-size: 0.85em;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+        .game-progress-stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+        }
+        .game-progress-stat {
+            text-align: center;
+        }
+        .game-progress-value {
+            font-size: 1.1em;
+            font-weight: 700;
+            color: var(--cyan);
+        }
+        .game-progress-label {
+            font-size: 0.7em;
+            color: var(--text-secondary);
+        }
+
+        /* Tasks */
+        .tasks-area { margin-top: 20px; }
+        .tasks-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .tasks-title { font-family: 'Russo One', sans-serif; }
+        .tasks-progress {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.9em;
+        }
+        .tasks-progress-bar {
+            width: 100px;
+            height: 8px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .tasks-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--green), var(--cyan));
+            transition: width 0.3s ease;
+        }
+        .tasks-progress-text {
+            color: var(--cyan);
+            font-weight: 600;
+        }
+        .tasks-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+        .task-card {
+            background: rgba(0,0,0,0.3);
+            border-radius: 10px;
+            padding: 15px;
+            border: 2px solid rgba(255,255,255,0.1);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .task-card:hover:not(.completed):not(.failed) { border-color: var(--blue); transform: translateY(-3px); }
+        @keyframes task-highlight {
+            0%, 100% { border-color: rgba(255,255,255,0.1); box-shadow: none; }
+            50% { border-color: var(--yellow); box-shadow: 0 0 20px rgba(241,196,15,0.5); }
+        }
+        .task-card.selected { border-color: var(--cyan); box-shadow: 0 0 15px rgba(0,217,165,0.3); }
+        .task-card.completed { opacity: 0.5; border-color: var(--green); pointer-events: none; }
+        .task-card.failed { opacity: 0.5; border-color: var(--red); }
+        .task-name { font-weight: 600; margin-bottom: 8px; }
+        .task-requirements { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
+        .task-req {
+            padding: 4px 10px;
+            border-radius: 5px;
+            font-size: 0.8em;
+            font-weight: 600;
+        }
+        .task-req.yellow { background: rgba(241,196,15,0.2); color: var(--yellow); }
+        .task-req.green { background: rgba(46,204,113,0.2); color: var(--green); }
+        .task-req.red { background: rgba(231,76,60,0.2); color: var(--red); }
+        .task-points { font-size: 0.85em; color: var(--cyan); }
+        .task-difficulty { font-size: 0.75em; color: var(--text-secondary); margin-top: 5px; }
+
+        /* Artifacts */
+        .artifacts-list { max-height: 300px; overflow-y: auto; }
+        .artifact-item {
+            background: rgba(155,89,182,0.1);
+            border: 1px solid rgba(155,89,182,0.3);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .artifact-item:hover { background: rgba(155,89,182,0.2); transform: translateX(5px); }
+        .artifact-item.owned { border-color: var(--cyan); background: rgba(0,217,165,0.1); }
+        .artifact-item.used { opacity: 0.4; pointer-events: none; }
+        .artifact-name { font-weight: 600; font-size: 0.9em; margin-bottom: 5px; }
+        .artifact-desc { font-size: 0.75em; color: var(--text-secondary); }
+        .artifact-cost { font-size: 0.75em; color: var(--orange); margin-top: 5px; }
+
+        /* Log */
+        .log { max-height: 200px; overflow-y: auto; }
+        .log-entry { padding: 6px 10px; border-radius: 6px; margin-bottom: 4px; font-size: 0.8em;
+            background: rgba(255,255,255,0.03); border-left: 3px solid var(--text-secondary); }
+        .log-entry.success { border-left-color: var(--green); }
+        .log-entry.fail { border-left-color: var(--red); }
+        .log-entry.info { border-left-color: var(--blue); }
+        .log-entry.artifact { border-left-color: var(--purple); }
+        .log-entry.warning { border-left-color: var(--yellow); }
+
+        /* Setup Modal */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9); z-index: 1000; }
+        .modal.active { display: flex; align-items: center; justify-content: center; }
+        .modal-box { background: var(--bg-card); border-radius: 16px; padding: 30px; width: 90%; max-width: 500px;
+            max-height: 85vh; overflow-y: auto; border: 1px solid rgba(255,255,255,0.1); }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .modal-title { font-family: 'Russo One', sans-serif; font-size: 1.5em; }
+        .modal-close { background: none; border: none; color: var(--text-secondary); font-size: 1.5em; cursor: pointer; }
+
+        /* Setup Form */
+        .setup-section { margin-bottom: 20px; }
+        .setup-section label { display: block; margin-bottom: 8px; color: var(--text-secondary); }
+        .setup-section select, .setup-section input {
+            width: 100%;
+            padding: 12px;
+            background: var(--bg-panel);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-family: 'Exo 2', sans-serif;
+            font-size: 1em;
+        }
+        .setup-section input:focus { outline: none; border-color: var(--cyan); }
+        .player-inputs { display: flex; flex-direction: column; gap: 10px; margin-top: 15px; }
+        .player-input-row { display: flex; align-items: center; gap: 10px; }
+        .player-input-row span { width: 30px; font-size: 1.2em; }
+        .player-input-row input { flex: 1; }
+
+        /* Round indicator */
+        .round-indicator {
+            background: linear-gradient(135deg, var(--purple), var(--blue));
+            padding: 10px 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        .round-num { font-size: 1.5em; font-weight: 700; }
+        .round-label { font-size: 0.8em; opacity: 0.8; }
+
+        /* Action result */
+        .action-result {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--bg-card);
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            z-index: 1500;
+            display: none;
+            animation: popIn 0.3s ease-out;
+        }
+        .action-result.success { border: 3px solid var(--green); }
+        .action-result.fail { border: 3px solid var(--red); }
+        .action-result h2 { font-size: 2em; margin-bottom: 15px; }
+        @keyframes popIn {
+            0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        }
+
+        /* Game Over */
+        .game-over { position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(10,14,23,0.95); display: none; z-index: 2000;
+            flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+        .game-over h1 { font-family: 'Russo One', sans-serif; font-size: 3em; margin-bottom: 15px;
+            background: linear-gradient(135deg, var(--yellow), var(--green));
+            background-clip: text; -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent; }
+        .final-results { display: flex; flex-direction: column; gap: 15px; margin: 25px 0; }
+        .final-player { background: var(--bg-card); border-radius: 12px; padding: 20px; min-width: 300px;
+            display: flex; justify-content: space-between; align-items: center; }
+        .final-player.winner { border: 2px solid var(--yellow); }
+        .final-rank { font-size: 2em; margin-right: 15px; }
+        .final-name { font-weight: 700; font-size: 1.2em; }
+        .final-score { font-size: 1.5em; font-weight: 700; color: var(--cyan); }
+
+        /* Rules */
+        .rules h3 { color: var(--cyan); margin: 15px 0 8px; font-family: 'Russo One', sans-serif; }
+        .rules ul { padding-left: 18px; line-height: 1.8; }
+        .rules p { line-height: 1.6; margin-bottom: 10px; }
+        .dice-legend { display: flex; gap: 15px; margin: 15px 0; justify-content: center; flex-wrap: wrap; }
+        .dice-legend-item { display: flex; align-items: center; gap: 8px; }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .layout { grid-template-columns: 1fr; }
+            .players-area { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+        }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 3px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header class="header">
+        <h1 class="title">DevOps Dice</h1>
+        <p class="subtitle">Командная игра на кубиках для IT-команд</p>
+    </header>
+
+    <div class="layout">
+        <!-- Left Panel -->
+        <aside class="panel">
+            <div class="round-indicator">
+                <div class="round-label">РАУНД</div>
+                <div class="round-num" id="round">0 / 5</div>
+            </div>
+
+            <div class="selection-timer" id="selectionTimer">10</div>
+
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <div class="stat-value" style="color: var(--yellow)" id="yellowCount">0</div>
+                    <div class="stat-label">Желтых</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" style="color: var(--green)" id="greenCount">0</div>
+                    <div class="stat-label">Зеленых</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" style="color: var(--red)" id="redCount">0</div>
+                    <div class="stat-label">Красных</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="totalDice">0</div>
+                    <div class="stat-label">Осталось</div>
+                </div>
+            </div>
+
+            <button class="btn btn-start" id="btnStart" onclick="showSetup()">▶ НОВАЯ ИГРА</button>
+            <button class="btn btn-roll" id="btnRoll" onclick="rollDice()" disabled>🎲 Бросить кубики</button>
+            <button class="btn btn-next" id="btnNext" onclick="nextPlayer()" disabled>➡️ Следующий игрок</button>
+            <button class="btn btn-reset" onclick="resetGame()">↻ СБРОС</button>
+            <button class="btn btn-rules" onclick="showRules()">📖 ПРАВИЛА</button>
+
+            <div class="panel-title" style="margin-top: 15px;">📜 Журнал</div>
+            <div class="log" id="log"></div>
+        </aside>
+
+        <!-- Main Board -->
+        <main class="panel board">
+            <div class="selection-info" id="selectionInfo">
+                <h3>🎲 <span id="selectingPlayerName">Игрок</span> выбирает кубики!</h3>
+                <p>Кликните на 3 кубика из пула. Осталось выбрать: <strong id="diceToSelect">3</strong></p>
+            </div>
+
+            <div class="dice-pool">
+                <div class="dice-pool-title">
+                    <span>🎲 Пул кубиков</span>
+                    <span id="poolTotal">0 доступно</span>
+                </div>
+                <div class="dice-pool-grid" id="dicePool"></div>
+            </div>
+
+            <div class="players-area" id="playersArea">
+                <div class="player-card">
+                    <div class="player-name">👤 Ожидание игры...</div>
+                    <p style="color: var(--text-secondary);">Нажмите "НОВАЯ ИГРА" для начала</p>
+                </div>
+            </div>
+
+            <div class="tasks-area">
+                <div class="tasks-header">
+                    <h3 class="tasks-title">📋 Доступные задачи</h3>
+                    <div class="tasks-progress">
+                        <div class="tasks-progress-bar">
+                            <div class="tasks-progress-fill" id="tasksProgressFill" style="width: 0%"></div>
+                        </div>
+                        <span class="tasks-progress-text" id="tasksProgressText">0/6</span>
+                    </div>
+                </div>
+                <div class="tasks-grid" id="tasksGrid">
+                    <div class="task-card">
+                        <div class="task-name">Задачи появятся после старта игры</div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Right Panel - Artifacts & Progress -->
+        <aside class="panel">
+            <!-- Current Player Budget -->
+            <div class="current-budget" id="currentBudgetSection">
+                <div class="current-budget-title">💰 <span id="currentPlayerName">Игрок</span> — Баланс</div>
+                <div class="current-budget-grid">
+                    <div class="current-budget-item">
+                        <div class="current-budget-value" style="color: var(--green);" id="budgetEarned">0</div>
+                        <div class="current-budget-label">Заработано</div>
+                    </div>
+                    <div class="current-budget-item">
+                        <div class="current-budget-value" style="color: var(--orange);" id="budgetSpent">0</div>
+                        <div class="current-budget-label">Потрачено</div>
+                    </div>
+                    <div class="current-budget-item">
+                        <div class="current-budget-value" style="color: var(--cyan);" id="budgetAvailable">0</div>
+                        <div class="current-budget-label">Доступно</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Game Progress -->
+            <div class="game-progress" id="gameProgressSection" style="display: none;">
+                <div class="game-progress-title">📊 Прогресс игры</div>
+                <div class="game-progress-stats">
+                    <div class="game-progress-stat">
+                        <div class="game-progress-value" id="totalTasksDone">0</div>
+                        <div class="game-progress-label">Задач выполнено</div>
+                    </div>
+                    <div class="game-progress-stat">
+                        <div class="game-progress-value" style="color: var(--green);" id="totalPointsEarned">0</div>
+                        <div class="game-progress-label">Заработано</div>
+                    </div>
+                    <div class="game-progress-stat">
+                        <div class="game-progress-value" style="color: var(--orange);" id="totalPointsSpent">0</div>
+                        <div class="game-progress-label">Потрачено</div>
+                    </div>
+                    <div class="game-progress-stat">
+                        <div class="game-progress-value" id="totalArtifacts">0</div>
+                        <div class="game-progress-label">Артефактов</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Leaderboard -->
+            <div class="leaderboard" id="leaderboardSection" style="display: none;">
+                <div class="leaderboard-title">🏆 Таблица лидеров</div>
+                <div id="leaderboardList"></div>
+            </div>
+
+            <div class="panel-title">🎨 Эпические артефакты</div>
+            <p style="font-size: 0.8em; color: var(--text-secondary); margin-bottom: 10px;">
+                Покупайте за очки, используйте в критический момент!
+            </p>
+            <div class="artifacts-list" id="artifactsList"></div>
+
+            <div style="margin-top: 15px;">
+                <div class="panel-title">ℹ️ Подсказка</div>
+                <div id="hint" style="font-size: 0.85em; color: var(--text-secondary); line-height: 1.5;">
+                    Нажмите "НОВАЯ ИГРА", введите имена игроков и начните!
+                </div>
+            </div>
+        </aside>
+    </div>
+</div>
+
+<!-- Setup Modal -->
+<div class="modal" id="setupModal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h2 class="modal-title">🎮 Настройка игры</h2>
+            <button class="modal-close" onclick="closeSetup()">×</button>
+        </div>
+
+        <div class="setup-section">
+            <label>Количество игроков:</label>
+            <select id="playerCount" onchange="updatePlayerInputs()">
+                <option value="2">2 игрока</option>
+                <option value="3" selected>3 игрока</option>
+                <option value="4">4 игрока</option>
+                <option value="5">5 игроков</option>
+                <option value="6">6 игроков</option>
+            </select>
+        </div>
+
+        <div class="setup-section">
+            <label>Количество раундов:</label>
+            <select id="roundCount">
+                <option value="3">3 раунда</option>
+                <option value="5" selected>5 раундов</option>
+                <option value="7">7 раундов</option>
+            </select>
+        </div>
+
+        <div class="setup-section">
+            <label>Имена игроков:</label>
+            <div class="player-inputs" id="playerInputs"></div>
+        </div>
+
+        <button class="btn btn-start" onclick="startGame()">🚀 НАЧАТЬ ИГРУ</button>
+    </div>
+</div>
+
+<!-- Rules Modal -->
+<div class="modal" id="rulesModal">
+    <div class="modal-box" style="max-width: 650px;">
+        <div class="modal-header">
+            <h2 class="modal-title">📖 Правила DevOps Dice</h2>
+            <button class="modal-close" onclick="closeRules()">×</button>
+        </div>
+        <div class="rules">
+            <h3>🎯 Цель игры</h3>
+            <p>Набрать больше всех очков, выполняя IT-задачи с помощью кубиков!</p>
+
+            <h3>🎲 Кубики</h3>
+            <div class="dice-legend">
+                <div class="dice-legend-item"><div class="dice dice-small yellow">?</div> Желтый — Планирование</div>
+                <div class="dice-legend-item"><div class="dice dice-small green">?</div> Зеленый — Разработка</div>
+                <div class="dice-legend-item"><div class="dice dice-small red">?</div> Красный — Риски</div>
+            </div>
+            <ul>
+                <li>Пул: по (N+1) кубика каждого цвета, где N — число игроков</li>
+                <li>Каждый игрок выбирает 3 любых кубика за 10 секунд</li>
+                <li>Если время вышло — кубики назначаются случайно</li>
+            </ul>
+
+            <h3>📋 Задачи</h3>
+            <p>Каждая задача имеет требования:</p>
+            <ul>
+                <li><strong>🟨 ≥ X</strong> — сумма желтых ≥ X</li>
+                <li><strong>🟩 ≥ X</strong> — сумма зеленых ≥ X</li>
+                <li><strong>🟥 ≤ X</strong> — сумма красных ≤ X (контроль рисков!)</li>
+            </ul>
+
+            <h3>🎨 Артефакты</h3>
+            <p>Покупайте за очки для получения преимуществ!</p>
+
+            <h3>🔄 Ход игры</h3>
+            <ol style="padding-left: 20px; line-height: 2;">
+                <li>Настройте игру: имена и количество игроков</li>
+                <li>Каждый игрок выбирает 3 кубика из пула (10 сек)</li>
+                <li><strong style="color: var(--yellow);">⚠️ СНАЧАЛА выберите задачу</strong> — кликните на карточку</li>
+                <li>Затем бросьте кубики — нажмите "Бросить кубики"</li>
+                <li>Если требования выполнены — получите очки!</li>
+                <li>Можете купить артефакты за заработанные очки</li>
+                <li>Побеждает игрок с наибольшим счётом</li>
+            </ol>
+
+            <div style="background: rgba(241,196,15,0.1); border: 1px solid var(--yellow); border-radius: 8px; padding: 12px; margin-top: 15px;">
+                <strong style="color: var(--yellow);">💡 Важно:</strong> Нельзя бросить кубики, не выбрав задачу! Сначала изучите требования задач и выберите ту, которую хотите выполнить.
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Action Result Popup -->
+<div class="action-result" id="actionResult">
+    <h2 id="resultTitle">Результат</h2>
+    <p id="resultText">Текст результата</p>
+</div>
+
+<!-- Game Over -->
+<div class="game-over" id="gameOver">
+    <h1>🏆 ИГРА ЗАВЕРШЕНА!</h1>
+    <p style="font-size: 1.2em; color: var(--text-secondary);">Финальные результаты</p>
+    <div class="final-results" id="finalResults"></div>
+    <button class="btn btn-start" style="padding: 15px 50px; font-size: 1.1em; width: auto;" onclick="resetGame(); document.getElementById('gameOver').style.display='none';">
+        🔄 ИГРАТЬ СНОВА
+    </button>
+</div>
+
+<script>
+// ===== GAME DATA =====
+const ARTIFACTS = [
+    { id: 'stability', name: 'DevOps-амулет стабильности', icon: '🛡️', desc: 'Игнорирует требования 🟥 на 1 задачу', cost: 15, effect: 'ignoreRed' },
+    { id: 'antibug', name: 'Амулет Анти-Бага', icon: '🐛', desc: 'Один провал по 🟥 = успех', cost: 20, effect: 'redFailSuccess' },
+    { id: 'architecture', name: 'Чертёж идеальной архитектуры', icon: '📐', desc: 'Сложность всех задач −1 до конца игры', cost: 30, effect: 'reduceDifficulty', permanent: true },
+    { id: 'jvm', name: 'Магический JVM-тюнер', icon: '☕', desc: 'Автоуспех задач на производительность', cost: 25, effect: 'autoPerformance' },
+    { id: 'shield', name: 'Щит от изменения требований', icon: '🔰', desc: 'Перебросить все кубики', cost: 15, effect: 'reroll' },
+    { id: 'sprint', name: 'Свиток сверх-продуктивного спринта', icon: '📜', desc: '+5 очков к следующей задаче', cost: 20, effect: 'bonusPoints' },
+    { id: 'merge', name: 'Священный Merge без конфликтов', icon: '🔱', desc: 'Сложная фича — автоуспех', cost: 40, effect: 'autoHardTask' }
+];
+
+const TASKS = [
+    { name: 'Простой SELECT-запрос для проверки БД', reqs: [{color: 'yellow', op: '>=', val: 3}], points: 5, category: 'db' },
+    { name: 'Добавление GET-эндпоинта', reqs: [{color: 'green', op: '>=', val: 3}], points: 5, category: 'api' },
+    { name: 'Валидация входных данных', reqs: [{color: 'green', op: '>=', val: 3}, {color: 'red', op: '<=', val: 4}], points: 8, category: 'security' },
+    { name: 'Логирование запросов API', reqs: [{color: 'yellow', op: '>=', val: 2}], points: 4, category: 'monitoring' },
+    { name: 'Фикс ошибки в сериализации', reqs: [{color: 'red', op: '>=', val: 3}], points: 6, category: 'bugfix' },
+    { name: 'Оптимизация SQL-запроса', reqs: [{color: 'yellow', op: '>=', val: 4}, {color: 'green', op: '>=', val: 2}], points: 10, category: 'performance' },
+    { name: 'Написание unit-тестов', reqs: [{color: 'green', op: '>=', val: 5}], points: 8, category: 'testing' },
+    { name: 'Code review коллеги', reqs: [{color: 'yellow', op: '>=', val: 4}], points: 6, category: 'review' },
+    { name: 'Настройка CI/CD пайплайна', reqs: [{color: 'yellow', op: '>=', val: 3}, {color: 'green', op: '>=', val: 3}, {color: 'red', op: '<=', val: 3}], points: 15, category: 'devops' },
+    { name: 'Деплой на staging', reqs: [{color: 'green', op: '>=', val: 4}, {color: 'red', op: '<=', val: 5}], points: 10, category: 'deploy' },
+    { name: 'Рефакторинг legacy кода', reqs: [{color: 'yellow', op: '>=', val: 5}, {color: 'red', op: '<=', val: 3}], points: 12, category: 'refactor' },
+    { name: 'Документирование API', reqs: [{color: 'yellow', op: '>=', val: 6}], points: 8, category: 'docs' },
+    { name: 'Исправление критического бага', reqs: [{color: 'red', op: '>=', val: 5}, {color: 'green', op: '>=', val: 3}], points: 15, category: 'bugfix' },
+    { name: 'Интеграция с внешним API', reqs: [{color: 'yellow', op: '>=', val: 3}, {color: 'green', op: '>=', val: 4}, {color: 'red', op: '<=', val: 4}], points: 12, category: 'integration' },
+    { name: 'Настройка мониторинга', reqs: [{color: 'yellow', op: '>=', val: 4}, {color: 'green', op: '>=', val: 2}], points: 9, category: 'monitoring' },
+    { name: 'Оптимизация производительности', reqs: [{color: 'yellow', op: '>=', val: 5}, {color: 'green', op: '>=', val: 4}], points: 14, category: 'performance' },
+    { name: 'Миграция базы данных', reqs: [{color: 'yellow', op: '>=', val: 4}, {color: 'red', op: '<=', val: 2}], points: 11, category: 'db' },
+    { name: 'Hotfix на продакшене', reqs: [{color: 'red', op: '>=', val: 4}, {color: 'green', op: '>=', val: 5}], points: 18, category: 'bugfix', hard: true },
+    { name: 'Внедрение новой фичи', reqs: [{color: 'yellow', op: '>=', val: 4}, {color: 'green', op: '>=', val: 5}, {color: 'red', op: '<=', val: 3}], points: 20, category: 'feature', hard: true },
+    { name: 'Настройка Kubernetes', reqs: [{color: 'yellow', op: '>=', val: 6}, {color: 'green', op: '>=', val: 4}, {color: 'red', op: '<=', val: 2}], points: 25, category: 'devops', hard: true }
+];
+
+const PLAYER_ICONS = ['👩‍💻', '👨‍💻', '🧑‍💻', '👩‍🔧', '👨‍🔧', '🧑‍🔧'];
+
+// ===== GAME STATE =====
+let G = {
+    phase: 'setup', // setup, selecting, playing, gameOver
+    round: 0,
+    maxRounds: 5,
+    currentPlayer: 0,
+    selectingPlayer: 0,
+    players: [],
+    dicePool: [],
+    availableTasks: [],
+    selectedTask: null,
+    difficultyReduction: 0,
+    selectionTimer: null,
+    selectionTimeLeft: 10,
+    selectedDiceIndices: [],
+    totalTasksCompleted: 0,
+    winScore: 50 // Target score for "progress to win"
+};
+
+// ===== UTILITY FUNCTIONS =====
+function rnd(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+function shuffle(arr) {
+    const a = [...arr];
+    for(let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+}
+
+function log(msg, type = 'info') {
+    const el = document.getElementById('log');
+    const e = document.createElement('div');
+    e.className = `log-entry ${type}`;
+    e.textContent = msg;
+    el.insertBefore(e, el.firstChild);
+    while(el.children.length > 30) el.removeChild(el.lastChild);
+}
+
+function showResult(title, text, success) {
+    const el = document.getElementById('actionResult');
+    el.className = `action-result ${success ? 'success' : 'fail'}`;
+    document.getElementById('resultTitle').textContent = title;
+    document.getElementById('resultText').textContent = text;
+    el.style.display = 'block';
+    setTimeout(() => el.style.display = 'none', 2000);
+}
+
+function updateHint(text) {
+    document.getElementById('hint').textContent = text;
+}
+
+// ===== SETUP =====
+function showSetup() {
+    document.getElementById('setupModal').classList.add('active');
+    updatePlayerInputs();
+}
+
+function closeSetup() {
+    document.getElementById('setupModal').classList.remove('active');
+}
+
+function updatePlayerInputs() {
+    const count = parseInt(document.getElementById('playerCount').value);
+    const container = document.getElementById('playerInputs');
+    container.innerHTML = '';
+
+    for(let i = 0; i < count; i++) {
+        const row = document.createElement('div');
+        row.className = 'player-input-row';
+        row.innerHTML = `
+            <span>${PLAYER_ICONS[i]}</span>
+            <input type="text" id="playerName${i}" placeholder="Игрок ${i + 1}" maxlength="15">
+        `;
+        container.appendChild(row);
+    }
+}
+
+// ===== DICE POOL =====
+function createDicePool() {
+    const playerCount = G.players.length;
+    const perColor = playerCount + 1; // N+1 dice of each color
+
+    G.dicePool = [];
+    const colors = ['yellow', 'green', 'red'];
+    colors.forEach(color => {
+        for(let i = 0; i < perColor; i++) {
+            G.dicePool.push({ color, value: 0, taken: false, takenBy: null });
+        }
+    });
+
+    G.dicePool = shuffle(G.dicePool);
+    renderDicePool();
+    updateDiceStats();
+}
+
+function renderDicePool() {
+    const pool = document.getElementById('dicePool');
+    pool.innerHTML = '';
+
+    G.dicePool.forEach((dice, idx) => {
+        const el = document.createElement('div');
+        el.className = `dice ${dice.color} ${dice.taken ? 'taken' : ''} ${G.selectedDiceIndices.includes(idx) ? 'selected' : ''}`;
+        if(G.phase !== 'selecting' || dice.taken) {
+            el.classList.add('disabled');
+        }
+        el.textContent = dice.value || '?';
+        el.dataset.idx = idx;
+        el.onclick = () => selectDiceFromPool(idx);
+        pool.appendChild(el);
+    });
+
+    const available = G.dicePool.filter(d => !d.taken).length;
+    document.getElementById('poolTotal').textContent = `${available} доступно`;
+}
+
+function updateDiceStats() {
+    const available = G.dicePool.filter(d => !d.taken);
+    document.getElementById('yellowCount').textContent = available.filter(d => d.color === 'yellow').length;
+    document.getElementById('greenCount').textContent = available.filter(d => d.color === 'green').length;
+    document.getElementById('redCount').textContent = available.filter(d => d.color === 'red').length;
+    document.getElementById('totalDice').textContent = available.length;
+}
+
+function selectDiceFromPool(idx) {
+    if(G.phase !== 'selecting') return;
+    if(G.dicePool[idx].taken) return;
+
+    const selectedIdx = G.selectedDiceIndices.indexOf(idx);
+    if(selectedIdx > -1) {
+        // Deselect
+        G.selectedDiceIndices.splice(selectedIdx, 1);
+    } else if(G.selectedDiceIndices.length < 3) {
+        // Select
+        G.selectedDiceIndices.push(idx);
+    }
+
+    document.getElementById('diceToSelect').textContent = 3 - G.selectedDiceIndices.length;
+    renderDicePool();
+
+    // Auto-confirm if 3 selected
+    if(G.selectedDiceIndices.length === 3) {
+        confirmDiceSelection();
+    }
+}
+
+function confirmDiceSelection() {
+    clearInterval(G.selectionTimer);
+
+    const player = G.players[G.selectingPlayer];
+
+    // Assign selected dice to player
+    G.selectedDiceIndices.forEach(idx => {
+        G.dicePool[idx].taken = true;
+        G.dicePool[idx].takenBy = G.selectingPlayer;
+        player.dice.push(G.dicePool[idx]);
+    });
+
+    log(`${player.name} выбрал кубики: ${player.dice.map(d => d.color === 'yellow' ? '🟨' : d.color === 'green' ? '🟩' : '🟥').join('')}`, 'info');
+
+    G.selectedDiceIndices = [];
+    updateDiceStats();
+    renderDicePool();
+    renderPlayers();
+
+    // Next player selection or start playing
+    G.selectingPlayer++;
+    if(G.selectingPlayer < G.players.length) {
+        startDiceSelection();
+    } else {
+        startPlayingPhase();
+    }
+}
+
+function autoAssignDice() {
+    clearInterval(G.selectionTimer);
+
+    const player = G.players[G.selectingPlayer];
+    const available = G.dicePool.map((d, i) => ({...d, idx: i})).filter(d => !d.taken);
+    const shuffled = shuffle(available);
+
+    // Take first 3 available
+    const toAssign = shuffled.slice(0, 3 - G.selectedDiceIndices.length);
+
+    // First assign any already selected
+    G.selectedDiceIndices.forEach(idx => {
+        G.dicePool[idx].taken = true;
+        G.dicePool[idx].takenBy = G.selectingPlayer;
+        player.dice.push(G.dicePool[idx]);
+    });
+
+    // Then auto-assign remaining
+    toAssign.forEach(d => {
+        G.dicePool[d.idx].taken = true;
+        G.dicePool[d.idx].takenBy = G.selectingPlayer;
+        player.dice.push(G.dicePool[d.idx]);
+    });
+
+    log(`⏰ Время вышло! ${player.name} получил случайные кубики`, 'warning');
+
+    G.selectedDiceIndices = [];
+    updateDiceStats();
+    renderDicePool();
+    renderPlayers();
+
+    G.selectingPlayer++;
+    if(G.selectingPlayer < G.players.length) {
+        startDiceSelection();
+    } else {
+        startPlayingPhase();
+    }
+}
+
+// ===== SELECTION PHASE =====
+function startDiceSelection() {
+    G.phase = 'selecting';
+    G.selectedDiceIndices = [];
+    G.selectionTimeLeft = 10;
+
+    const player = G.players[G.selectingPlayer];
+
+    document.getElementById('selectionInfo').classList.add('active');
+    document.getElementById('selectingPlayerName').textContent = player.name;
+    document.getElementById('diceToSelect').textContent = '3';
+    document.getElementById('selectionTimer').classList.add('active');
+    document.getElementById('selectionTimer').textContent = '10';
+
+    renderPlayers();
+    renderDicePool();
+
+    updateHint(`${player.name}, выберите 3 кубика из пула! Кликайте на кубики.`);
+
+    G.selectionTimer = setInterval(() => {
+        G.selectionTimeLeft--;
+        document.getElementById('selectionTimer').textContent = G.selectionTimeLeft;
+
+        if(G.selectionTimeLeft <= 0) {
+            autoAssignDice();
+        }
+    }, 1000);
+}
+
+// ===== PLAYING PHASE =====
+function startPlayingPhase() {
+    G.phase = 'playing';
+    G.currentPlayer = 0;
+    G.round = 1;
+
+    document.getElementById('selectionInfo').classList.remove('active');
+    document.getElementById('selectionTimer').classList.remove('active');
+
+    generateTasks();
+    renderPlayers();
+    renderArtifacts();
+    updateRound();
+
+    document.getElementById('btnRoll').disabled = false;
+
+    log(`🎮 Раунд 1 начинается!`, 'info');
+    updateHint(`Ход игрока ${G.players[0].name}. Сначала выберите задачу!`);
+}
+
+// ===== PLAYERS =====
+function createPlayers() {
+    const count = parseInt(document.getElementById('playerCount').value);
+    G.players = [];
+
+    for(let i = 0; i < count; i++) {
+        const nameInput = document.getElementById(`playerName${i}`);
+        const name = nameInput.value.trim() || `Игрок ${i + 1}`;
+
+        G.players.push({
+            id: i,
+            name: name,
+            icon: PLAYER_ICONS[i],
+            score: 0,
+            totalEarned: 0,
+            totalSpent: 0,
+            dice: [],
+            artifacts: [],
+            usedArtifacts: [],
+            rolled: false,
+            tasksCompleted: 0
+        });
+    }
+}
+
+function getPlayerRankings() {
+    const sorted = [...G.players].sort((a, b) => b.score - a.score);
+    const rankings = {};
+    sorted.forEach((p, idx) => {
+        rankings[p.id] = idx + 1;
+    });
+    return rankings;
+}
+
+function getMaxScore() {
+    return Math.max(...G.players.map(p => p.score), 1);
+}
+
+function renderPlayers() {
+    const area = document.getElementById('playersArea');
+    area.innerHTML = '';
+
+    const rankings = getPlayerRankings();
+    const maxScore = getMaxScore();
+    const leaderId = G.players.reduce((max, p) => p.score > (G.players.find(x => x.id === max)?.score || 0) ? p.id : max, G.players[0]?.id);
+
+    G.players.forEach((player, idx) => {
+        const card = document.createElement('div');
+        let cardClass = 'player-card';
+        if(G.phase === 'selecting' && idx === G.selectingPlayer) {
+            cardClass += ' selecting';
+        } else if(G.phase === 'playing' && idx === G.currentPlayer) {
+            cardClass += ' active';
+        }
+        // Mark leader (only if they have points and are ahead)
+        if(G.phase === 'playing' && player.score > 0 && player.id === leaderId && G.players.filter(p => p.score === player.score).length === 1) {
+            cardClass += ' leader';
+        }
+        card.className = cardClass;
+
+        const rank = rankings[player.id];
+        const rankClass = rank === 1 ? 'first' : rank === 2 ? 'second' : rank === 3 ? 'third' : '';
+        const rankEmoji = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `#${rank}`;
+
+        const progressPercent = maxScore > 0 ? (player.score / maxScore) * 100 : 0;
+        const tasksCompleted = player.tasksCompleted || 0;
+
+        card.innerHTML = `
+            <div class="player-name">${player.icon} ${player.name}</div>
+            <div class="player-score">
+                <span>Очки: <strong>${player.score}</strong></span>
+                ${G.phase === 'playing' ? `<span class="player-rank ${rankClass}">${rankEmoji}</span>` : ''}
+            </div>
+            <div class="player-budget">
+                <div class="budget-item budget-earned">
+                    <div class="budget-value">${player.totalEarned}</div>
+                    <div class="budget-label">Заработано</div>
+                </div>
+                <div class="budget-item budget-spent">
+                    <div class="budget-value">${player.totalSpent}</div>
+                    <div class="budget-label">Потрачено</div>
+                </div>
+                <div class="budget-item budget-available">
+                    <div class="budget-value">${player.score}</div>
+                    <div class="budget-label">Доступно</div>
+                </div>
+            </div>
+            <div class="player-progress">
+                <div class="progress-label">
+                    <span>Прогресс</span>
+                    <span>${Math.round(progressPercent)}%</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: ${progressPercent}%"></div>
+                </div>
+            </div>
+            <div class="player-stats-mini">
+                <span>✅ ${tasksCompleted} задач</span>
+                <span>🎨 ${player.artifacts.length} артеф.</span>
+            </div>
+            <div class="player-dice">${renderPlayerDice(player)}</div>
+            <div class="player-artifacts">${renderPlayerArtifacts(player)}</div>
+        `;
+        area.appendChild(card);
+    });
+
+    // Update leaderboard and budgets
+    renderLeaderboard();
+    updateGameProgress();
+    updateCurrentBudget();
+}
+
+function renderLeaderboard() {
+    if(G.phase !== 'playing' || G.players.length === 0) {
+        document.getElementById('leaderboardSection').style.display = 'none';
+        return;
+    }
+
+    document.getElementById('leaderboardSection').style.display = 'block';
+    const list = document.getElementById('leaderboardList');
+    list.innerHTML = '';
+
+    const sorted = [...G.players].sort((a, b) => b.score - a.score);
+    const maxScore = Math.max(...sorted.map(p => p.score), 1);
+    const rankEmojis = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣', '6️⃣'];
+
+    sorted.forEach((player, idx) => {
+        const item = document.createElement('div');
+        item.className = `leaderboard-item ${idx === 0 && player.score > 0 ? 'top' : ''}`;
+
+        const barWidth = maxScore > 0 ? (player.score / maxScore) * 100 : 0;
+
+        item.innerHTML = `
+            <div class="leaderboard-rank">${rankEmojis[idx]}</div>
+            <div style="flex: 1;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span class="leaderboard-name">${player.icon} ${player.name}</span>
+                    <span class="leaderboard-score">${player.score}</span>
+                </div>
+                <div class="leaderboard-bar">
+                    <div class="leaderboard-bar-fill" style="width: ${barWidth}%"></div>
+                </div>
+            </div>
+        `;
+        list.appendChild(item);
+    });
+}
+
+function updateGameProgress() {
+    if(G.phase !== 'playing') {
+        document.getElementById('gameProgressSection').style.display = 'none';
+        return;
+    }
+
+    document.getElementById('gameProgressSection').style.display = 'block';
+
+    const totalEarned = G.players.reduce((sum, p) => sum + p.totalEarned, 0);
+    const totalSpent = G.players.reduce((sum, p) => sum + p.totalSpent, 0);
+    const totalArtifacts = G.players.reduce((sum, p) => sum + p.artifacts.length, 0);
+
+    document.getElementById('totalTasksDone').textContent = G.totalTasksCompleted;
+    document.getElementById('totalPointsEarned').textContent = totalEarned;
+    document.getElementById('totalPointsSpent').textContent = totalSpent;
+    document.getElementById('totalArtifacts').textContent = totalArtifacts;
+}
+
+function updateTasksProgress() {
+    const completed = G.availableTasks.filter(t => t.completed).length;
+    const total = G.availableTasks.length;
+    const percent = total > 0 ? (completed / total) * 100 : 0;
+
+    document.getElementById('tasksProgressFill').style.width = `${percent}%`;
+    document.getElementById('tasksProgressText').textContent = `${completed}/${total}`;
+}
+
+function updateCurrentBudget() {
+    const section = document.getElementById('currentBudgetSection');
+
+    if(G.phase !== 'playing' || G.players.length === 0) {
+        section.classList.remove('active');
+        return;
+    }
+
+    section.classList.add('active');
+    const player = G.players[G.currentPlayer];
+
+    document.getElementById('currentPlayerName').textContent = player.name;
+    document.getElementById('budgetEarned').textContent = player.totalEarned;
+    document.getElementById('budgetSpent').textContent = player.totalSpent;
+    document.getElementById('budgetAvailable').textContent = player.score;
+}
+
+function renderPlayerDice(player) {
+    if(!player.dice.length) return '<span style="color: var(--text-secondary); font-size: 0.85em;">Ожидает выбора...</span>';
+
+    return player.dice.map((d, i) => {
+        const val = d.value || '?';
+        return `<div class="dice dice-small ${d.color}">${val}</div>`;
+    }).join('');
+}
+
+function renderPlayerArtifacts(player) {
+    if(!player.artifacts.length) return '';
+
+    return player.artifacts.map(a => {
+        const artifact = ARTIFACTS.find(ar => ar.id === a.id);
+        const used = player.usedArtifacts.includes(a.id);
+        return `<span class="artifact-badge ${used ? 'used' : ''}" title="${artifact.desc}">${artifact.icon}</span>`;
+    }).join('');
+}
+
+// ===== TASKS =====
+function generateTasks() {
+    G.availableTasks = shuffle([...TASKS]).slice(0, 6).map(t => ({...t, completed: false, failed: false}));
+    renderTasks();
+}
+
+function renderTasks() {
+    const grid = document.getElementById('tasksGrid');
+    grid.innerHTML = '';
+
+    G.availableTasks.forEach((task, idx) => {
+        const card = document.createElement('div');
+        card.className = `task-card ${G.selectedTask === idx ? 'selected' : ''} ${task.completed ? 'completed' : ''} ${task.failed ? 'failed' : ''}`;
+        card.onclick = () => selectTask(idx);
+
+        const reqs = task.reqs.map(r => {
+            const symbol = r.color === 'yellow' ? '🟨' : r.color === 'green' ? '🟩' : '🟥';
+            const val = Math.max(1, r.val - G.difficultyReduction);
+            return `<span class="task-req ${r.color}">${symbol} ${r.op} ${val}</span>`;
+        }).join('');
+
+        card.innerHTML = `
+            <div class="task-name">${task.name}</div>
+            <div class="task-requirements">${reqs}</div>
+            <div class="task-points">+${task.points} очков</div>
+            ${task.hard ? '<div class="task-difficulty">⚡ Сложная</div>' : ''}
+        `;
+        grid.appendChild(card);
+    });
+
+    updateTasksProgress();
+}
+
+function selectTask(idx) {
+    if(G.phase !== 'playing') return;
+    if(G.availableTasks[idx].completed || G.availableTasks[idx].failed) return;
+
+    const player = G.players[G.currentPlayer];
+    G.selectedTask = idx;
+    renderTasks();
+
+    if(player.rolled) {
+        updateHint(`Задача выбрана: ${G.availableTasks[idx].name}`);
+    } else {
+        updateHint(`✅ Задача выбрана! Теперь нажмите "Бросить кубики"`);
+        log(`${player.name} выбрал задачу: ${G.availableTasks[idx].name}`, 'info');
+    }
+}
+
+function checkTaskCompletion() {
+    if(G.selectedTask === null) {
+        updateHint('Выберите задачу для выполнения!');
+        return;
+    }
+
+    const task = G.availableTasks[G.selectedTask];
+    const player = G.players[G.currentPlayer];
+
+    const sums = { yellow: 0, green: 0, red: 0 };
+    player.dice.forEach(d => sums[d.color] += d.value);
+
+    // Check artifacts
+    const hasStability = player.artifacts.some(a => a.id === 'stability' && !player.usedArtifacts.includes('stability'));
+    const hasAntibug = player.artifacts.some(a => a.id === 'antibug' && !player.usedArtifacts.includes('antibug'));
+    const hasJVM = player.artifacts.some(a => a.id === 'jvm' && !player.usedArtifacts.includes('jvm'));
+    const hasMerge = player.artifacts.some(a => a.id === 'merge' && !player.usedArtifacts.includes('merge'));
+    const hasSprint = player.artifacts.some(a => a.id === 'sprint' && !player.usedArtifacts.includes('sprint'));
+
+    // Auto-success for performance tasks
+    if(hasJVM && task.category === 'performance') {
+        player.usedArtifacts.push('jvm');
+        task.completed = true;
+        player.score += task.points;
+        player.totalEarned += task.points;
+        player.tasksCompleted++;
+        G.totalTasksCompleted++;
+        showResult('☕ JVM-тюнер!', `+${task.points} очков`, true);
+        log(`${player.name}: JVM-тюнер! +${task.points}`, 'artifact');
+        renderPlayers();
+        renderTasks();
+        return;
+    }
+
+    // Auto-success for hard tasks
+    if(hasMerge && task.hard) {
+        player.usedArtifacts.push('merge');
+        task.completed = true;
+        player.score += task.points;
+        player.totalEarned += task.points;
+        player.tasksCompleted++;
+        G.totalTasksCompleted++;
+        showResult('🔱 Merge!', `+${task.points} очков`, true);
+        log(`${player.name}: Merge! +${task.points}`, 'artifact');
+        renderPlayers();
+        renderTasks();
+        return;
+    }
+
+    let success = true;
+    let redFailed = false;
+
+    for(const req of task.reqs) {
+        const val = Math.max(1, req.val - G.difficultyReduction);
+        const sum = sums[req.color];
+
+        if(req.op === '>=' && sum < val) {
+            if(req.color === 'red' && hasStability) continue;
+            success = false;
+            if(req.color === 'red') redFailed = true;
+        }
+        if(req.op === '<=' && sum > val) {
+            if(req.color === 'red' && hasStability) continue;
+            success = false;
+            if(req.color === 'red') redFailed = true;
+        }
+    }
+
+    if(!success && redFailed && hasAntibug) {
+        player.usedArtifacts.push('antibug');
+        success = true;
+        log(`${player.name}: Анти-Баг!`, 'artifact');
+    }
+
+    if(hasStability && task.reqs.some(r => r.color === 'red')) {
+        player.usedArtifacts.push('stability');
+    }
+
+    let bonus = 0;
+    if(hasSprint) {
+        bonus = 5;
+        player.usedArtifacts.push('sprint');
+    }
+
+    if(success) {
+        task.completed = true;
+        const earned = task.points + bonus;
+        player.score += earned;
+        player.totalEarned += earned;
+        player.tasksCompleted++;
+        G.totalTasksCompleted++;
+        showResult('✅ Успех!', `+${earned} очков`, true);
+        log(`${player.name}: ${task.name} (+${earned})`, 'success');
+    } else {
+        task.failed = true;
+        showResult('❌ Провал!', 'Требования не выполнены', false);
+        log(`${player.name}: провал - ${task.name}`, 'fail');
+    }
+
+    renderPlayers();
+    renderTasks();
+    renderArtifacts();
+}
+
+// ===== ARTIFACTS =====
+function renderArtifacts() {
+    const list = document.getElementById('artifactsList');
+    list.innerHTML = '';
+
+    if(G.phase !== 'playing') return;
+
+    const player = G.players[G.currentPlayer];
+
+    ARTIFACTS.forEach(artifact => {
+        const owned = player.artifacts.some(a => a.id === artifact.id);
+        const used = player.usedArtifacts.includes(artifact.id);
+        const canBuy = player.score >= artifact.cost && !owned;
+
+        const item = document.createElement('div');
+        item.className = `artifact-item ${owned ? 'owned' : ''} ${used ? 'used' : ''}`;
+        item.onclick = () => {
+            if(!owned && canBuy) buyArtifact(artifact);
+        };
+
+        item.innerHTML = `
+            <div class="artifact-name">${artifact.icon} ${artifact.name}</div>
+            <div class="artifact-desc">${artifact.desc}</div>
+            <div class="artifact-cost">${owned ? (used ? '✓ Использован' : '✓ Есть') : `💰 ${artifact.cost}`}</div>
+        `;
+        list.appendChild(item);
+    });
+}
+
+function buyArtifact(artifact) {
+    const player = G.players[G.currentPlayer];
+    if(player.score < artifact.cost) return;
+
+    player.score -= artifact.cost;
+    player.totalSpent += artifact.cost;
+    player.artifacts.push({ id: artifact.id });
+
+    if(artifact.effect === 'reduceDifficulty') {
+        G.difficultyReduction++;
+        renderTasks();
+    }
+
+    log(`${player.name} купил: ${artifact.name} (-${artifact.cost})`, 'artifact');
+    renderPlayers();
+    renderArtifacts();
+}
+
+// ===== GAME FLOW =====
+function startGame() {
+    closeSetup();
+
+    G.maxRounds = parseInt(document.getElementById('roundCount').value);
+    G.round = 0;
+    G.currentPlayer = 0;
+    G.selectingPlayer = 0;
+    G.difficultyReduction = 0;
+    G.selectedTask = null;
+    G.selectedDiceIndices = [];
+
+    createPlayers();
+    createDicePool();
+
+    document.getElementById('btnStart').disabled = true;
+    document.getElementById('btnRoll').disabled = true;
+    document.getElementById('btnNext').disabled = true;
+
+    log('🎮 Игра началась! Выбор кубиков...', 'info');
+
+    // Start dice selection phase
+    startDiceSelection();
+}
+
+function rollDice() {
+    if(G.phase !== 'playing') return;
+
+    const player = G.players[G.currentPlayer];
+    if(player.rolled) return;
+
+    // Check if task is selected - REQUIRED before rolling
+    if(G.selectedTask === null) {
+        showResult('⚠️ Выберите задачу!', 'Сначала выберите задачу, затем бросайте кубики', false);
+        updateHint('Сначала выберите задачу из списка ниже, затем бросьте кубики!');
+        highlightTasks();
+        return;
+    }
+
+    // Roll animation
+    const diceEls = document.querySelectorAll('.player-card.active .dice');
+    diceEls.forEach(el => el.classList.add('rolling'));
+
+    setTimeout(() => {
+        player.dice.forEach(d => d.value = rnd(1, 6));
+        player.rolled = true;
+
+        diceEls.forEach(el => el.classList.remove('rolling'));
+        renderPlayers();
+
+        const sums = { yellow: 0, green: 0, red: 0 };
+        player.dice.forEach(d => sums[d.color] += d.value);
+
+        log(`${player.name}: 🟨${sums.yellow} 🟩${sums.green} 🟥${sums.red}`, 'info');
+
+        // Auto-check task completion
+        setTimeout(() => checkTaskCompletion(), 500);
+
+        document.getElementById('btnRoll').disabled = true;
+        document.getElementById('btnNext').disabled = false;
+
+        updateHint('Результат получен! Нажмите "Следующий игрок"');
+    }, 600);
+}
+
+function highlightTasks() {
+    const cards = document.querySelectorAll('.task-card:not(.completed):not(.failed)');
+    cards.forEach(card => {
+        card.style.animation = 'task-highlight 0.5s ease-in-out 3';
+    });
+    setTimeout(() => {
+        cards.forEach(card => card.style.animation = '');
+    }, 1500);
+}
+
+function nextPlayer() {
+    if(G.phase !== 'playing') return;
+
+    G.currentPlayer++;
+    G.selectedTask = null;
+
+    if(G.currentPlayer >= G.players.length) {
+        nextRound();
+        return;
+    }
+
+    G.players[G.currentPlayer].rolled = false;
+    document.getElementById('btnRoll').disabled = false;
+    document.getElementById('btnNext').disabled = true;
+
+    renderPlayers();
+    renderArtifacts();
+    updateHint(`Ход: ${G.players[G.currentPlayer].name}. Сначала выберите задачу!`);
+}
+
+function nextRound() {
+    G.round++;
+
+    if(G.round > G.maxRounds) {
+        endGame();
+        return;
+    }
+
+    G.currentPlayer = 0;
+    G.selectingPlayer = 0;
+    G.selectedTask = null;
+
+    // Reset dice
+    G.players.forEach(p => {
+        p.rolled = false;
+        p.dice = [];
+    });
+
+    // New dice pool and selection
+    createDicePool();
+    startDiceSelection();
+
+    updateRound();
+    log(`🔄 Раунд ${G.round}`, 'info');
+}
+
+function updateRound() {
+    document.getElementById('round').textContent = `${G.round} / ${G.maxRounds}`;
+}
+
+function endGame() {
+    G.phase = 'gameOver';
+
+    const sorted = [...G.players].sort((a, b) => b.score - a.score);
+
+    const results = document.getElementById('finalResults');
+    results.innerHTML = '';
+
+    const ranks = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣', '6️⃣'];
+    sorted.forEach((player, idx) => {
+        const div = document.createElement('div');
+        div.className = `final-player ${idx === 0 ? 'winner' : ''}`;
+        div.innerHTML = `
+            <div style="display: flex; align-items: center;">
+                <span class="final-rank">${ranks[idx]}</span>
+                <span class="final-name">${player.icon} ${player.name}</span>
+            </div>
+            <span class="final-score">${player.score}</span>
+        `;
+        results.appendChild(div);
+    });
+
+    document.getElementById('gameOver').style.display = 'flex';
+    log(`🏆 Победитель: ${sorted[0].name}!`, 'success');
+}
+
+function resetGame() {
+    clearInterval(G.selectionTimer);
+
+    G = {
+        phase: 'setup',
+        round: 0,
+        maxRounds: 5,
+        currentPlayer: 0,
+        selectingPlayer: 0,
+        players: [],
+        dicePool: [],
+        availableTasks: [],
+        selectedTask: null,
+        difficultyReduction: 0,
+        selectionTimer: null,
+        selectionTimeLeft: 10,
+        selectedDiceIndices: [],
+        totalTasksCompleted: 0,
+        winScore: 50
+    };
+
+    document.getElementById('btnStart').disabled = false;
+    document.getElementById('btnRoll').disabled = true;
+    document.getElementById('btnNext').disabled = true;
+    document.getElementById('gameOver').style.display = 'none';
+    document.getElementById('selectionInfo').classList.remove('active');
+    document.getElementById('selectionTimer').classList.remove('active');
+    document.getElementById('gameProgressSection').style.display = 'none';
+    document.getElementById('leaderboardSection').style.display = 'none';
+    document.getElementById('currentBudgetSection').classList.remove('active');
+    document.getElementById('tasksProgressFill').style.width = '0%';
+    document.getElementById('tasksProgressText').textContent = '0/6';
+
+    document.getElementById('dicePool').innerHTML = '';
+    document.getElementById('playersArea').innerHTML = `
+        <div class="player-card">
+            <div class="player-name">👤 Ожидание игры...</div>
+            <p style="color: var(--text-secondary);">Нажмите "НОВАЯ ИГРА" для начала</p>
+        </div>
+    `;
+    document.getElementById('tasksGrid').innerHTML = `
+        <div class="task-card">
+            <div class="task-name">Задачи появятся после старта игры</div>
+        </div>
+    `;
+    document.getElementById('round').textContent = '0 / 5';
+    document.getElementById('log').innerHTML = '';
+    document.getElementById('artifactsList').innerHTML = '';
+    document.getElementById('poolTotal').textContent = '0 доступно';
+
+    ['yellowCount', 'greenCount', 'redCount', 'totalDice'].forEach(id => {
+        document.getElementById(id).textContent = '0';
+    });
+
+    updateHint('Нажмите "НОВАЯ ИГРА", введите имена игроков и начните!');
+}
+
+// ===== MODALS =====
+function showRules() { document.getElementById('rulesModal').classList.add('active'); }
+function closeRules() { document.getElementById('rulesModal').classList.remove('active'); }
+
+window.onclick = e => {
+    if(e.target.classList.contains('modal')) {
+        e.target.classList.remove('active');
+    }
+}
+
+// Init
+updatePlayerInputs();
+</script>
+</body>
+</html>
