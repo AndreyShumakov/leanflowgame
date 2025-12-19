@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ITIL4 Практики - Выбери 3 практики для кейса</title>
+    <link href="https://fonts.googleapis.com/css2?family=Russo+One&family=Exo+2:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0d1117;
+            --bg-card: #161b22;
+            --bg-panel: #21262d;
+            --bg-hover: #30363d;
+            --text-primary: #e6edf3;
+            --text-secondary: #8b949e;
+            --text-muted: #6e7681;
+            --accent: #58a6ff;
+            --success: #3fb950;
+            --warning: #d29922;
+            --danger: #f85149;
+            --purple: #a371f7;
+            --border: #30363d;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Exo 2', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            padding: 25px 0;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 25px;
+        }
+
+        h1 {
+            font-family: 'Russo One', sans-serif;
+            font-size: 2rem;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, var(--accent), var(--purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        .score-board {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            margin: 20px 0;
+        }
+
+        .score-item {
+            text-align: center;
+            padding: 12px 25px;
+            background: var(--bg-card);
+            border-radius: 10px;
+            border: 1px solid var(--border);
+        }
+
+        .score-value {
+            font-family: 'Russo One', sans-serif;
+            font-size: 1.8rem;
+            color: var(--accent);
+        }
+
+        .score-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .game-area {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+
+        @media (max-width: 1000px) {
+            .game-area { grid-template-columns: 1fr; }
+        }
+
+        .panel {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid var(--border);
+        }
+
+        .case-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .case-number {
+            font-size: 0.85rem;
+            color: var(--purple);
+            background: rgba(163, 113, 247, 0.15);
+            padding: 5px 12px;
+            border-radius: 20px;
+        }
+
+        .difficulty {
+            font-size: 0.8rem;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        .difficulty-easy { background: rgba(63, 185, 80, 0.2); color: var(--success); }
+        .difficulty-medium { background: rgba(210, 153, 34, 0.2); color: var(--warning); }
+        .difficulty-hard { background: rgba(248, 81, 73, 0.2); color: var(--danger); }
+
+        .case-title {
+            font-family: 'Russo One', sans-serif;
+            font-size: 1.25rem;
+            margin-bottom: 12px;
+            color: var(--text-primary);
+        }
+
+        .case-description {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.7;
+            margin-bottom: 15px;
+        }
+
+        .case-hint {
+            background: var(--bg-panel);
+            padding: 12px 15px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            border-left: 3px solid var(--accent);
+        }
+
+        .practices-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .practices-title {
+            font-family: 'Russo One', sans-serif;
+            font-size: 1rem;
+            color: var(--accent);
+        }
+
+        .selected-count {
+            font-size: 0.9rem;
+            color: var(--purple);
+            font-weight: 600;
+        }
+
+        .category-section {
+            margin-bottom: 18px;
+        }
+
+        .category-title {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid var(--border);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .practices-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .practice-btn {
+            padding: 7px 12px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background: var(--bg-panel);
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: 'Exo 2', sans-serif;
+        }
+
+        .practice-btn:hover:not(:disabled) {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+            border-color: var(--accent);
+        }
+
+        .practice-btn.selected {
+            background: rgba(88, 166, 255, 0.2);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .practice-btn.correct {
+            background: rgba(63, 185, 80, 0.2);
+            border-color: var(--success);
+            color: var(--success);
+        }
+
+        .practice-btn.incorrect {
+            background: rgba(248, 81, 73, 0.2);
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+
+        .practice-btn.missed {
+            background: rgba(210, 153, 34, 0.2);
+            border-color: var(--warning);
+            color: var(--warning);
+        }
+
+        .practice-btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 12px 28px;
+            border-radius: 8px;
+            border: none;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: 'Exo 2', sans-serif;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent), #2563eb);
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(88, 166, 255, 0.3);
+        }
+
+        .btn-primary:disabled {
+            background: var(--bg-panel);
+            color: var(--text-muted);
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: var(--bg-panel);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-hover);
+        }
+
+        .result-panel {
+            margin-top: 20px;
+            padding: 18px;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .result-panel.show { display: block; animation: slideIn 0.3s ease; }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result-panel.success {
+            background: rgba(63, 185, 80, 0.1);
+            border: 1px solid var(--success);
+        }
+
+        .result-panel.partial {
+            background: rgba(210, 153, 34, 0.1);
+            border: 1px solid var(--warning);
+        }
+
+        .result-panel.fail {
+            background: rgba(248, 81, 73, 0.1);
+            border: 1px solid var(--danger);
+        }
+
+        .result-title {
+            font-family: 'Russo One', sans-serif;
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+        }
+
+        .result-text {
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+            font-size: 0.9rem;
+        }
+
+        .correct-answers {
+            background: var(--bg-panel);
+            padding: 12px;
+            border-radius: 8px;
+        }
+
+        .correct-answers h4 {
+            color: var(--success);
+            margin-bottom: 8px;
+            font-size: 0.85rem;
+        }
+
+        .correct-answers ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .correct-answers li {
+            padding: 4px 0;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        .correct-answers li::before {
+            content: "✓ ";
+            color: var(--success);
+        }
+
+        .explanation {
+            margin-top: 12px;
+            padding: 12px;
+            background: var(--bg-panel);
+            border-radius: 8px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .start-screen, .end-screen {
+            text-align: center;
+            padding: 50px 20px;
+        }
+
+        .start-screen h2, .end-screen h2 {
+            font-family: 'Russo One', sans-serif;
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+        }
+
+        .start-screen p {
+            color: var(--text-secondary);
+            margin-bottom: 25px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .rules {
+            text-align: left;
+            background: var(--bg-card);
+            padding: 25px;
+            border-radius: 12px;
+            max-width: 550px;
+            margin: 0 auto 25px;
+            border: 1px solid var(--border);
+        }
+
+        .rules h3 {
+            margin-bottom: 15px;
+            color: var(--accent);
+            font-family: 'Russo One', sans-serif;
+        }
+
+        .rules ul {
+            color: var(--text-secondary);
+            margin-left: 20px;
+        }
+
+        .rules li {
+            margin-bottom: 8px;
+        }
+
+        .final-score {
+            font-family: 'Russo One', sans-serif;
+            font-size: 4rem;
+            color: var(--accent);
+            margin: 25px 0;
+        }
+
+        .final-score span {
+            font-size: 2rem;
+            color: var(--text-muted);
+        }
+
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin: 25px 0;
+        }
+
+        .stat { text-align: center; }
+
+        .stat-value {
+            font-family: 'Russo One', sans-serif;
+            font-size: 2rem;
+        }
+
+        .stat-value.green { color: var(--success); }
+        .stat-value.orange { color: var(--warning); }
+        .stat-value.red { color: var(--danger); }
+
+        .stat-label {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        footer {
+            text-align: center;
+            padding: 25px;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            border-top: 1px solid var(--border);
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>ITIL4 Практики</h1>
+            <p class="subtitle">Выберите 3 практики для решения каждого IT-кейса</p>
+            <div class="score-board">
+                <div class="score-item">
+                    <div class="score-value" id="current-score">0</div>
+                    <div class="score-label">Очки</div>
+                </div>
+                <div class="score-item">
+                    <div class="score-value" id="current-case">0</div>
+                    <div class="score-label">Кейс</div>
+                </div>
+                <div class="score-item">
+                    <div class="score-value" id="total-cases">12</div>
+                    <div class="score-label">Всего</div>
+                </div>
+            </div>
+        </header>
+
+        <main id="game-container">
+            <!-- Start Screen -->
+            <div id="start-screen" class="start-screen">
+                <h2>Добро пожаловать!</h2>
+                <p>Проверьте свои знания 34 практик ITIL4, решая реальные кейсы из IT-менеджмента.</p>
+
+                <div class="rules">
+                    <h3>Как играть:</h3>
+                    <ul>
+                        <li>Внимательно прочитайте описание кейса</li>
+                        <li>Выберите ровно <strong>3 практики</strong> из 34 практик ITIL4</li>
+                        <li>Нажмите "Проверить ответ"</li>
+                        <li>Очки: 3 за идеальный ответ, 2 за 2/3, 1 за 1/3</li>
+                        <li>Пройдите все 12 кейсов для завершения игры</li>
+                    </ul>
+                </div>
+
+                <button class="btn btn-primary" onclick="startGame()">Начать игру</button>
+            </div>
+
+            <!-- Game Screen -->
+            <div id="game-screen" style="display: none;">
+                <div class="game-area">
+                    <div class="panel">
+                        <div class="case-header">
+                            <span class="case-number" id="case-number">Кейс 1/12</span>
+                            <span class="difficulty difficulty-medium" id="case-difficulty">Средний</span>
+                        </div>
+                        <h2 class="case-title" id="case-title">Загрузка...</h2>
+                        <p class="case-description" id="case-description"></p>
+                        <div class="case-hint" id="case-hint"></div>
+
+                        <div class="result-panel" id="result-panel">
+                            <h3 class="result-title" id="result-title"></h3>
+                            <p class="result-text" id="result-text"></p>
+                            <div class="correct-answers">
+                                <h4>Правильные практики:</h4>
+                                <ul id="correct-list"></ul>
+                            </div>
+                            <div class="explanation" id="explanation"></div>
+                        </div>
+
+                        <div class="actions">
+                            <button class="btn btn-primary" id="check-btn" onclick="checkAnswer()" disabled>
+                                Проверить (0/3)
+                            </button>
+                            <button class="btn btn-secondary" id="next-btn" onclick="nextCase()" style="display: none;">
+                                Следующий кейс
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="panel">
+                        <div class="practices-header">
+                            <span class="practices-title">34 практики ITIL4</span>
+                            <span class="selected-count" id="selected-count">Выбрано: 0/3</span>
+                        </div>
+
+                        <div class="category-section">
+                            <div class="category-title">Общие практики управления (14)</div>
+                            <div class="practices-grid" id="general-practices"></div>
+                        </div>
+
+                        <div class="category-section">
+                            <div class="category-title">Практики управления услугами (17)</div>
+                            <div class="practices-grid" id="service-practices"></div>
+                        </div>
+
+                        <div class="category-section">
+                            <div class="category-title">Технические практики (3)</div>
+                            <div class="practices-grid" id="technical-practices"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- End Screen -->
+            <div id="end-screen" class="end-screen" style="display: none;">
+                <h2>Игра завершена!</h2>
+                <div class="final-score">
+                    <span id="final-score">0</span> <span>/ 36</span>
+                </div>
+                <div class="stats">
+                    <div class="stat">
+                        <div class="stat-value green" id="perfect-count">0</div>
+                        <div class="stat-label">Идеально (3/3)</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value orange" id="partial-count">0</div>
+                        <div class="stat-label">Частично (1-2/3)</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value red" id="miss-count">0</div>
+                        <div class="stat-label">Мимо (0/3)</div>
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="restartGame()">Играть снова</button>
+            </div>
+        </main>
+
+        <footer>
+            ITIL4 Практики | 34 практики ITIL 4 Foundation
+        </footer>
+    </div>
+
+    <script>
+        // 34 практики ITIL4 на русском
+        const practices = {
+            general: [
+                "Управление архитектурой",
+                "Непрерывное улучшение",
+                "Управление ИБ",
+                "Управление знаниями",
+                "Измерение и отчётность",
+                "Управление орг. изменениями",
+                "Управление портфелем",
+                "Управление проектами",
+                "Управление взаимоотношениями",
+                "Управление рисками",
+                "Финансовое управление",
+                "Стратегическое управление",
+                "Управление поставщиками",
+                "Управление персоналом"
+            ],
+            service: [
+                "Управление доступностью",
+                "Бизнес-анализ",
+                "Управление мощностями",
+                "Управление изменениями",
+                "Управление инцидентами",
+                "Управление ИТ-активами",
+                "Мониторинг и события",
+                "Управление проблемами",
+                "Управление релизами",
+                "Каталог услуг",
+                "Управление конфигурацией",
+                "Управление непрерывностью",
+                "Проектирование услуг",
+                "Service Desk",
+                "Управление уровнем услуг",
+                "Управление запросами",
+                "Валидация и тестирование"
+            ],
+            technical: [
+                "Управление развёртыванием",
+                "Управление инфраструктурой",
+                "Разработка ПО"
+            ]
+        };
+
+        // Кейсы на русском
+        const cases = [
+            {
+                title: "Критический сбой в продакшене",
+                description: "Крупная e-commerce платформа полностью упала в Чёрную пятницу. Тысячи клиентов не могут оформить заказы, компания теряет миллионы. Служба поддержки завалена звонками, причина сбоя неизвестна.",
+                hint: "Подумайте о быстром восстановлении, коммуникации с пользователями и поиске причины.",
+                difficulty: "easy",
+                difficultyText: "Лёгкий",
+                answers: ["Управление инцидентами", "Service Desk", "Управление проблемами"],
+                explanation: "Управление инцидентами быстро восстанавливает сервис. Service Desk обрабатывает обращения пользователей. Управление проблемами ищет корневую причину для предотвращения повторения."
+            },
+            {
+                title: "Миграция в облако",
+                description: "Организация планирует перенести legacy-приложения в облачную инфраструктуру AWS. Это затронет архитектуру, требует тщательного планирования и повлияет на несколько бизнес-подразделений в течение 18 месяцев.",
+                hint: "Учтите планирование, архитектурные изменения и управление трансформацией.",
+                difficulty: "medium",
+                difficultyText: "Средний",
+                answers: ["Управление проектами", "Управление архитектурой", "Управление орг. изменениями"],
+                explanation: "Управление проектами координирует миграцию. Управление архитектурой обеспечивает правильную облачную архитектуру. Управление орг. изменениями помогает людям адаптироваться к новым способам работы."
+            },
+            {
+                title: "Повторяющиеся сбои базы данных",
+                description: "База данных клиентов падала 3 раза за месяц с похожими симптомами. Каждый раз команда восстанавливает из бэкапа, но не может понять причину. Руководство требует постоянного решения.",
+                hint: "Сфокусируйтесь на поиске корневой причины и предотвращении будущих инцидентов.",
+                difficulty: "easy",
+                difficultyText: "Лёгкий",
+                answers: ["Управление проблемами", "Управление доступностью", "Мониторинг и события"],
+                explanation: "Управление проблемами исследует корневую причину. Управление доступностью улучшает надёжность БД. Мониторинг и события обнаруживает проблемы до того, как они вызовут сбой."
+            },
+            {
+                title: "Внедрение нового SaaS-приложения",
+                description: "ИТ-отдел должен развернуть новую HR-систему. Нужно протестировать, обучить персонал, мигрировать данные из старой системы и скоординировать запуск без нарушения расчёта зарплаты.",
+                hint: "Подумайте о тестировании, развёртывании и управлении изменениями.",
+                difficulty: "medium",
+                difficultyText: "Средний",
+                answers: ["Валидация и тестирование", "Управление развёртыванием", "Управление изменениями"],
+                explanation: "Валидация и тестирование обеспечивает качество. Управление развёртыванием выполняет раскатку. Управление изменениями контролирует процесс и согласования."
+            },
+            {
+                title: "Утечка данных",
+                description: "Служба безопасности обнаружила несанкционированный доступ к данным клиентов. Масштаб утечки неизвестен, возможно потребуется уведомление регулятора, доверие клиентов под угрозой. Руководство требует немедленной оценки и плана действий.",
+                hint: "Учтите безопасность, оценку рисков и коммуникацию с заинтересованными сторонами.",
+                difficulty: "hard",
+                difficultyText: "Сложный",
+                answers: ["Управление ИБ", "Управление рисками", "Управление взаимоотношениями"],
+                explanation: "Управление ИБ реагирует на инцидент безопасности. Управление рисками оценивает последствия и меры. Управление взаимоотношениями поддерживает доверие клиентов и стейкхолдеров."
+            },
+            {
+                title: "Деградация производительности",
+                description: "Пользователи жалуются на медленную работу ERP-системы. Время отклика увеличилось на 300% за неделю. Система обрабатывает критичные бизнес-процессы, руководство требует улучшений.",
+                hint: "Подумайте об анализе производительности и обязательствах по уровню сервиса.",
+                difficulty: "easy",
+                difficultyText: "Лёгкий",
+                answers: ["Управление мощностями", "Управление уровнем услуг", "Мониторинг и события"],
+                explanation: "Управление мощностями анализирует и исправляет проблемы производительности. Управление уровнем услуг обеспечивает выполнение SLA. Мониторинг и события предоставляет данные о производительности."
+            },
+            {
+                title: "Продление контракта с вендором",
+                description: "Контракт с критичным поставщиком ПО истекает через 3 месяца. Вендор требует повышения цены на 40%. Нужно оценить альтернативы, риски перехода и договориться о лучших условиях.",
+                hint: "Учтите отношения с поставщиками, финансовые аспекты и стратегические решения.",
+                difficulty: "medium",
+                difficultyText: "Средний",
+                answers: ["Управление поставщиками", "Финансовое управление", "Стратегическое управление"],
+                explanation: "Управление поставщиками ведёт переговоры с вендором. Финансовое управление оценивает затраты и выгоды. Стратегическое управление согласует решения с целями бизнеса."
+            },
+            {
+                title: "Риск потери знаний",
+                description: "Три старших инженера, которые создавали платёжную систему, уходят на пенсию в следующем году. Их знания не документированы, младшие сотрудники не могут поддерживать критичные системы. Передача знаний срочно необходима.",
+                hint: "Сфокусируйтесь на сохранении знаний и планировании кадров.",
+                difficulty: "medium",
+                difficultyText: "Средний",
+                answers: ["Управление знаниями", "Управление персоналом", "Управление конфигурацией"],
+                explanation: "Управление знаниями фиксирует и передаёт экспертизу. Управление персоналом планирует преемственность. Управление конфигурацией документирует связи систем."
+            },
+            {
+                title: "Запуск нового мобильного приложения",
+                description: "Маркетинг хочет запустить новое мобильное приложение через 6 недель. Разработке нужны требования, UX-дизайн, тестирование и продакшн-инфраструктура. Несколько команд должны эффективно сотрудничать.",
+                hint: "Подумайте о требованиях, разработке и координации релиза.",
+                difficulty: "hard",
+                difficultyText: "Сложный",
+                answers: ["Бизнес-анализ", "Разработка ПО", "Управление релизами"],
+                explanation: "Бизнес-анализ определяет требования. Разработка ПО создаёт приложение. Управление релизами координирует запуск между командами."
+            },
+            {
+                title: "Провал теста DR",
+                description: "Ежегодное тестирование аварийного восстановления показало, что время восстановления — 12 часов вместо требуемых 4. Резервные системы устарели, процедуры неясны, план непрерывности требует обновления.",
+                hint: "Учтите планирование непрерывности, инфраструктуру и постоянное улучшение.",
+                difficulty: "hard",
+                difficultyText: "Сложный",
+                answers: ["Управление непрерывностью", "Управление инфраструктурой", "Непрерывное улучшение"],
+                explanation: "Управление непрерывностью улучшает возможности DR. Управление инфраструктурой обновляет системы. Непрерывное улучшение обеспечивает систематические улучшения."
+            },
+            {
+                title: "Путаница с каталогом услуг",
+                description: "Пользователи не знают, какие ИТ-услуги доступны и как их запросить. Разные отделы создали свои списки. ИТ хочет единый источник правды для всех услуг и процедур запросов.",
+                hint: "Подумайте о документации услуг и обработке запросов.",
+                difficulty: "easy",
+                difficultyText: "Лёгкий",
+                answers: ["Каталог услуг", "Управление запросами", "Проектирование услуг"],
+                explanation: "Каталог услуг создаёт единый каталог. Управление запросами стандартизирует процесс запроса услуг. Проектирование услуг обеспечивает соответствие услуг потребностям пользователей."
+            },
+            {
+                title: "Провал аудита активов",
+                description: "Внешний аудит выявил, что 20% оборудования не учтено. Лицензии могут быть не в соответствии, организации грозят штрафы. Учёт активов нужно срочно улучшить.",
+                hint: "Учтите отслеживание активов, данные конфигурации и снижение рисков.",
+                difficulty: "medium",
+                difficultyText: "Средний",
+                answers: ["Управление ИТ-активами", "Управление конфигурацией", "Управление рисками"],
+                explanation: "Управление ИТ-активами отслеживает физические активы. Управление конфигурацией поддерживает точность CMDB. Управление рисками решает вопросы комплаенса и финансовых рисков."
+            }
+        ];
+
+        // Состояние игры
+        let currentCase = 0;
+        let score = 0;
+        let selectedPractices = [];
+        let answered = false;
+        let perfectCount = 0;
+        let partialCount = 0;
+        let missCount = 0;
+        let shuffledCases = [];
+
+        // Инициализация кнопок практик
+        function initPractices() {
+            const generalContainer = document.getElementById('general-practices');
+            const serviceContainer = document.getElementById('service-practices');
+            const technicalContainer = document.getElementById('technical-practices');
+
+            practices.general.forEach(p => {
+                generalContainer.innerHTML += `<button class="practice-btn" onclick="togglePractice(this, '${p}')">${p}</button>`;
+            });
+
+            practices.service.forEach(p => {
+                serviceContainer.innerHTML += `<button class="practice-btn" onclick="togglePractice(this, '${p}')">${p}</button>`;
+            });
+
+            practices.technical.forEach(p => {
+                technicalContainer.innerHTML += `<button class="practice-btn" onclick="togglePractice(this, '${p}')">${p}</button>`;
+            });
+        }
+
+        // Переключение выбора практики
+        function togglePractice(btn, practice) {
+            if (answered) return;
+
+            if (btn.classList.contains('selected')) {
+                btn.classList.remove('selected');
+                selectedPractices = selectedPractices.filter(p => p !== practice);
+            } else if (selectedPractices.length < 3) {
+                btn.classList.add('selected');
+                selectedPractices.push(practice);
+            }
+
+            updateUI();
+        }
+
+        // Обновление UI
+        function updateUI() {
+            document.getElementById('selected-count').textContent = `Выбрано: ${selectedPractices.length}/3`;
+            const checkBtn = document.getElementById('check-btn');
+            checkBtn.textContent = `Проверить (${selectedPractices.length}/3)`;
+            checkBtn.disabled = selectedPractices.length !== 3;
+        }
+
+        // Начать игру
+        function startGame() {
+            shuffledCases = [...cases].sort(() => Math.random() - 0.5);
+
+            document.getElementById('start-screen').style.display = 'none';
+            document.getElementById('game-screen').style.display = 'block';
+            document.getElementById('total-cases').textContent = shuffledCases.length;
+
+            loadCase();
+        }
+
+        // Загрузить кейс
+        function loadCase() {
+            const caseData = shuffledCases[currentCase];
+
+            document.getElementById('case-number').textContent = `Кейс ${currentCase + 1}/${shuffledCases.length}`;
+            document.getElementById('current-case').textContent = currentCase + 1;
+            document.getElementById('case-title').textContent = caseData.title;
+            document.getElementById('case-description').textContent = caseData.description;
+            document.getElementById('case-hint').innerHTML = `<strong>Подсказка:</strong> ${caseData.hint}`;
+
+            const difficultyEl = document.getElementById('case-difficulty');
+            difficultyEl.textContent = caseData.difficultyText;
+            difficultyEl.className = `difficulty difficulty-${caseData.difficulty}`;
+
+            // Сброс состояния
+            selectedPractices = [];
+            answered = false;
+
+            // Сброс кнопок
+            document.querySelectorAll('.practice-btn').forEach(btn => {
+                btn.classList.remove('selected', 'correct', 'incorrect', 'missed');
+                btn.disabled = false;
+            });
+
+            // Скрыть панель результата
+            document.getElementById('result-panel').classList.remove('show', 'success', 'partial', 'fail');
+            document.getElementById('next-btn').style.display = 'none';
+            document.getElementById('check-btn').style.display = 'inline-block';
+
+            updateUI();
+        }
+
+        // Проверить ответ
+        function checkAnswer() {
+            if (selectedPractices.length !== 3) return;
+
+            answered = true;
+            const caseData = shuffledCases[currentCase];
+            const correct = caseData.answers;
+
+            let correctCount = 0;
+
+            // Отметить кнопки
+            document.querySelectorAll('.practice-btn').forEach(btn => {
+                btn.disabled = true;
+                const practice = btn.textContent;
+
+                if (correct.includes(practice)) {
+                    if (selectedPractices.includes(practice)) {
+                        btn.classList.add('correct');
+                        correctCount++;
+                    } else {
+                        btn.classList.add('missed');
+                    }
+                } else if (selectedPractices.includes(practice)) {
+                    btn.classList.add('incorrect');
+                }
+            });
+
+            // Подсчёт очков
+            let points = 0;
+            let resultClass = '';
+            let resultTitle = '';
+            let resultText = '';
+
+            if (correctCount === 3) {
+                points = 3;
+                resultClass = 'success';
+                resultTitle = 'Отлично! 3/3';
+                resultText = 'Вы выбрали все правильные практики!';
+                perfectCount++;
+            } else if (correctCount === 2) {
+                points = 2;
+                resultClass = 'partial';
+                resultTitle = 'Хорошо! 2/3';
+                resultText = 'Вы угадали 2 из 3 практик.';
+                partialCount++;
+            } else if (correctCount === 1) {
+                points = 1;
+                resultClass = 'partial';
+                resultTitle = 'Частично 1/3';
+                resultText = 'Вы угадали 1 из 3 практик.';
+                partialCount++;
+            } else {
+                points = 0;
+                resultClass = 'fail';
+                resultTitle = 'Мимо 0/3';
+                resultText = 'Ни одна практика не угадана.';
+                missCount++;
+            }
+
+            score += points;
+            document.getElementById('current-score').textContent = score;
+
+            // Показать панель результата
+            const resultPanel = document.getElementById('result-panel');
+            resultPanel.className = `result-panel show ${resultClass}`;
+            document.getElementById('result-title').textContent = resultTitle;
+            document.getElementById('result-text').textContent = resultText;
+
+            // Показать правильные ответы
+            const correctList = document.getElementById('correct-list');
+            correctList.innerHTML = correct.map(p => `<li>${p}</li>`).join('');
+
+            document.getElementById('explanation').innerHTML = `<strong>Объяснение:</strong> ${caseData.explanation}`;
+
+            // Показать кнопку далее
+            document.getElementById('check-btn').style.display = 'none';
+            document.getElementById('next-btn').style.display = 'inline-block';
+            document.getElementById('next-btn').textContent =
+                currentCase < shuffledCases.length - 1 ? 'Следующий кейс →' : 'Завершить игру';
+        }
+
+        // Следующий кейс
+        function nextCase() {
+            currentCase++;
+
+            if (currentCase >= shuffledCases.length) {
+                endGame();
+            } else {
+                loadCase();
+            }
+        }
+
+        // Конец игры
+        function endGame() {
+            document.getElementById('game-screen').style.display = 'none';
+            document.getElementById('end-screen').style.display = 'block';
+
+            document.getElementById('final-score').textContent = score;
+            document.getElementById('perfect-count').textContent = perfectCount;
+            document.getElementById('partial-count').textContent = partialCount;
+            document.getElementById('miss-count').textContent = missCount;
+        }
+
+        // Перезапуск игры
+        function restartGame() {
+            currentCase = 0;
+            score = 0;
+            perfectCount = 0;
+            partialCount = 0;
+            missCount = 0;
+
+            document.getElementById('current-score').textContent = '0';
+            document.getElementById('end-screen').style.display = 'none';
+            startGame();
+        }
+
+        // Инициализация при загрузке
+        document.addEventListener('DOMContentLoaded', () => {
+            initPractices();
+        });
+    </script>
+</body>
+</html>
