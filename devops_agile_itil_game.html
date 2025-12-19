@@ -1,0 +1,1191 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevOps + Agile + ITIL - Синергия фреймворков</title>
+    <link href="https://fonts.googleapis.com/css2?family=Russo+One&family=Exo+2:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0d1117;
+            --bg-card: #161b22;
+            --bg-panel: #21262d;
+            --bg-hover: #30363d;
+            --text-primary: #e6edf3;
+            --text-secondary: #8b949e;
+            --text-muted: #6e7681;
+            --devops: #f97316;
+            --agile: #22c55e;
+            --itil: #3b82f6;
+            --accent: #a78bfa;
+            --success: #3fb950;
+            --warning: #d29922;
+            --danger: #f85149;
+            --border: #30363d;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Exo 2', sans-serif;
+            background: var(--bg-dark);
+            background-image:
+                radial-gradient(ellipse at 20% 20%, rgba(249, 115, 22, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(34, 197, 94, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 50%, rgba(59, 130, 246, 0.05) 0%, transparent 60%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            padding: 20px 0;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-family: 'Russo One', sans-serif;
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+
+        h1 .devops { color: var(--devops); }
+        h1 .agile { color: var(--agile); }
+        h1 .itil { color: var(--itil); }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .score-board {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .score-item {
+            text-align: center;
+            padding: 10px 20px;
+            background: var(--bg-card);
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            min-width: 80px;
+        }
+
+        .score-value {
+            font-family: 'Russo One', sans-serif;
+            font-size: 1.6rem;
+            color: var(--accent);
+        }
+
+        .score-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* Framework badges */
+        .framework-badges {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .framework-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .framework-badge.devops {
+            background: rgba(249, 115, 22, 0.2);
+            color: var(--devops);
+            border: 1px solid var(--devops);
+        }
+
+        .framework-badge.agile {
+            background: rgba(34, 197, 94, 0.2);
+            color: var(--agile);
+            border: 1px solid var(--agile);
+        }
+
+        .framework-badge.itil {
+            background: rgba(59, 130, 246, 0.2);
+            color: var(--itil);
+            border: 1px solid var(--itil);
+        }
+
+        /* Game layout */
+        .game-layout {
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 20px;
+        }
+
+        @media (max-width: 1100px) {
+            .game-layout { grid-template-columns: 1fr; }
+        }
+
+        .panel {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid var(--border);
+        }
+
+        /* Scenario card */
+        .scenario-card {
+            background: linear-gradient(135deg, var(--bg-panel), rgba(167, 139, 250, 0.1));
+            border: 1px solid var(--accent);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .scenario-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .scenario-number {
+            font-size: 0.85rem;
+            color: var(--accent);
+            background: rgba(167, 139, 250, 0.15);
+            padding: 4px 12px;
+            border-radius: 20px;
+        }
+
+        .scenario-type {
+            font-size: 0.8rem;
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-weight: 600;
+        }
+
+        .type-delivery { background: rgba(249, 115, 22, 0.2); color: var(--devops); }
+        .type-planning { background: rgba(34, 197, 94, 0.2); color: var(--agile); }
+        .type-operations { background: rgba(59, 130, 246, 0.2); color: var(--itil); }
+        .type-transformation { background: rgba(167, 139, 250, 0.2); color: var(--accent); }
+
+        .scenario-title {
+            font-family: 'Russo One', sans-serif;
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+        }
+
+        .scenario-description {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.7;
+            margin-bottom: 15px;
+        }
+
+        .scenario-goal {
+            background: var(--bg-panel);
+            padding: 12px;
+            border-radius: 8px;
+            border-left: 3px solid var(--accent);
+            font-size: 0.9rem;
+        }
+
+        .scenario-goal strong {
+            color: var(--accent);
+        }
+
+        /* Selection grid */
+        .selection-area {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 800px) {
+            .selection-area { grid-template-columns: 1fr; }
+        }
+
+        .framework-column {
+            background: var(--bg-panel);
+            border-radius: 10px;
+            padding: 15px;
+        }
+
+        .framework-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .framework-header.devops { color: var(--devops); border-bottom-color: var(--devops); }
+        .framework-header.agile { color: var(--agile); border-bottom-color: var(--agile); }
+        .framework-header.itil { color: var(--itil); border-bottom-color: var(--itil); }
+
+        .framework-icon { font-size: 1.3rem; }
+        .framework-name { font-weight: 600; font-size: 0.95rem; }
+
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .option-btn {
+            padding: 10px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--bg-card);
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: left;
+            font-family: 'Exo 2', sans-serif;
+        }
+
+        .option-btn:hover:not(:disabled) {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+        }
+
+        .option-btn.selected {
+            color: white;
+        }
+
+        .option-btn.selected.devops {
+            background: rgba(249, 115, 22, 0.3);
+            border-color: var(--devops);
+            color: var(--devops);
+        }
+
+        .option-btn.selected.agile {
+            background: rgba(34, 197, 94, 0.3);
+            border-color: var(--agile);
+            color: var(--agile);
+        }
+
+        .option-btn.selected.itil {
+            background: rgba(59, 130, 246, 0.3);
+            border-color: var(--itil);
+            color: var(--itil);
+        }
+
+        .option-btn.correct {
+            background: rgba(63, 185, 80, 0.25);
+            border-color: var(--success);
+            color: var(--success);
+        }
+
+        .option-btn.incorrect {
+            background: rgba(248, 81, 73, 0.25);
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+
+        .option-btn.missed {
+            background: rgba(210, 153, 34, 0.25);
+            border-color: var(--warning);
+            color: var(--warning);
+        }
+
+        .option-btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.8;
+        }
+
+        /* Selected summary */
+        .selected-summary {
+            background: var(--bg-panel);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .selected-summary-title {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+        }
+
+        .selected-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            min-height: 32px;
+        }
+
+        .selected-tag {
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .selected-tag.devops { background: rgba(249, 115, 22, 0.2); color: var(--devops); }
+        .selected-tag.agile { background: rgba(34, 197, 94, 0.2); color: var(--agile); }
+        .selected-tag.itil { background: rgba(59, 130, 246, 0.2); color: var(--itil); }
+
+        .empty-selection {
+            color: var(--text-muted);
+            font-style: italic;
+            font-size: 0.85rem;
+        }
+
+        /* Buttons */
+        .actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            border: none;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'Exo 2', sans-serif;
+        }
+
+        .btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent), #7c3aed);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: var(--bg-panel);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        /* Result panel */
+        .result-panel {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 12px;
+            display: none;
+        }
+
+        .result-panel.show { display: block; animation: slideIn 0.3s ease; }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result-panel.success { background: rgba(63, 185, 80, 0.1); border: 1px solid var(--success); }
+        .result-panel.partial { background: rgba(210, 153, 34, 0.1); border: 1px solid var(--warning); }
+        .result-panel.fail { background: rgba(248, 81, 73, 0.1); border: 1px solid var(--danger); }
+
+        .result-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .result-icon { font-size: 1.8rem; }
+        .result-title { font-family: 'Russo One', sans-serif; font-size: 1.1rem; }
+
+        .result-explanation {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .synergy-box {
+            background: var(--bg-panel);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .synergy-title {
+            font-size: 0.85rem;
+            color: var(--accent);
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .synergy-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        /* Side panel */
+        .side-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .panel-title {
+            font-family: 'Russo One', sans-serif;
+            font-size: 1rem;
+            color: var(--accent);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: var(--bg-panel);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--devops), var(--agile), var(--itil));
+            transition: width 0.5s;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .stat-box {
+            background: var(--bg-panel);
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-family: 'Russo One', sans-serif;
+            font-size: 1.5rem;
+            color: var(--accent);
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* Info cards */
+        .info-card {
+            background: var(--bg-panel);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 10px;
+        }
+
+        .info-card h4 {
+            font-size: 0.85rem;
+            margin-bottom: 8px;
+        }
+
+        .info-card.devops h4 { color: var(--devops); }
+        .info-card.agile h4 { color: var(--agile); }
+        .info-card.itil h4 { color: var(--itil); }
+
+        .info-card p {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        /* Start/End screens */
+        .screen {
+            text-align: center;
+            padding: 50px 20px;
+        }
+
+        .screen h2 {
+            font-family: 'Russo One', sans-serif;
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+        }
+
+        .screen p {
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto 25px;
+        }
+
+        .intro-frameworks {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+
+        .intro-framework {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 20px;
+            width: 200px;
+            border: 1px solid var(--border);
+        }
+
+        .intro-framework.devops { border-top: 3px solid var(--devops); }
+        .intro-framework.agile { border-top: 3px solid var(--agile); }
+        .intro-framework.itil { border-top: 3px solid var(--itil); }
+
+        .intro-framework h3 {
+            font-size: 1rem;
+            margin-bottom: 8px;
+        }
+
+        .intro-framework.devops h3 { color: var(--devops); }
+        .intro-framework.agile h3 { color: var(--agile); }
+        .intro-framework.itil h3 { color: var(--itil); }
+
+        .intro-framework p {
+            font-size: 0.8rem;
+            margin: 0;
+        }
+
+        .final-score {
+            font-family: 'Russo One', sans-serif;
+            font-size: 3.5rem;
+            color: var(--accent);
+            margin: 20px 0;
+        }
+
+        .final-score span {
+            font-size: 1.8rem;
+            color: var(--text-muted);
+        }
+
+        .final-stats {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin: 25px 0;
+        }
+
+        .final-stat { text-align: center; }
+        .final-stat-value { font-family: 'Russo One', sans-serif; font-size: 2rem; }
+        .final-stat-value.green { color: var(--success); }
+        .final-stat-value.orange { color: var(--warning); }
+        .final-stat-label { font-size: 0.8rem; color: var(--text-muted); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><span class="devops">DevOps</span> + <span class="agile">Agile</span> + <span class="itil">ITIL</span></h1>
+            <p class="subtitle">Найдите синергию трёх фреймворков для решения IT-задач</p>
+
+            <div class="framework-badges">
+                <span class="framework-badge devops">DevOps</span>
+                <span class="framework-badge agile">Agile</span>
+                <span class="framework-badge itil">ITIL</span>
+            </div>
+
+            <div class="score-board">
+                <div class="score-item">
+                    <div class="score-value" id="score">0</div>
+                    <div class="score-label">Очки</div>
+                </div>
+                <div class="score-item">
+                    <div class="score-value" id="current">0</div>
+                    <div class="score-label">Сценарий</div>
+                </div>
+                <div class="score-item">
+                    <div class="score-value" id="total">10</div>
+                    <div class="score-label">Всего</div>
+                </div>
+            </div>
+        </header>
+
+        <main id="main">
+            <!-- Start Screen -->
+            <div id="start-screen" class="screen">
+                <h2>Синергия фреймворков</h2>
+                <p>Научитесь комбинировать практики DevOps, Agile и ITIL для эффективного управления IT-услугами.</p>
+
+                <div class="intro-frameworks">
+                    <div class="intro-framework devops">
+                        <h3>DevOps</h3>
+                        <p>CI/CD, автоматизация, культура сотрудничества Dev и Ops</p>
+                    </div>
+                    <div class="intro-framework agile">
+                        <h3>Agile</h3>
+                        <p>Итерации, гибкость, быстрая обратная связь, ценность клиенту</p>
+                    </div>
+                    <div class="intro-framework itil">
+                        <h3>ITIL</h3>
+                        <p>34 практики, управление услугами, процессы и контроль</p>
+                    </div>
+                </div>
+
+                <div class="panel" style="max-width: 500px; margin: 0 auto 25px; text-align: left;">
+                    <h3 style="color: var(--accent); margin-bottom: 12px;">Как играть:</h3>
+                    <ul style="color: var(--text-secondary); margin-left: 20px; font-size: 0.9rem;">
+                        <li>Прочитайте сценарий IT-задачи</li>
+                        <li>Выберите по 1 элементу из каждого фреймворка</li>
+                        <li>Найдите синергию — элементы должны дополнять друг друга</li>
+                        <li>Очки: 3 за идеальный ответ, частичные за совпадения</li>
+                    </ul>
+                </div>
+
+                <button class="btn btn-primary" onclick="startGame()">Начать игру</button>
+            </div>
+
+            <!-- Game Screen -->
+            <div id="game-screen" style="display: none;">
+                <div class="game-layout">
+                    <div class="main-area">
+                        <!-- Scenario -->
+                        <div class="scenario-card">
+                            <div class="scenario-header">
+                                <span class="scenario-number" id="scenario-number">Сценарий 1/10</span>
+                                <span class="scenario-type" id="scenario-type">Тип</span>
+                            </div>
+                            <h2 class="scenario-title" id="scenario-title">Загрузка...</h2>
+                            <p class="scenario-description" id="scenario-description"></p>
+                            <div class="scenario-goal">
+                                <strong>Задача:</strong> <span id="scenario-goal">Выберите оптимальную комбинацию практик</span>
+                            </div>
+                        </div>
+
+                        <!-- Selection Grid -->
+                        <div class="selection-area">
+                            <div class="framework-column">
+                                <div class="framework-header devops">
+                                    <span class="framework-icon">🔧</span>
+                                    <span class="framework-name">DevOps</span>
+                                </div>
+                                <div class="options-list" id="devops-options"></div>
+                            </div>
+
+                            <div class="framework-column">
+                                <div class="framework-header agile">
+                                    <span class="framework-icon">🔄</span>
+                                    <span class="framework-name">Agile</span>
+                                </div>
+                                <div class="options-list" id="agile-options"></div>
+                            </div>
+
+                            <div class="framework-column">
+                                <div class="framework-header itil">
+                                    <span class="framework-icon">📋</span>
+                                    <span class="framework-name">ITIL</span>
+                                </div>
+                                <div class="options-list" id="itil-options"></div>
+                            </div>
+                        </div>
+
+                        <!-- Selected Summary -->
+                        <div class="selected-summary">
+                            <div class="selected-summary-title">Ваш выбор (нужно 3 — по одному из каждого):</div>
+                            <div class="selected-items" id="selected-items">
+                                <span class="empty-selection">Выберите элементы из каждого фреймворка...</span>
+                            </div>
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="actions">
+                            <button class="btn btn-primary" id="check-btn" onclick="checkAnswer()" disabled>
+                                Проверить синергию
+                            </button>
+                            <button class="btn btn-secondary" id="next-btn" onclick="nextScenario()" style="display: none;">
+                                Следующий сценарий →
+                            </button>
+                            <button class="btn btn-secondary" onclick="clearSelection()">Сбросить</button>
+                        </div>
+
+                        <!-- Result -->
+                        <div class="result-panel" id="result-panel">
+                            <div class="result-header">
+                                <span class="result-icon" id="result-icon">✓</span>
+                                <span class="result-title" id="result-title">Результат</span>
+                            </div>
+                            <p class="result-explanation" id="result-explanation"></p>
+                            <div class="synergy-box">
+                                <div class="synergy-title">Оптимальная синергия:</div>
+                                <div class="synergy-items" id="synergy-items"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Side Panel -->
+                    <div class="side-panel">
+                        <div class="panel">
+                            <div class="panel-title">📊 Прогресс</div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="progress" style="width: 0%"></div>
+                            </div>
+                            <div class="stats-grid">
+                                <div class="stat-box">
+                                    <div class="stat-value" id="correct-count">0</div>
+                                    <div class="stat-label">Верно</div>
+                                </div>
+                                <div class="stat-box">
+                                    <div class="stat-value" id="streak">0</div>
+                                    <div class="stat-label">Серия</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="panel">
+                            <div class="panel-title">💡 Подсказки</div>
+                            <div class="info-card devops">
+                                <h4>DevOps</h4>
+                                <p>Автоматизация, CI/CD, инфраструктура как код, мониторинг, культура</p>
+                            </div>
+                            <div class="info-card agile">
+                                <h4>Agile</h4>
+                                <p>Спринты, Scrum, Kanban, User Stories, ретроспективы, MVP</p>
+                            </div>
+                            <div class="info-card itil">
+                                <h4>ITIL</h4>
+                                <p>Управление инцидентами, изменениями, проблемами, релизами, уровнем услуг</p>
+                            </div>
+                        </div>
+
+                        <button class="btn btn-secondary" style="width: 100%;" onclick="restartGame()">
+                            🔄 Начать заново
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- End Screen -->
+            <div id="end-screen" class="screen" style="display: none;">
+                <h2>Игра завершена!</h2>
+                <div class="final-score">
+                    <span id="final-score">0</span> <span>/ 30</span>
+                </div>
+                <div class="final-stats">
+                    <div class="final-stat">
+                        <div class="final-stat-value green" id="final-correct">0</div>
+                        <div class="final-stat-label">Идеальных</div>
+                    </div>
+                    <div class="final-stat">
+                        <div class="final-stat-value orange" id="final-partial">0</div>
+                        <div class="final-stat-label">Частичных</div>
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="restartGame()">Играть снова</button>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Опции для каждого фреймворка
+        const options = {
+            devops: [
+                "CI/CD Pipeline",
+                "Infrastructure as Code",
+                "Автоматизированное тестирование",
+                "Мониторинг и логирование",
+                "Контейнеризация (Docker/K8s)",
+                "GitOps",
+                "Feature Flags",
+                "Blue-Green Deployment"
+            ],
+            agile: [
+                "Спринты и итерации",
+                "Daily Standup",
+                "Ретроспектива",
+                "Product Backlog",
+                "User Stories",
+                "Kanban-доска",
+                "MVP подход",
+                "Cross-functional команды"
+            ],
+            itil: [
+                "Управление инцидентами",
+                "Управление проблемами",
+                "Управление изменениями",
+                "Управление релизами",
+                "Управление уровнем услуг",
+                "Управление конфигурацией",
+                "Непрерывное улучшение",
+                "Service Desk"
+            ]
+        };
+
+        // Сценарии
+        const scenarios = [
+            {
+                title: "Ускорение доставки фич",
+                description: "Команда разработки тратит 2 недели на ручное тестирование и деплой каждого релиза. Бизнес требует выпускать обновления каждую неделю. Качество страдает из-за спешки.",
+                goal: "Выберите комбинацию для ускорения доставки без потери качества",
+                type: "delivery",
+                typeText: "Доставка",
+                answers: {
+                    devops: "CI/CD Pipeline",
+                    agile: "Спринты и итерации",
+                    itil: "Управление релизами"
+                },
+                explanation: "CI/CD автоматизирует сборку и деплой. Спринты обеспечивают ритмичную доставку. Управление релизами контролирует качество и координацию выпусков."
+            },
+            {
+                title: "Частые сбои в продакшене",
+                description: "После каждого релиза возникают инциденты. Команда тушит пожары, но одни и те же проблемы повторяются. Нет понимания корневых причин.",
+                goal: "Найдите синергию для стабилизации продакшена",
+                type: "operations",
+                typeText: "Эксплуатация",
+                answers: {
+                    devops: "Мониторинг и логирование",
+                    agile: "Ретроспектива",
+                    itil: "Управление проблемами"
+                },
+                explanation: "Мониторинг выявляет проблемы проактивно. Ретроспектива анализирует что пошло не так. Управление проблемами находит и устраняет корневые причины."
+            },
+            {
+                title: "Запуск нового продукта",
+                description: "Стартап хочет быстро выйти на рынок с новым приложением. Требования не до конца ясны, нужна гибкость. Важно получить обратную связь от пользователей.",
+                goal: "Комбинация для быстрого запуска с возможностью pivot",
+                type: "planning",
+                typeText: "Планирование",
+                answers: {
+                    devops: "Feature Flags",
+                    agile: "MVP подход",
+                    itil: "Непрерывное улучшение"
+                },
+                explanation: "Feature Flags позволяют включать/выключать функции. MVP помогает быстро проверить гипотезы. Непрерывное улучшение обеспечивает развитие на основе фидбека."
+            },
+            {
+                title: "Миграция в Kubernetes",
+                description: "Компания переносит монолит в микросервисную архитектуру на Kubernetes. Нужно управлять конфигурациями сотен сервисов и не потерять контроль.",
+                goal: "Синергия для управляемой трансформации инфраструктуры",
+                type: "transformation",
+                typeText: "Трансформация",
+                answers: {
+                    devops: "Infrastructure as Code",
+                    agile: "Cross-functional команды",
+                    itil: "Управление конфигурацией"
+                },
+                explanation: "IaC версионирует инфраструктуру. Кросс-функциональные команды объединяют Dev и Ops. Управление конфигурацией поддерживает CMDB в актуальном состоянии."
+            },
+            {
+                title: "Критический инцидент",
+                description: "Платёжная система упала в пиковые часы. Клиенты не могут оплатить заказы. Нужно быстро восстановить сервис и понять, что произошло.",
+                goal: "Комбинация для быстрого восстановления и предотвращения",
+                type: "operations",
+                typeText: "Эксплуатация",
+                answers: {
+                    devops: "Blue-Green Deployment",
+                    agile: "Daily Standup",
+                    itil: "Управление инцидентами"
+                },
+                explanation: "Blue-Green позволяет быстро откатиться. Daily Standup обеспечивает координацию команды. Управление инцидентами — процесс быстрого восстановления."
+            },
+            {
+                title: "Техдолг и качество",
+                description: "Кодовая база обросла техническим долгом. Новые фичи добавляют баги. Тесты устарели, покрытие низкое. Разработчики боятся рефакторинга.",
+                goal: "Синергия для системного улучшения качества",
+                type: "delivery",
+                typeText: "Доставка",
+                answers: {
+                    devops: "Автоматизированное тестирование",
+                    agile: "Product Backlog",
+                    itil: "Непрерывное улучшение"
+                },
+                explanation: "Автотесты дают уверенность при изменениях. Backlog приоритизирует техдолг наравне с фичами. Непрерывное улучшение — системный подход к качеству."
+            },
+            {
+                title: "Требования от бизнеса",
+                description: "Бизнес постоянно меняет требования. Разработка не успевает. Нет единого понимания приоритетов между IT и бизнесом.",
+                goal: "Комбинация для эффективной работы с требованиями",
+                type: "planning",
+                typeText: "Планирование",
+                answers: {
+                    devops: "GitOps",
+                    agile: "User Stories",
+                    itil: "Управление уровнем услуг"
+                },
+                explanation: "GitOps делает изменения прозрачными. User Stories формализуют требования. SLA устанавливает взаимные ожидания между IT и бизнесом."
+            },
+            {
+                title: "Масштабирование команды",
+                description: "Команда выросла с 5 до 25 человек. Старые процессы не работают. Коммуникация страдает, релизы тормозят, каждый делает по-своему.",
+                goal: "Синергия для масштабируемых процессов",
+                type: "transformation",
+                typeText: "Трансформация",
+                answers: {
+                    devops: "CI/CD Pipeline",
+                    agile: "Kanban-доска",
+                    itil: "Управление изменениями"
+                },
+                explanation: "CI/CD стандартизирует процесс доставки. Kanban визуализирует поток работы для всех. Управление изменениями координирует работу команд."
+            },
+            {
+                title: "Поддержка пользователей",
+                description: "Служба поддержки завалена тикетами. Много повторяющихся вопросов. Нет базы знаний. Пользователи недовольны временем ответа.",
+                goal: "Комбинация для улучшения поддержки",
+                type: "operations",
+                typeText: "Эксплуатация",
+                answers: {
+                    devops: "Мониторинг и логирование",
+                    agile: "Kanban-доска",
+                    itil: "Service Desk"
+                },
+                explanation: "Мониторинг помогает проактивно находить проблемы. Kanban управляет потоком тикетов. Service Desk — единая точка контакта с процессами эскалации."
+            },
+            {
+                title: "Безопасный деплой",
+                description: "Регулятор требует контролируемые изменения в финансовой системе. Нужен audit trail. При этом бизнес хочет частые релизы.",
+                goal: "Синергия для compliant-доставки",
+                type: "delivery",
+                typeText: "Доставка",
+                answers: {
+                    devops: "GitOps",
+                    agile: "Спринты и итерации",
+                    itil: "Управление изменениями"
+                },
+                explanation: "GitOps обеспечивает аудит через Git. Спринты дают предсказуемый ритм. Управление изменениями — формальный процесс одобрения для compliance."
+            }
+        ];
+
+        // Состояние игры
+        let state = {
+            current: 0,
+            score: 0,
+            correctCount: 0,
+            partialCount: 0,
+            streak: 0,
+            selection: { devops: null, agile: null, itil: null },
+            answered: false,
+            shuffledScenarios: []
+        };
+
+        function startGame() {
+            state = {
+                current: 0,
+                score: 0,
+                correctCount: 0,
+                partialCount: 0,
+                streak: 0,
+                selection: { devops: null, agile: null, itil: null },
+                answered: false,
+                shuffledScenarios: [...scenarios].sort(() => Math.random() - 0.5)
+            };
+
+            document.getElementById('start-screen').style.display = 'none';
+            document.getElementById('game-screen').style.display = 'block';
+            document.getElementById('end-screen').style.display = 'none';
+            document.getElementById('total').textContent = state.shuffledScenarios.length;
+
+            loadScenario();
+        }
+
+        function loadScenario() {
+            const scenario = state.shuffledScenarios[state.current];
+            state.selection = { devops: null, agile: null, itil: null };
+            state.answered = false;
+
+            document.getElementById('scenario-number').textContent = `Сценарий ${state.current + 1}/${state.shuffledScenarios.length}`;
+            document.getElementById('current').textContent = state.current + 1;
+            document.getElementById('scenario-title').textContent = scenario.title;
+            document.getElementById('scenario-description').textContent = scenario.description;
+            document.getElementById('scenario-goal').textContent = scenario.goal;
+
+            const typeEl = document.getElementById('scenario-type');
+            typeEl.textContent = scenario.typeText;
+            typeEl.className = `scenario-type type-${scenario.type}`;
+
+            // Render options
+            renderOptions('devops', options.devops);
+            renderOptions('agile', options.agile);
+            renderOptions('itil', options.itil);
+
+            updateUI();
+            document.getElementById('result-panel').classList.remove('show');
+            document.getElementById('check-btn').style.display = 'inline-block';
+            document.getElementById('next-btn').style.display = 'none';
+        }
+
+        function renderOptions(framework, opts) {
+            const container = document.getElementById(`${framework}-options`);
+            const shuffled = [...opts].sort(() => Math.random() - 0.5).slice(0, 5);
+
+            // Ensure correct answer is included
+            const scenario = state.shuffledScenarios[state.current];
+            const correctAnswer = scenario.answers[framework];
+            if (!shuffled.includes(correctAnswer)) {
+                shuffled[Math.floor(Math.random() * shuffled.length)] = correctAnswer;
+            }
+
+            container.innerHTML = shuffled.map(opt => `
+                <button class="option-btn" data-framework="${framework}" data-value="${opt}" onclick="selectOption('${framework}', '${opt}', this)">
+                    ${opt}
+                </button>
+            `).join('');
+        }
+
+        function selectOption(framework, value, btn) {
+            if (state.answered) return;
+
+            // Deselect previous
+            document.querySelectorAll(`[data-framework="${framework}"]`).forEach(b => {
+                b.classList.remove('selected', framework);
+            });
+
+            // Select new
+            btn.classList.add('selected', framework);
+            state.selection[framework] = value;
+
+            updateUI();
+        }
+
+        function updateUI() {
+            // Update selected summary
+            const items = document.getElementById('selected-items');
+            const selected = [];
+
+            if (state.selection.devops) selected.push(`<span class="selected-tag devops">${state.selection.devops}</span>`);
+            if (state.selection.agile) selected.push(`<span class="selected-tag agile">${state.selection.agile}</span>`);
+            if (state.selection.itil) selected.push(`<span class="selected-tag itil">${state.selection.itil}</span>`);
+
+            items.innerHTML = selected.length > 0 ? selected.join('') : '<span class="empty-selection">Выберите элементы из каждого фреймворка...</span>';
+
+            // Update check button
+            const allSelected = state.selection.devops && state.selection.agile && state.selection.itil;
+            document.getElementById('check-btn').disabled = !allSelected;
+
+            // Update progress
+            const progress = (state.current / state.shuffledScenarios.length) * 100;
+            document.getElementById('progress').style.width = `${progress}%`;
+
+            // Update stats
+            document.getElementById('score').textContent = state.score;
+            document.getElementById('correct-count').textContent = state.correctCount;
+            document.getElementById('streak').textContent = state.streak;
+        }
+
+        function clearSelection() {
+            if (state.answered) return;
+            state.selection = { devops: null, agile: null, itil: null };
+            document.querySelectorAll('.option-btn').forEach(btn => {
+                btn.classList.remove('selected', 'devops', 'agile', 'itil');
+            });
+            updateUI();
+        }
+
+        function checkAnswer() {
+            state.answered = true;
+            const scenario = state.shuffledScenarios[state.current];
+            const correct = scenario.answers;
+
+            let matches = 0;
+
+            // Mark buttons
+            document.querySelectorAll('.option-btn').forEach(btn => {
+                btn.disabled = true;
+                const framework = btn.dataset.framework;
+                const value = btn.dataset.value;
+
+                if (value === correct[framework]) {
+                    if (state.selection[framework] === value) {
+                        btn.classList.add('correct');
+                        matches++;
+                    } else {
+                        btn.classList.add('missed');
+                    }
+                } else if (state.selection[framework] === value) {
+                    btn.classList.add('incorrect');
+                }
+            });
+
+            // Calculate score
+            let points = matches;
+            let resultClass, resultTitle;
+
+            if (matches === 3) {
+                resultClass = 'success';
+                resultTitle = 'Отличная синергия! +3';
+                state.correctCount++;
+                state.streak++;
+            } else if (matches >= 1) {
+                resultClass = 'partial';
+                resultTitle = `Частичное совпадение: ${matches}/3`;
+                state.partialCount++;
+                state.streak = 0;
+            } else {
+                resultClass = 'fail';
+                resultTitle = 'Попробуйте другую комбинацию';
+                state.streak = 0;
+            }
+
+            state.score += points;
+
+            // Show result
+            const panel = document.getElementById('result-panel');
+            panel.className = `result-panel show ${resultClass}`;
+            document.getElementById('result-icon').textContent = matches === 3 ? '✅' : matches >= 1 ? '⚠️' : '❌';
+            document.getElementById('result-title').textContent = resultTitle;
+            document.getElementById('result-explanation').textContent = scenario.explanation;
+
+            // Show correct synergy
+            document.getElementById('synergy-items').innerHTML = `
+                <span class="selected-tag devops">${correct.devops}</span>
+                <span class="selected-tag agile">${correct.agile}</span>
+                <span class="selected-tag itil">${correct.itil}</span>
+            `;
+
+            document.getElementById('check-btn').style.display = 'none';
+            document.getElementById('next-btn').style.display = 'inline-block';
+            document.getElementById('next-btn').textContent =
+                state.current < state.shuffledScenarios.length - 1 ? 'Следующий сценарий →' : 'Завершить';
+
+            updateUI();
+        }
+
+        function nextScenario() {
+            state.current++;
+            if (state.current >= state.shuffledScenarios.length) {
+                endGame();
+            } else {
+                loadScenario();
+            }
+        }
+
+        function endGame() {
+            document.getElementById('game-screen').style.display = 'none';
+            document.getElementById('end-screen').style.display = 'block';
+
+            document.getElementById('final-score').textContent = state.score;
+            document.getElementById('final-correct').textContent = state.correctCount;
+            document.getElementById('final-partial').textContent = state.partialCount;
+        }
+
+        function restartGame() {
+            document.getElementById('end-screen').style.display = 'none';
+            startGame();
+        }
+    </script>
+</body>
+</html>
