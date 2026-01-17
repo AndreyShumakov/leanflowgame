@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ITIL4: 7 шагов модели постоянного улучшения (CSI)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            color: #fff;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            font-size: 1.6rem;
+            margin-bottom: 8px;
+            background: linear-gradient(90deg, #f39c12, #e74c3c);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header p {
+            color: #888;
+            font-size: 0.9rem;
+        }
+
+        .model-diagram {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            padding: 15px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 10px;
+        }
+
+        .step-badge {
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .step-badge .num {
+            width: 20px;
+            height: 20px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+        }
+
+        .step-badge.s1 { background: #9b59b6; }
+        .step-badge.s2 { background: #3498db; }
+        .step-badge.s3 { background: #1abc9c; }
+        .step-badge.s4 { background: #2ecc71; }
+        .step-badge.s5 { background: #f1c40f; color: #000; }
+        .step-badge.s6 { background: #e67e22; }
+        .step-badge.s7 { background: #e74c3c; }
+
+        .arrow {
+            color: #555;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .score-panel {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+        }
+
+        .score-item {
+            text-align: center;
+        }
+
+        .score-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            background: linear-gradient(90deg, #f39c12, #e74c3c);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .score-label {
+            font-size: 0.8rem;
+            color: #888;
+        }
+
+        .cases-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .case-card {
+            background: rgba(255,255,255,0.05);
+            border: 2px solid rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .case-card:hover {
+            background: rgba(255,255,255,0.08);
+            transform: translateY(-2px);
+        }
+
+        .case-card.selected {
+            border-color: #f39c12;
+            background: rgba(243, 156, 18, 0.1);
+        }
+
+        .case-card.completed {
+            border-color: #2ecc71;
+            background: rgba(46, 204, 113, 0.1);
+        }
+
+        .case-number {
+            display: inline-block;
+            background: linear-gradient(135deg, #f39c12, #e74c3c);
+            color: #fff;
+            padding: 3px 10px;
+            border-radius: 15px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .case-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+            font-size: 0.95rem;
+        }
+
+        .case-preview {
+            font-size: 0.8rem;
+            color: #888;
+            line-height: 1.4;
+        }
+
+        .case-status {
+            margin-top: 8px;
+            font-size: 0.75rem;
+            color: #2ecc71;
+        }
+
+        .workspace {
+            background: rgba(255,255,255,0.03);
+            border-radius: 15px;
+            padding: 20px;
+            display: none;
+        }
+
+        .workspace.active {
+            display: block;
+        }
+
+        .case-full {
+            background: rgba(243, 156, 18, 0.1);
+            border-left: 4px solid #f39c12;
+            padding: 15px 20px;
+            border-radius: 0 10px 10px 0;
+            margin-bottom: 20px;
+        }
+
+        .case-full h3 {
+            color: #f39c12;
+            margin-bottom: 10px;
+        }
+
+        .case-full p {
+            line-height: 1.6;
+            color: #ccc;
+        }
+
+        .steps-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .step-card {
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            padding: 15px;
+            border-left: 4px solid;
+        }
+
+        .step-card.s1 { border-left-color: #9b59b6; }
+        .step-card.s2 { border-left-color: #3498db; }
+        .step-card.s3 { border-left-color: #1abc9c; }
+        .step-card.s4 { border-left-color: #2ecc71; }
+        .step-card.s5 { border-left-color: #f1c40f; }
+        .step-card.s6 { border-left-color: #e67e22; }
+        .step-card.s7 { border-left-color: #e74c3c; }
+
+        .step-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .step-num {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .step-card.s1 .step-num { background: #9b59b6; }
+        .step-card.s2 .step-num { background: #3498db; }
+        .step-card.s3 .step-num { background: #1abc9c; }
+        .step-card.s4 .step-num { background: #2ecc71; }
+        .step-card.s5 .step-num { background: #f1c40f; color: #000; }
+        .step-card.s6 .step-num { background: #e67e22; }
+        .step-card.s7 .step-num { background: #e74c3c; }
+
+        .step-title {
+            font-weight: 600;
+        }
+
+        .step-question {
+            font-size: 0.85rem;
+            color: #888;
+            margin-bottom: 10px;
+        }
+
+        .step-textarea {
+            width: 100%;
+            min-height: 80px;
+            padding: 12px;
+            border: 2px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            background: rgba(0,0,0,0.3);
+            color: #fff;
+            font-size: 0.9rem;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        .step-textarea:focus {
+            outline: none;
+            border-color: #f39c12;
+        }
+
+        .step-textarea:disabled {
+            opacity: 0.7;
+        }
+
+        .step-example {
+            margin-top: 10px;
+            padding: 10px;
+            background: rgba(46, 204, 113, 0.1);
+            border-radius: 8px;
+            font-size: 0.85rem;
+            display: none;
+            border: 1px solid rgba(46, 204, 113, 0.3);
+        }
+
+        .step-example.show {
+            display: block;
+        }
+
+        .step-example-title {
+            color: #2ecc71;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .practice-section {
+            background: rgba(231, 76, 60, 0.1);
+            border: 2px solid rgba(231, 76, 60, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .practice-section h4 {
+            color: #e74c3c;
+            margin-bottom: 10px;
+        }
+
+        .practice-section p {
+            font-size: 0.9rem;
+            color: #aaa;
+            margin-bottom: 15px;
+        }
+
+        .practice-input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid rgba(255,255,255,0.2);
+            border-radius: 8px;
+            background: rgba(0,0,0,0.3);
+            color: #fff;
+            font-size: 1rem;
+        }
+
+        .practice-input:focus {
+            outline: none;
+            border-color: #e74c3c;
+        }
+
+        .practice-result {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .practice-result.correct {
+            background: rgba(46, 204, 113, 0.2);
+            border: 2px solid #2ecc71;
+            display: block;
+        }
+
+        .practice-result.incorrect {
+            background: rgba(231, 76, 60, 0.2);
+            border: 2px solid #e74c3c;
+            display: block;
+        }
+
+        .practice-result.partial {
+            background: rgba(241, 196, 15, 0.2);
+            border: 2px solid #f1c40f;
+            display: block;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .btn-check {
+            background: linear-gradient(135deg, #f39c12, #e74c3c);
+            color: #fff;
+        }
+
+        .btn-reset {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+        }
+
+        .btn-next {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            color: #fff;
+        }
+
+        .btn-show {
+            background: rgba(52, 152, 219, 0.2);
+            color: #3498db;
+            border: 1px solid #3498db;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .final-results {
+            display: none;
+            text-align: center;
+            padding: 30px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 15px;
+            margin-top: 20px;
+        }
+
+        .final-results.show {
+            display: block;
+        }
+
+        .final-grade {
+            font-size: 4rem;
+            font-weight: bold;
+            background: linear-gradient(90deg, #f39c12, #e74c3c);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 15px;
+        }
+
+        .results-table {
+            width: 100%;
+            max-width: 600px;
+            margin: 20px auto;
+            border-collapse: collapse;
+        }
+
+        .results-table th, .results-table td {
+            padding: 10px 15px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .results-table th {
+            color: #888;
+            font-weight: 600;
+        }
+
+        .result-correct { color: #2ecc71; }
+        .result-incorrect { color: #e74c3c; }
+        .result-partial { color: #f1c40f; }
+
+        .hints-panel {
+            background: rgba(52, 152, 219, 0.1);
+            border: 1px solid rgba(52, 152, 219, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .hints-panel h4 {
+            color: #3498db;
+            margin-bottom: 10px;
+        }
+
+        .hints-panel ul {
+            margin-left: 20px;
+            color: #aaa;
+            font-size: 0.85rem;
+        }
+
+        .hints-panel li {
+            margin-bottom: 5px;
+        }
+
+        @media (max-width: 768px) {
+            .model-diagram {
+                justify-content: flex-start;
+                overflow-x: auto;
+            }
+            .cases-selector {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>7 шагов модели постоянного улучшения (CSI)</h1>
+        <p>Решите кейсы, применяя модель Continual Service Improvement</p>
+    </div>
+
+    <div class="model-diagram">
+        <div class="step-badge s1"><span class="num">1</span> Видение</div>
+        <div class="arrow">→</div>
+        <div class="step-badge s2"><span class="num">2</span> Где мы?</div>
+        <div class="arrow">→</div>
+        <div class="step-badge s3"><span class="num">3</span> Куда идём?</div>
+        <div class="arrow">→</div>
+        <div class="step-badge s4"><span class="num">4</span> Как?</div>
+        <div class="arrow">→</div>
+        <div class="step-badge s5"><span class="num">5</span> Действие</div>
+        <div class="arrow">→</div>
+        <div class="step-badge s6"><span class="num">6</span> Проверка</div>
+        <div class="arrow">→</div>
+        <div class="step-badge s7"><span class="num">7</span> Закрепление</div>
+    </div>
+
+    <div class="score-panel">
+        <div class="score-item">
+            <div class="score-value" id="completedCases">0</div>
+            <div class="score-label">Кейсов решено</div>
+        </div>
+        <div class="score-item">
+            <div class="score-value" id="totalPoints">0</div>
+            <div class="score-label">Очков</div>
+        </div>
+        <div class="score-item">
+            <div class="score-value" id="maxPoints">60</div>
+            <div class="score-label">Максимум</div>
+        </div>
+    </div>
+
+    <div class="cases-selector" id="casesSelector"></div>
+
+    <div class="workspace" id="workspace">
+        <div class="case-full" id="caseDescription"></div>
+
+        <div class="hints-panel">
+            <h4>Подсказка по шагам:</h4>
+            <ul>
+                <li><strong>Шаг 1:</strong> Какова стратегическая цель? Как это связано с бизнесом?</li>
+                <li><strong>Шаг 2:</strong> Измерьте текущее состояние (метрики, факты)</li>
+                <li><strong>Шаг 3:</strong> Определите целевые показатели (SMART)</li>
+                <li><strong>Шаг 4:</strong> Составьте план действий</li>
+                <li><strong>Шаг 5:</strong> Выполните запланированные действия</li>
+                <li><strong>Шаг 6:</strong> Измерьте результат, сравните с целью</li>
+                <li><strong>Шаг 7:</strong> Стандартизируйте улучшения, планируйте следующий цикл</li>
+            </ul>
+        </div>
+
+        <div class="steps-container" id="stepsContainer"></div>
+
+        <div class="practice-section">
+            <h4>Ключевая практика ITIL4</h4>
+            <p>Какая практика ITIL4 наиболее релевантна для решения этого кейса? Введите название практики на русском или английском языке.</p>
+            <input type="text" class="practice-input" id="practiceInput" placeholder="Например: Incident Management или Управление инцидентами">
+            <div class="practice-result" id="practiceResult"></div>
+        </div>
+
+        <div class="controls">
+            <button class="btn btn-reset" onclick="resetCase()">Сбросить кейс</button>
+            <button class="btn btn-show" onclick="showExamples()">Показать примеры</button>
+            <button class="btn btn-check" onclick="checkCase()">Проверить</button>
+        </div>
+    </div>
+
+    <div class="final-results" id="finalResults">
+        <div class="final-grade" id="finalGrade">A</div>
+        <h2 id="finalMessage">Отличная работа!</h2>
+        <p id="finalDescription"></p>
+        <table class="results-table">
+            <thead>
+                <tr>
+                    <th>Кейс</th>
+                    <th>Практика</th>
+                    <th>Результат</th>
+                </tr>
+            </thead>
+            <tbody id="resultsBody"></tbody>
+        </table>
+        <div class="controls">
+            <button class="btn btn-reset" onclick="resetAll()">Начать заново</button>
+        </div>
+    </div>
+
+    <script>
+        const cases = [
+            {
+                id: 1,
+                title: "Медленная обработка заявок в Service Desk",
+                preview: "Среднее время решения выросло с 4 до 12 часов...",
+                description: `Пользователи жалуются, что их заявки в техподдержку обрабатываются слишком долго. Среднее время решения инцидента выросло с 4 до 12 часов за последние полгода. Руководство требует разобраться в ситуации и улучшить показатели.`,
+                practice: ["incident management", "управление инцидентами", "service desk"],
+                practiceDisplay: "Incident Management (Управление инцидентами)",
+                examples: [
+                    "Обеспечить быструю и качественную техподдержку для минимизации влияния инцидентов на бизнес-процессы",
+                    "Текущий MTTR = 12 часов, FCR = 35%, backlog = 150 заявок, 2 специалиста первой линии на 500 пользователей",
+                    "Целевой MTTR = 4 часа, FCR = 60%, backlog < 30 заявок, время реакции < 30 минут",
+                    "Внедрить систему приоритизации, расширить базу знаний, добавить 1 специалиста, автоматизировать типовые запросы",
+                    "Обучить персонал, настроить автоматическую маршрутизацию, создать 50 статей FAQ, внедрить чат-бот для типовых вопросов",
+                    "Еженедельный мониторинг MTTR и FCR, опрос удовлетворённости пользователей, анализ причин эскалаций",
+                    "Документировать новые процессы, включить метрики в регулярную отчётность, запланировать квартальный обзор эффективности"
+                ]
+            },
+            {
+                id: 2,
+                title: "Частые сбои корпоративной почты",
+                preview: "8 сбоев за квартал, цель — доступность 99,5%...",
+                description: `За последний квартал почтовый сервер «падал» 8 раз, каждый раз на 1-3 часа. Бизнес-подразделения теряют письма от клиентов и срывают сроки. CIO поставил задачу добиться доступности почты 99,5%.`,
+                practice: ["availability management", "управление доступностью", "problem management", "управление проблемами"],
+                practiceDisplay: "Availability Management (Управление доступностью)",
+                examples: [
+                    "Обеспечить надёжную работу почтового сервиса для бесперебойной коммуникации с клиентами и внутри компании",
+                    "Availability = 97.8%, 8 сбоев/квартал, MTTR = 2 часа, причины: 4 — переполнение диска, 2 — сбой ПО, 2 — неизвестно",
+                    "Availability = 99.5%, не более 1 сбоя в квартал, MTTR < 30 минут, мониторинг 24/7",
+                    "Настроить проактивный мониторинг, внедрить автоочистку логов, обновить ПО, добавить резервный сервер",
+                    "Установить Zabbix/Prometheus для мониторинга, настроить алерты, провести обновление Exchange/Postfix, развернуть failover-кластер",
+                    "Отслеживать uptime ежедневно, фиксировать все инциденты, ежемесячный отчёт по доступности",
+                    "Внести мониторинг в стандарт эксплуатации, запланировать регулярное обновление ПО, проводить учения по переключению на резерв"
+                ]
+            },
+            {
+                id: 3,
+                title: "Переход на удалённую работу",
+                preview: "VPN на 50 человек, нужно на 200...",
+                description: `Компания планирует перевести 40% сотрудников на гибридный формат работы. Текущая инфраструктура не готова: VPN рассчитан на 50 человек, а нужно 200. Есть 3 месяца на подготовку.`,
+                practice: ["capacity management", "управление мощностями", "capacity and performance management", "infrastructure and platform management"],
+                practiceDisplay: "Capacity and Performance Management",
+                examples: [
+                    "Обеспечить комфортную удалённую работу для 200 сотрудников с сохранением производительности и безопасности",
+                    "VPN: лимит 50 пользователей, пропускная способность 100 Мбит, нет MFA, 20% сотрудников имеют корпоративные ноутбуки",
+                    "VPN: 250 одновременных подключений, 500 Мбит канал, MFA для всех, 100% удалённых сотрудников обеспечены оборудованием",
+                    "Закупить лицензии VPN, расширить канал, внедрить MFA, закупить ноутбуки, подготовить документацию для пользователей",
+                    "Неделя 1-4: закупка и настройка оборудования. Неделя 5-8: пилот на 20 пользователях. Неделя 9-12: масштабирование и обучение",
+                    "Тестирование нагрузки, опрос пилотных пользователей, мониторинг стабильности подключений",
+                    "Разработать политику удалённой работы, создать инструкции для пользователей, запланировать ежеквартальный пересмотр ёмкости"
+                ]
+            },
+            {
+                id: 4,
+                title: "Низкая удовлетворённость пользователей",
+                preview: "Только 45% довольны ИТ-службой, цель — 75%...",
+                description: `Результаты опроса показали: только 45% сотрудников довольны работой ИТ-службы. Основные претензии — «не понимают наших задач», «говорят на непонятном языке», «долго ждать». Руководство хочет поднять показатель до 75%.`,
+                practice: ["service level management", "управление уровнем услуг", "relationship management", "управление взаимоотношениями"],
+                practiceDisplay: "Service Level Management / Relationship Management",
+                examples: [
+                    "Сделать ИТ-службу клиентоориентированной, повысить ценность ИТ для бизнеса",
+                    "CSAT = 45%, основные жалобы: непонимание задач бизнеса, сложный язык общения, долгое ожидание",
+                    "CSAT = 75%, NPS > 30, время первого ответа < 1 часа, 90% пользователей понимают статус своих заявок",
+                    "Обучить ИТ-специалистов коммуникации, внедрить SLA с уведомлениями, назначить relationship managers для ключевых отделов",
+                    "Провести тренинг по soft skills, настроить автоуведомления о статусе заявок, провести встречи с руководителями отделов для понимания их потребностей",
+                    "Ежеквартальный опрос CSAT, анализ жалоб и благодарностей, отслеживание NPS",
+                    "Включить CSAT в KPI ИТ-службы, регулярные встречи с бизнес-подразделениями, программа непрерывного обучения soft skills"
+                ]
+            },
+            {
+                id: 5,
+                title: "Хаос в управлении лицензиями",
+                preview: "340 копий ПО, 280 лицензий, риск штрафов...",
+                description: `Аудит выявил, что компания использует 340 копий ПО, а лицензий куплено только 280. Одновременно обнаружено 50 неиспользуемых лицензий другого ПО. Есть риск штрафов и перерасход бюджета.`,
+                practice: ["it asset management", "управление ит-активами", "software asset management", "sam"],
+                practiceDisplay: "IT Asset Management / Software Asset Management",
+                examples: [
+                    "Обеспечить полное соответствие лицензионным требованиям и оптимизировать затраты на ПО",
+                    "Дефицит: 60 лицензий (штраф до 5 млн руб.), избыток: 50 неиспользуемых лицензий (300 тыс. руб./год), нет единого реестра ПО",
+                    "100% соответствие лицензиям, экономия 300 тыс./год на неиспользуемых лицензиях, актуальный реестр ПО",
+                    "Внедрить систему SAM, провести инвентаризацию, докупить недостающие лицензии, отказаться от избыточных",
+                    "Развернуть SCCM/GLPI для инвентаризации, создать реестр в CMDB, согласовать закупку 60 лицензий, расторгнуть подписки на неиспользуемое ПО",
+                    "Ежемесячная сверка установленного ПО с реестром лицензий, квартальный аудит соответствия",
+                    "Внедрить процесс согласования установки ПО, автоматические отчёты о соответствии, ежегодный пересмотр потребностей в лицензиях"
+                ]
+            },
+            {
+                id: 6,
+                title: "Внедрение новой CRM-системы «буксует»",
+                preview: "60% менеджеров всё ещё в Excel...",
+                description: `CRM внедрена 4 месяца назад, но 60% менеджеров продолжают вести клиентов в Excel. Обучение проведено, но система «неудобная». Инвестиции в проект — 5 млн рублей, ROI под вопросом.`,
+                practice: ["organizational change management", "управление организационными изменениями", "change enablement", "ocm"],
+                practiceDisplay: "Organizational Change Management",
+                examples: [
+                    "Обеспечить полное adoption CRM для повышения эффективности продаж и возврата инвестиций",
+                    "Adoption rate = 40%, причины: неудобный интерфейс (35%), нет мотивации (40%), недостаточное обучение (25%), Excel привычнее",
+                    "Adoption rate = 90%, все сделки ведутся в CRM, руководство получает отчёты из системы, ROI достигнут за 12 месяцев",
+                    "Собрать обратную связь, доработать интерфейс, провести повторное обучение, ввести KPI по использованию CRM, привлечь амбассадоров",
+                    "Провести воркшопы с пользователями, настроить быстрые сценарии, создать видеоинструкции, назначить CRM-чемпионов в каждом отделе, отключить возможность вести сделки вне CRM",
+                    "Еженедельный мониторинг adoption rate, опрос удовлетворённости пользователей, отслеживание количества сделок в системе",
+                    "Регулярные сессии обратной связи, план развития системы на основе пожеланий пользователей, программа признания лучших пользователей CRM"
+                ]
+            }
+        ];
+
+        const steps = [
+            { num: 1, title: "What is the vision? (Каково видение?)", question: "Какова стратегическая цель улучшения? Как это связано с бизнес-целями?" },
+            { num: 2, title: "Where are we now? (Где мы сейчас?)", question: "Опишите текущее состояние. Какие метрики и факты характеризуют ситуацию?" },
+            { num: 3, title: "Where do we want to be? (Где хотим быть?)", question: "Какие целевые показатели вы установите? Используйте SMART-критерии." },
+            { num: 4, title: "How do we get there? (Как достичь?)", question: "Какой план действий вы предлагаете? Какие ресурсы потребуются?" },
+            { num: 5, title: "Take action (Действуем)", question: "Какие конкретные шаги нужно выполнить? Кто ответственный?" },
+            { num: 6, title: "Did we get there? (Достигли?)", question: "Как вы будете измерять успех? Какие метрики отслеживать?" },
+            { num: 7, title: "Keep momentum (Закрепление)", question: "Как закрепить улучшения и не откатиться назад? Что дальше?" }
+        ];
+
+        let currentCase = null;
+        let caseResults = {};
+        let answersShown = {};
+
+        function init() {
+            const selector = document.getElementById('casesSelector');
+
+            cases.forEach(c => {
+                const card = document.createElement('div');
+                card.className = 'case-card';
+                card.dataset.id = c.id;
+                card.innerHTML = `
+                    <span class="case-number">Кейс ${c.id}</span>
+                    <div class="case-title">${c.title}</div>
+                    <div class="case-preview">${c.preview}</div>
+                    <div class="case-status" id="status-${c.id}"></div>
+                `;
+                card.onclick = () => selectCase(c.id);
+                selector.appendChild(card);
+            });
+        }
+
+        function selectCase(id) {
+            currentCase = cases.find(c => c.id === id);
+
+            document.querySelectorAll('.case-card').forEach(card => {
+                card.classList.toggle('selected', parseInt(card.dataset.id) === id);
+            });
+
+            document.getElementById('workspace').classList.add('active');
+            document.getElementById('caseDescription').innerHTML = `
+                <h3>Кейс ${currentCase.id}: ${currentCase.title}</h3>
+                <p>${currentCase.description}</p>
+            `;
+
+            renderSteps();
+            document.getElementById('practiceInput').value = '';
+            document.getElementById('practiceResult').className = 'practice-result';
+            document.getElementById('practiceResult').innerHTML = '';
+
+            document.getElementById('workspace').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function renderSteps() {
+            const container = document.getElementById('stepsContainer');
+            container.innerHTML = '';
+
+            steps.forEach((step, idx) => {
+                const savedAnswer = localStorage.getItem(`case-${currentCase.id}-step-${step.num}`) || '';
+
+                const card = document.createElement('div');
+                card.className = `step-card s${step.num}`;
+                card.innerHTML = `
+                    <div class="step-header">
+                        <div class="step-num">${step.num}</div>
+                        <div class="step-title">${step.title}</div>
+                    </div>
+                    <div class="step-question">${step.question}</div>
+                    <textarea class="step-textarea" id="step-${step.num}" placeholder="Введите ваш ответ...">${savedAnswer}</textarea>
+                    <div class="step-example" id="example-${step.num}">
+                        <div class="step-example-title">Пример ответа:</div>
+                        <div>${currentCase.examples[idx]}</div>
+                    </div>
+                `;
+                container.appendChild(card);
+
+                // Auto-save
+                const textarea = card.querySelector('textarea');
+                textarea.addEventListener('input', () => {
+                    localStorage.setItem(`case-${currentCase.id}-step-${step.num}`, textarea.value);
+                });
+            });
+        }
+
+        function showExamples() {
+            answersShown[currentCase.id] = true;
+            document.querySelectorAll('.step-example').forEach(el => {
+                el.classList.add('show');
+            });
+        }
+
+        function checkCase() {
+            const practiceInput = document.getElementById('practiceInput').value.toLowerCase().trim();
+            const practiceResult = document.getElementById('practiceResult');
+
+            // Check practice
+            let practiceCorrect = false;
+            let practicePartial = false;
+
+            for (const validAnswer of currentCase.practice) {
+                if (practiceInput.includes(validAnswer) || validAnswer.includes(practiceInput)) {
+                    if (practiceInput.length > 5) {
+                        practiceCorrect = true;
+                        break;
+                    } else {
+                        practicePartial = true;
+                    }
+                }
+            }
+
+            // Check if steps are filled
+            let stepsFilled = 0;
+            steps.forEach(step => {
+                const textarea = document.getElementById(`step-${step.num}`);
+                if (textarea.value.trim().length > 20) {
+                    stepsFilled++;
+                }
+            });
+
+            let points = 0;
+            let resultClass = '';
+            let resultMessage = '';
+
+            if (practiceCorrect) {
+                points += 5;
+                resultClass = 'correct';
+                resultMessage = `<strong>Верно!</strong> ${currentCase.practiceDisplay}`;
+            } else if (practicePartial) {
+                points += 2;
+                resultClass = 'partial';
+                resultMessage = `<strong>Частично верно.</strong> Полный ответ: ${currentCase.practiceDisplay}`;
+            } else {
+                resultClass = 'incorrect';
+                resultMessage = `<strong>Неверно.</strong> Правильный ответ: ${currentCase.practiceDisplay}`;
+            }
+
+            // Points for steps (up to 5 points)
+            points += Math.min(5, Math.floor(stepsFilled * 0.7));
+
+            practiceResult.className = `practice-result ${resultClass}`;
+            practiceResult.innerHTML = resultMessage;
+
+            // Save result
+            caseResults[currentCase.id] = {
+                practiceCorrect: practiceCorrect,
+                practicePartial: practicePartial,
+                stepsFilled: stepsFilled,
+                points: points,
+                answersShown: answersShown[currentCase.id] || false
+            };
+
+            // Update case card
+            const statusEl = document.getElementById(`status-${currentCase.id}`);
+            statusEl.textContent = `Завершено: ${points} очков`;
+            document.querySelector(`[data-id="${currentCase.id}"]`).classList.add('completed');
+
+            // Show examples
+            showExamples();
+
+            updateTotalScore();
+
+            // Check if all cases completed
+            if (Object.keys(caseResults).length === cases.length) {
+                showFinalResults();
+            }
+        }
+
+        function updateTotalScore() {
+            const completed = Object.keys(caseResults).length;
+            let total = 0;
+
+            for (const result of Object.values(caseResults)) {
+                total += result.points;
+            }
+
+            document.getElementById('completedCases').textContent = completed;
+            document.getElementById('totalPoints').textContent = total;
+        }
+
+        function showFinalResults() {
+            const resultsDiv = document.getElementById('finalResults');
+            const tbody = document.getElementById('resultsBody');
+            tbody.innerHTML = '';
+
+            let totalPoints = 0;
+
+            cases.forEach(c => {
+                const result = caseResults[c.id];
+                if (result) {
+                    totalPoints += result.points;
+
+                    const row = document.createElement('tr');
+                    let statusClass = result.practiceCorrect ? 'result-correct' :
+                                     result.practicePartial ? 'result-partial' : 'result-incorrect';
+                    let statusText = result.practiceCorrect ? 'Верно' :
+                                    result.practicePartial ? 'Частично' : 'Неверно';
+
+                    row.innerHTML = `
+                        <td>Кейс ${c.id}: ${c.title.substring(0, 30)}...</td>
+                        <td>${c.practiceDisplay}</td>
+                        <td class="${statusClass}">${statusText} (${result.points} очков)</td>
+                    `;
+                    tbody.appendChild(row);
+                }
+            });
+
+            const percentage = Math.round((totalPoints / 60) * 100);
+            let grade, message;
+
+            if (percentage >= 90) {
+                grade = 'A';
+                message = 'Превосходно! Вы отлично понимаете модель CSI!';
+            } else if (percentage >= 75) {
+                grade = 'B';
+                message = 'Хороший результат!';
+            } else if (percentage >= 60) {
+                grade = 'C';
+                message = 'Удовлетворительно. Рекомендуется повторить материал.';
+            } else {
+                grade = 'D';
+                message = 'Нужна дополнительная практика.';
+            }
+
+            document.getElementById('finalGrade').textContent = grade;
+            document.getElementById('finalMessage').textContent = message;
+            document.getElementById('finalDescription').textContent = `Набрано ${totalPoints} из 60 очков (${percentage}%)`;
+
+            resultsDiv.classList.add('show');
+            resultsDiv.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function resetCase() {
+            if (!currentCase) return;
+
+            steps.forEach(step => {
+                const textarea = document.getElementById(`step-${step.num}`);
+                textarea.value = '';
+                localStorage.removeItem(`case-${currentCase.id}-step-${step.num}`);
+            });
+
+            document.querySelectorAll('.step-example').forEach(el => {
+                el.classList.remove('show');
+            });
+
+            document.getElementById('practiceInput').value = '';
+            document.getElementById('practiceResult').className = 'practice-result';
+
+            delete caseResults[currentCase.id];
+            delete answersShown[currentCase.id];
+
+            const card = document.querySelector(`[data-id="${currentCase.id}"]`);
+            card.classList.remove('completed');
+            document.getElementById(`status-${currentCase.id}`).textContent = '';
+
+            updateTotalScore();
+            document.getElementById('finalResults').classList.remove('show');
+        }
+
+        function resetAll() {
+            cases.forEach(c => {
+                steps.forEach(step => {
+                    localStorage.removeItem(`case-${c.id}-step-${step.num}`);
+                });
+            });
+
+            caseResults = {};
+            answersShown = {};
+            currentCase = null;
+
+            document.querySelectorAll('.case-card').forEach(card => {
+                card.classList.remove('completed', 'selected');
+            });
+
+            document.querySelectorAll('.case-status').forEach(el => {
+                el.textContent = '';
+            });
+
+            document.getElementById('workspace').classList.remove('active');
+            document.getElementById('finalResults').classList.remove('show');
+            updateTotalScore();
+        }
+
+        init();
+    </script>
+</body>
+</html>
