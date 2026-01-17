@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cynefin Framework: Классификация проблем ИТ-службы</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            color: #fff;
+            padding: 15px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .header h1 {
+            font-size: 1.6rem;
+            margin-bottom: 8px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header p {
+            color: #888;
+            font-size: 0.9rem;
+        }
+
+        .score-panel {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 15px;
+            padding: 15px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+        }
+
+        .score-item {
+            text-align: center;
+        }
+
+        .score-value {
+            font-size: 2rem;
+            font-weight: bold;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .score-label {
+            font-size: 0.8rem;
+            color: #888;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 4px;
+            margin-bottom: 15px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .main-container {
+            display: flex;
+            gap: 15px;
+            height: calc(100vh - 280px);
+            min-height: 500px;
+        }
+
+        .domains-panel {
+            width: 280px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .domain {
+            flex: 1;
+            padding: 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .domain:hover {
+            transform: translateX(5px);
+        }
+
+        .domain.selected {
+            border-color: #fff;
+            box-shadow: 0 0 20px rgba(255,255,255,0.2);
+        }
+
+        .domain-clear { background: linear-gradient(135deg, #2ed573, #17a558); }
+        .domain-complicated { background: linear-gradient(135deg, #3498db, #2980b9); }
+        .domain-complex { background: linear-gradient(135deg, #e67e22, #d35400); }
+        .domain-chaotic { background: linear-gradient(135deg, #e74c3c, #c0392b); }
+        .domain-disorder { background: linear-gradient(135deg, #9b59b6, #8e44ad); }
+
+        .domain-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+
+        .domain-name {
+            font-weight: bold;
+            font-size: 0.95rem;
+        }
+
+        .domain-count {
+            background: rgba(0,0,0,0.3);
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.8rem;
+        }
+
+        .domain-subtitle {
+            font-size: 0.7rem;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+
+        .domain-approach {
+            font-size: 0.7rem;
+            opacity: 0.8;
+            font-style: italic;
+        }
+
+        .problems-panel {
+            flex: 1;
+            background: rgba(255,255,255,0.03);
+            border-radius: 10px;
+            padding: 15px;
+            overflow-y: auto;
+            border: 2px dashed rgba(255,255,255,0.1);
+        }
+
+        .problems-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .problems-title {
+            font-weight: 600;
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 5px;
+        }
+
+        .filter-btn {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            transition: all 0.2s;
+        }
+
+        .filter-btn:hover, .filter-btn.active {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .problems-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 10px;
+        }
+
+        .problem-card {
+            background: rgba(255,255,255,0.06);
+            border-radius: 8px;
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 2px solid transparent;
+            position: relative;
+        }
+
+        .problem-card:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .problem-card.answered {
+            opacity: 0.7;
+        }
+
+        .problem-card.correct {
+            border-color: #2ed573;
+            background: rgba(46, 213, 115, 0.1);
+        }
+
+        .problem-card.incorrect {
+            border-color: #e74c3c;
+            background: rgba(231, 76, 60, 0.1);
+        }
+
+        .problem-number {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            font-size: 0.7rem;
+            color: #666;
+        }
+
+        .problem-text {
+            font-size: 0.85rem;
+            line-height: 1.4;
+            margin-bottom: 8px;
+            padding-right: 25px;
+        }
+
+        .problem-answer {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        .answer-clear { background: rgba(46, 213, 115, 0.3); }
+        .answer-complicated { background: rgba(52, 152, 219, 0.3); }
+        .answer-complex { background: rgba(230, 126, 34, 0.3); }
+        .answer-chaotic { background: rgba(231, 76, 60, 0.3); }
+        .answer-disorder { background: rgba(155, 89, 182, 0.3); }
+
+        .correct-answer {
+            font-size: 0.7rem;
+            color: #888;
+            margin-top: 5px;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .btn-check {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff;
+        }
+
+        .btn-reset {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+        }
+
+        .btn-show {
+            background: rgba(46, 213, 115, 0.2);
+            color: #2ed573;
+            border: 1px solid #2ed573;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .result {
+            text-align: center;
+            margin-top: 15px;
+            padding: 20px;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .result.show {
+            display: block;
+        }
+
+        .result.excellent {
+            background: rgba(46, 213, 115, 0.2);
+            border: 2px solid #2ed573;
+        }
+
+        .result.good {
+            background: rgba(52, 152, 219, 0.2);
+            border: 2px solid #3498db;
+        }
+
+        .result.average {
+            background: rgba(230, 126, 34, 0.2);
+            border: 2px solid #e67e22;
+        }
+
+        .result.poor {
+            background: rgba(231, 76, 60, 0.2);
+            border: 2px solid #e74c3c;
+        }
+
+        .grade {
+            font-size: 3rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .instruction-hint {
+            background: rgba(102, 126, 234, 0.1);
+            border-left: 3px solid #667eea;
+            padding: 10px 15px;
+            margin-bottom: 15px;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.85rem;
+            color: #aaa;
+        }
+
+        .legend {
+            display: none;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+            padding: 15px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 10px;
+        }
+
+        .legend.show {
+            display: grid;
+        }
+
+        .legend-item {
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            text-align: center;
+        }
+
+        .legend-item strong {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .legend-item.l-clear { background: rgba(46, 213, 115, 0.15); }
+        .legend-item.l-complicated { background: rgba(52, 152, 219, 0.15); }
+        .legend-item.l-complex { background: rgba(230, 126, 34, 0.15); }
+        .legend-item.l-chaotic { background: rgba(231, 76, 60, 0.15); }
+        .legend-item.l-disorder { background: rgba(155, 89, 182, 0.15); }
+
+        @media (max-width: 900px) {
+            .main-container {
+                flex-direction: column;
+                height: auto;
+            }
+            .domains-panel {
+                width: 100%;
+                flex-direction: row;
+                flex-wrap: wrap;
+            }
+            .domain {
+                flex: 1 1 calc(50% - 4px);
+                min-width: 140px;
+            }
+            .legend {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Cynefin Framework: Классификация проблем</h1>
+        <p>Распределите 50 ситуаций из практики ИТ-службы по доменам модели Cynefin</p>
+    </div>
+
+    <div class="score-panel">
+        <div class="score-item">
+            <div class="score-value" id="answered">0</div>
+            <div class="score-label">Отвечено</div>
+        </div>
+        <div class="score-item">
+            <div class="score-value" id="remaining">50</div>
+            <div class="score-label">Осталось</div>
+        </div>
+        <div class="score-item">
+            <div class="score-value" id="score">0</div>
+            <div class="score-label">Очки</div>
+        </div>
+        <div class="score-item">
+            <div class="score-value" id="percentage">0%</div>
+            <div class="score-label">Точность</div>
+        </div>
+    </div>
+
+    <div class="progress-bar">
+        <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+    </div>
+
+    <div class="instruction-hint">
+        <strong>Инструкция:</strong> Выберите домен слева, затем кликайте на карточки проблем, чтобы отнести их к выбранному домену. За каждый правильный ответ — 2 очка.
+    </div>
+
+    <div class="main-container">
+        <div class="domains-panel">
+            <div class="domain domain-clear" data-domain="clear" onclick="selectDomain('clear')">
+                <div class="domain-header">
+                    <span class="domain-name">Clear (Простой)</span>
+                    <span class="domain-count" id="count-clear">0</span>
+                </div>
+                <div class="domain-subtitle">Очевидные причинно-следственные связи</div>
+                <div class="domain-approach">Sense → Categorize → Respond</div>
+            </div>
+            <div class="domain domain-complicated" data-domain="complicated" onclick="selectDomain('complicated')">
+                <div class="domain-header">
+                    <span class="domain-name">Complicated (Сложный)</span>
+                    <span class="domain-count" id="count-complicated">0</span>
+                </div>
+                <div class="domain-subtitle">Требует анализа и экспертизы</div>
+                <div class="domain-approach">Sense → Analyze → Respond</div>
+            </div>
+            <div class="domain domain-complex" data-domain="complex" onclick="selectDomain('complex')">
+                <div class="domain-header">
+                    <span class="domain-name">Complex (Запутанный)</span>
+                    <span class="domain-count" id="count-complex">0</span>
+                </div>
+                <div class="domain-subtitle">Непредсказуемо, познаётся ретроспективно</div>
+                <div class="domain-approach">Probe → Sense → Respond</div>
+            </div>
+            <div class="domain domain-chaotic" data-domain="chaotic" onclick="selectDomain('chaotic')">
+                <div class="domain-header">
+                    <span class="domain-name">Chaotic (Хаотичный)</span>
+                    <span class="domain-count" id="count-chaotic">0</span>
+                </div>
+                <div class="domain-subtitle">Кризис, нужны немедленные действия</div>
+                <div class="domain-approach">Act → Sense → Respond</div>
+            </div>
+            <div class="domain domain-disorder" data-domain="disorder" onclick="selectDomain('disorder')">
+                <div class="domain-header">
+                    <span class="domain-name">Disorder (Беспорядок)</span>
+                    <span class="domain-count" id="count-disorder">0</span>
+                </div>
+                <div class="domain-subtitle">Неясно, к какому домену относится</div>
+                <div class="domain-approach">Разбить на части → Классифицировать</div>
+            </div>
+        </div>
+
+        <div class="problems-panel">
+            <div class="problems-header">
+                <span class="problems-title">Проблемы для классификации</span>
+                <div class="filter-buttons">
+                    <button class="filter-btn active" onclick="filterProblems('all')">Все</button>
+                    <button class="filter-btn" onclick="filterProblems('unanswered')">Без ответа</button>
+                    <button class="filter-btn" onclick="filterProblems('answered')">С ответом</button>
+                </div>
+            </div>
+            <div class="problems-grid" id="problemsGrid"></div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button class="btn btn-reset" onclick="resetAll()">Сбросить всё</button>
+        <button class="btn btn-show" onclick="showAnswers()" id="btnShow">Показать ответы</button>
+        <button class="btn btn-check" onclick="finishTest()" id="btnFinish">Завершить тест</button>
+    </div>
+
+    <div class="result" id="result"></div>
+
+    <div class="legend" id="legend">
+        <div class="legend-item l-clear">
+            <strong>Clear</strong>
+            Стандартные процедуры, чек-листы, FAQ
+        </div>
+        <div class="legend-item l-complicated">
+            <strong>Complicated</strong>
+            Диагностика, оптимизация, проектирование
+        </div>
+        <div class="legend-item l-complex">
+            <strong>Complex</strong>
+            Трансформация, инновации, изменение культуры
+        </div>
+        <div class="legend-item l-chaotic">
+            <strong>Chaotic</strong>
+            Аварии, кибератаки, критические сбои
+        </div>
+        <div class="legend-item l-disorder">
+            <strong>Disorder</strong>
+            Неопределённые ситуации, требующие декомпозиции
+        </div>
+    </div>
+
+    <script>
+        const problems = [
+            // CLEAR (10 проблем) - очевидные, стандартные процедуры
+            { id: 1, text: "Пользователь забыл пароль и просит сбросить его", correct: "clear" },
+            { id: 2, text: "Закончилась бумага в сетевом принтере", correct: "clear" },
+            { id: 3, text: "Нужно создать учётную запись для нового сотрудника", correct: "clear" },
+            { id: 4, text: "Запрос на установку стандартного ПО из каталога услуг", correct: "clear" },
+            { id: 5, text: "Истёк срок действия SSL-сертификата на известном сервере", correct: "clear" },
+            { id: 6, text: "Переполнился почтовый ящик пользователя", correct: "clear" },
+            { id: 7, text: "Нужно добавить пользователя в группу Active Directory", correct: "clear" },
+            { id: 8, text: "Плановая перезагрузка сервера согласно расписанию", correct: "clear" },
+            { id: 9, text: "Запрос на предоставление доступа к сетевой папке", correct: "clear" },
+            { id: 10, text: "Замена вышедшей из строя клавиатуры по гарантии", correct: "clear" },
+
+            // COMPLICATED (12 проблем) - требуют анализа и экспертизы
+            { id: 11, text: "Медленная работа базы данных требует анализа запросов", correct: "complicated" },
+            { id: 12, text: "Проектирование архитектуры нового микросервиса", correct: "complicated" },
+            { id: 13, text: "Оптимизация производительности корпоративного портала", correct: "complicated" },
+            { id: 14, text: "Расследование причин периодических сбоев сети", correct: "complicated" },
+            { id: 15, text: "Планирование миграции с on-premise в облако", correct: "complicated" },
+            { id: 16, text: "Выбор оптимального решения для резервного копирования", correct: "complicated" },
+            { id: 17, text: "Аудит безопасности корпоративной инфраструктуры", correct: "complicated" },
+            { id: 18, text: "Диагностика проблем производительности виртуальных машин", correct: "complicated" },
+            { id: 19, text: "Разработка плана disaster recovery для критичных систем", correct: "complicated" },
+            { id: 20, text: "Настройка балансировки нагрузки для веб-приложения", correct: "complicated" },
+            { id: 21, text: "Анализ логов для выявления причины утечки памяти", correct: "complicated" },
+            { id: 22, text: "Проектирование сетевой инфраструктуры нового офиса", correct: "complicated" },
+
+            // COMPLEX (12 проблем) - непредсказуемые, требуют экспериментов
+            { id: 23, text: "Внедрение DevOps-культуры в традиционной организации", correct: "complex" },
+            { id: 24, text: "Повышение вовлечённости пользователей в новую CRM-систему", correct: "complex" },
+            { id: 25, text: "Снижение сопротивления сотрудников при цифровой трансформации", correct: "complex" },
+            { id: 26, text: "Формирование самоорганизующихся Agile-команд", correct: "complex" },
+            { id: 27, text: "Улучшение коммуникации между ИТ и бизнес-подразделениями", correct: "complex" },
+            { id: 28, text: "Внедрение инновационных технологий в консервативной компании", correct: "complex" },
+            { id: 29, text: "Изменение процессов работы после слияния двух ИТ-отделов", correct: "complex" },
+            { id: 30, text: "Построение культуры непрерывного обучения в команде", correct: "complex" },
+            { id: 31, text: "Определение будущих потребностей бизнеса в ИТ на 5 лет", correct: "complex" },
+            { id: 32, text: "Развитие инновационного мышления в ИТ-департаменте", correct: "complex" },
+            { id: 33, text: "Создание эффективного взаимодействия распределённой команды", correct: "complex" },
+            { id: 34, text: "Адаптация ИТ-стратегии к быстро меняющемуся рынку", correct: "complex" },
+
+            // CHAOTIC (10 проблем) - кризисы, требуют немедленных действий
+            { id: 35, text: "Активная кибератака с шифрованием данных (ransomware)", correct: "chaotic" },
+            { id: 36, text: "Полный отказ системы ERP в разгар рабочего дня", correct: "chaotic" },
+            { id: 37, text: "Пожар в серверной комнате основного ЦОД", correct: "chaotic" },
+            { id: 38, text: "Массовая утечка персональных данных клиентов", correct: "chaotic" },
+            { id: 39, text: "DDoS-атака, парализовавшая все внешние сервисы", correct: "chaotic" },
+            { id: 40, text: "Критический сбой биллинговой системы в день выставления счетов", correct: "chaotic" },
+            { id: 41, text: "Обнаружение активного злоумышленника в корпоративной сети", correct: "chaotic" },
+            { id: 42, text: "Отказ системы охлаждения ЦОД с угрозой перегрева серверов", correct: "chaotic" },
+            { id: 43, text: "Сбой платёжной системы интернет-магазина в Чёрную пятницу", correct: "chaotic" },
+            { id: 44, text: "Полная потеря связи с удалённым дата-центром", correct: "chaotic" },
+
+            // DISORDER (6 проблем) - неясные ситуации
+            { id: 45, text: "Жалобы пользователей на 'плохую работу системы' без деталей", correct: "disorder" },
+            { id: 46, text: "Руководство требует 'сделать ИТ лучше' без конкретики", correct: "disorder" },
+            { id: 47, text: "Непонятные периодические проблемы с разными симптомами", correct: "disorder" },
+            { id: 48, text: "Запрос на решение без чёткого описания проблемы", correct: "disorder" },
+            { id: 49, text: "Конфликтующие требования от разных стейкхолдеров", correct: "disorder" },
+            { id: 50, text: "Ситуация с множеством неизвестных факторов и переменных", correct: "disorder" }
+        ];
+
+        let selectedDomain = null;
+        let answers = {};
+        let testFinished = false;
+        let currentFilter = 'all';
+
+        const domainNames = {
+            clear: 'Clear',
+            complicated: 'Complicated',
+            complex: 'Complex',
+            chaotic: 'Chaotic',
+            disorder: 'Disorder'
+        };
+
+        function init() {
+            const grid = document.getElementById('problemsGrid');
+            const shuffled = [...problems].sort(() => Math.random() - 0.5);
+
+            shuffled.forEach(problem => {
+                const card = document.createElement('div');
+                card.className = 'problem-card';
+                card.dataset.id = problem.id;
+                card.innerHTML = `
+                    <span class="problem-number">#${problem.id}</span>
+                    <div class="problem-text">${problem.text}</div>
+                `;
+                card.onclick = () => assignProblem(problem.id);
+                grid.appendChild(card);
+            });
+        }
+
+        function selectDomain(domain) {
+            if (testFinished) return;
+
+            selectedDomain = domain;
+            document.querySelectorAll('.domain').forEach(d => {
+                d.classList.toggle('selected', d.dataset.domain === domain);
+            });
+        }
+
+        function assignProblem(id) {
+            if (!selectedDomain || testFinished) return;
+            if (answers[id]) return; // Already answered
+
+            answers[id] = selectedDomain;
+
+            const card = document.querySelector(`[data-id="${id}"]`);
+            card.classList.add('answered');
+
+            const answerBadge = document.createElement('span');
+            answerBadge.className = `problem-answer answer-${selectedDomain}`;
+            answerBadge.textContent = domainNames[selectedDomain];
+            card.appendChild(answerBadge);
+
+            updateStats();
+            applyFilter(currentFilter);
+        }
+
+        function updateStats() {
+            const answeredCount = Object.keys(answers).length;
+            const remaining = problems.length - answeredCount;
+
+            let correctCount = 0;
+            for (const [id, answer] of Object.entries(answers)) {
+                const problem = problems.find(p => p.id === parseInt(id));
+                if (problem && problem.correct === answer) {
+                    correctCount++;
+                }
+            }
+
+            const score = correctCount * 2;
+            const percentage = answeredCount > 0 ? Math.round((correctCount / answeredCount) * 100) : 0;
+
+            document.getElementById('answered').textContent = answeredCount;
+            document.getElementById('remaining').textContent = remaining;
+            document.getElementById('score').textContent = score;
+            document.getElementById('percentage').textContent = percentage + '%';
+            document.getElementById('progressFill').style.width = (answeredCount / problems.length * 100) + '%';
+
+            // Update domain counts
+            const counts = { clear: 0, complicated: 0, complex: 0, chaotic: 0, disorder: 0 };
+            for (const answer of Object.values(answers)) {
+                counts[answer]++;
+            }
+            for (const [domain, count] of Object.entries(counts)) {
+                document.getElementById(`count-${domain}`).textContent = count;
+            }
+        }
+
+        function filterProblems(filter) {
+            currentFilter = filter;
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.textContent.toLowerCase().includes(filter) ||
+                    (filter === 'all' && btn.textContent === 'Все') ||
+                    (filter === 'unanswered' && btn.textContent === 'Без ответа') ||
+                    (filter === 'answered' && btn.textContent === 'С ответом'));
+            });
+            applyFilter(filter);
+        }
+
+        function applyFilter(filter) {
+            document.querySelectorAll('.problem-card').forEach(card => {
+                const isAnswered = card.classList.contains('answered');
+                if (filter === 'all') {
+                    card.style.display = 'block';
+                } else if (filter === 'unanswered') {
+                    card.style.display = isAnswered ? 'none' : 'block';
+                } else if (filter === 'answered') {
+                    card.style.display = isAnswered ? 'block' : 'none';
+                }
+            });
+        }
+
+        function showAnswers() {
+            testFinished = true;
+            document.getElementById('legend').classList.add('show');
+
+            problems.forEach(problem => {
+                const card = document.querySelector(`[data-id="${problem.id}"]`);
+                const userAnswer = answers[problem.id];
+
+                if (userAnswer) {
+                    if (userAnswer === problem.correct) {
+                        card.classList.add('correct');
+                    } else {
+                        card.classList.add('incorrect');
+                        const correctDiv = document.createElement('div');
+                        correctDiv.className = 'correct-answer';
+                        correctDiv.textContent = `Верно: ${domainNames[problem.correct]}`;
+                        card.appendChild(correctDiv);
+                    }
+                } else {
+                    const answerBadge = document.createElement('span');
+                    answerBadge.className = `problem-answer answer-${problem.correct}`;
+                    answerBadge.textContent = domainNames[problem.correct];
+                    card.appendChild(answerBadge);
+                }
+            });
+
+            document.getElementById('btnShow').disabled = true;
+            document.getElementById('btnFinish').disabled = true;
+        }
+
+        function finishTest() {
+            const answeredCount = Object.keys(answers).length;
+
+            if (answeredCount < problems.length) {
+                if (!confirm(`Вы ответили на ${answeredCount} из ${problems.length} вопросов. Завершить тест?`)) {
+                    return;
+                }
+            }
+
+            showAnswers();
+
+            let correctCount = 0;
+            for (const [id, answer] of Object.entries(answers)) {
+                const problem = problems.find(p => p.id === parseInt(id));
+                if (problem && problem.correct === answer) {
+                    correctCount++;
+                }
+            }
+
+            const score = correctCount * 2;
+            const maxScore = problems.length * 2;
+            const percentage = Math.round((correctCount / problems.length) * 100);
+
+            const resultDiv = document.getElementById('result');
+            let grade, gradeClass, message;
+
+            if (percentage >= 90) {
+                grade = 'A';
+                gradeClass = 'excellent';
+                message = 'Превосходно! Вы отлично понимаете Cynefin Framework!';
+            } else if (percentage >= 75) {
+                grade = 'B';
+                gradeClass = 'good';
+                message = 'Хороший результат! Есть небольшие пробелы в понимании.';
+            } else if (percentage >= 60) {
+                grade = 'C';
+                gradeClass = 'average';
+                message = 'Удовлетворительно. Рекомендуется повторить материал.';
+            } else {
+                grade = 'D';
+                gradeClass = 'poor';
+                message = 'Нужно больше практики. Изучите описания доменов.';
+            }
+
+            resultDiv.className = `result show ${gradeClass}`;
+            resultDiv.innerHTML = `
+                <div class="grade">${grade}</div>
+                <h3>${message}</h3>
+                <p style="margin-top:15px;">
+                    Правильных ответов: <strong>${correctCount}</strong> из <strong>${problems.length}</strong><br>
+                    Набрано очков: <strong>${score}</strong> из <strong>${maxScore}</strong><br>
+                    Точность: <strong>${percentage}%</strong>
+                </p>
+                <p style="margin-top:15px;color:#888;font-size:0.9rem;">
+                    Просмотрите карточки с красной рамкой, чтобы увидеть правильные ответы.
+                </p>
+            `;
+        }
+
+        function resetAll() {
+            if (Object.keys(answers).length > 0 && !confirm('Сбросить все ответы?')) {
+                return;
+            }
+
+            answers = {};
+            testFinished = false;
+            selectedDomain = null;
+            currentFilter = 'all';
+
+            document.querySelectorAll('.domain').forEach(d => d.classList.remove('selected'));
+            document.querySelectorAll('.problem-card').forEach(card => {
+                card.classList.remove('answered', 'correct', 'incorrect');
+                card.style.display = 'block';
+                const badge = card.querySelector('.problem-answer');
+                const correctDiv = card.querySelector('.correct-answer');
+                if (badge) badge.remove();
+                if (correctDiv) correctDiv.remove();
+            });
+
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.textContent === 'Все');
+            });
+
+            document.getElementById('result').className = 'result';
+            document.getElementById('legend').classList.remove('show');
+            document.getElementById('btnShow').disabled = false;
+            document.getElementById('btnFinish').disabled = false;
+
+            updateStats();
+        }
+
+        init();
+    </script>
+</body>
+</html>
