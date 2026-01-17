@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ITIL4: Связь Инцидентов, Проблем и Изменений</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            color: #fff;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, #00d9ff, #00ff88);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header p {
+            color: #888;
+            font-size: 0.95rem;
+        }
+
+        .instructions {
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            border-left: 4px solid #00d9ff;
+        }
+
+        .instructions h3 {
+            color: #00d9ff;
+            margin-bottom: 8px;
+        }
+
+        .instructions ol {
+            margin-left: 20px;
+            color: #aaa;
+        }
+
+        .workspace {
+            position: relative;
+            background: rgba(255,255,255,0.02);
+            border-radius: 15px;
+            min-height: 500px;
+            border: 2px dashed rgba(255,255,255,0.1);
+        }
+
+        svg.connections {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .columns {
+            display: flex;
+            justify-content: space-between;
+            padding: 20px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .column {
+            width: 30%;
+            min-height: 450px;
+        }
+
+        .column-header {
+            text-align: center;
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .incidents .column-header {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a5a);
+        }
+
+        .problems .column-header {
+            background: linear-gradient(135deg, #ffa502, #ff7f00);
+        }
+
+        .changes .column-header {
+            background: linear-gradient(135deg, #2ed573, #17a558);
+        }
+
+        .card {
+            background: rgba(255,255,255,0.08);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            border: 2px solid transparent;
+        }
+
+        .card:hover {
+            background: rgba(255,255,255,0.12);
+            transform: translateY(-2px);
+        }
+
+        .card.selected {
+            border-color: #00d9ff;
+            box-shadow: 0 0 20px rgba(0, 217, 255, 0.3);
+        }
+
+        .card.connected {
+            border-color: #00ff88;
+        }
+
+        .card-id {
+            font-size: 0.75rem;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .card-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .card-desc {
+            font-size: 0.85rem;
+            color: #aaa;
+            line-height: 1.4;
+        }
+
+        .incidents .card { border-left: 4px solid #ff6b6b; }
+        .problems .card { border-left: 4px solid #ffa502; }
+        .changes .card { border-left: 4px solid #2ed573; }
+
+        .connector {
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            background: #00d9ff;
+            border-radius: 50%;
+            cursor: crosshair;
+            z-index: 10;
+            transition: transform 0.2s;
+        }
+
+        .connector:hover {
+            transform: scale(1.3);
+        }
+
+        .connector.left { left: -8px; top: 50%; transform: translateY(-50%); }
+        .connector.right { right: -8px; top: 50%; transform: translateY(-50%); }
+
+        .connector.left:hover { transform: translateY(-50%) scale(1.3); }
+        .connector.right:hover { transform: translateY(-50%) scale(1.3); }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .btn-check {
+            background: linear-gradient(135deg, #00d9ff, #0099cc);
+            color: #fff;
+        }
+
+        .btn-reset {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        }
+
+        .result {
+            text-align: center;
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .result.success {
+            background: rgba(46, 213, 115, 0.2);
+            border: 2px solid #2ed573;
+            display: block;
+        }
+
+        .result.error {
+            background: rgba(255, 107, 107, 0.2);
+            border: 2px solid #ff6b6b;
+            display: block;
+        }
+
+        .result h3 {
+            margin-bottom: 10px;
+        }
+
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            color: #888;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 4px;
+            border-radius: 2px;
+        }
+
+        .arrow-marker {
+            fill: #00d9ff;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>ITIL4: Управление Инцидентами, Проблемами и Изменениями</h1>
+        <p>Практическое задание: установите связи между элементами</p>
+    </div>
+
+    <div class="instructions">
+        <h3>Инструкция:</h3>
+        <ol>
+            <li>Изучите карточки инцидентов, проблем и изменений</li>
+            <li>Кликните на точку-коннектор справа от карточки-источника</li>
+            <li>Затем кликните на точку-коннектор слева от карточки-цели</li>
+            <li>Соедините связанные элементы стрелками (Инцидент → Проблема → Изменение)</li>
+            <li>Нажмите "Проверить" для оценки результата</li>
+        </ol>
+    </div>
+
+    <div class="workspace">
+        <svg class="connections">
+            <defs>
+                <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                    <polygon points="0 0, 10 3.5, 0 7" class="arrow-marker"/>
+                </marker>
+            </defs>
+        </svg>
+        <div class="columns">
+            <div class="column incidents">
+                <div class="column-header">Инциденты</div>
+                <div class="card" data-id="INC001" data-type="incident">
+                    <div class="connector right" data-side="right"></div>
+                    <div class="card-id">INC001</div>
+                    <div class="card-title">Сбой почтового сервера</div>
+                    <div class="card-desc">Пользователи не могут отправлять и получать письма с 09:00</div>
+                </div>
+                <div class="card" data-id="INC002" data-type="incident">
+                    <div class="connector right" data-side="right"></div>
+                    <div class="card-id">INC002</div>
+                    <div class="card-title">Медленная работа CRM</div>
+                    <div class="card-desc">Система CRM загружается более 30 секунд</div>
+                </div>
+                <div class="card" data-id="INC003" data-type="incident">
+                    <div class="connector right" data-side="right"></div>
+                    <div class="card-id">INC003</div>
+                    <div class="card-title">Ошибка авторизации VPN</div>
+                    <div class="card-desc">Удалённые сотрудники не могут подключиться к VPN</div>
+                </div>
+            </div>
+
+            <div class="column problems">
+                <div class="column-header">Проблемы</div>
+                <div class="card" data-id="PRB001" data-type="problem">
+                    <div class="connector left" data-side="left"></div>
+                    <div class="connector right" data-side="right"></div>
+                    <div class="card-id">PRB001</div>
+                    <div class="card-title">Нехватка дискового пространства</div>
+                    <div class="card-desc">Корневая причина: логи заполняют диск сервера</div>
+                </div>
+                <div class="card" data-id="PRB002" data-type="problem">
+                    <div class="connector left" data-side="left"></div>
+                    <div class="connector right" data-side="right"></div>
+                    <div class="card-id">PRB002</div>
+                    <div class="card-title">Устаревшая версия базы данных</div>
+                    <div class="card-desc">Корневая причина: неоптимизированные запросы в старой версии СУБД</div>
+                </div>
+                <div class="card" data-id="PRB003" data-type="problem">
+                    <div class="connector left" data-side="left"></div>
+                    <div class="connector right" data-side="right"></div>
+                    <div class="card-id">PRB003</div>
+                    <div class="card-title">Истёкший сертификат</div>
+                    <div class="card-desc">Корневая причина: SSL-сертификат VPN-сервера просрочен</div>
+                </div>
+            </div>
+
+            <div class="column changes">
+                <div class="column-header">Изменения</div>
+                <div class="card" data-id="CHG001" data-type="change">
+                    <div class="connector left" data-side="left"></div>
+                    <div class="card-id">CHG001</div>
+                    <div class="card-title">Обновление СУБД до v15</div>
+                    <div class="card-desc">Миграция на PostgreSQL 15 с оптимизацией индексов</div>
+                </div>
+                <div class="card" data-id="CHG002" data-type="change">
+                    <div class="connector left" data-side="left"></div>
+                    <div class="card-id">CHG002</div>
+                    <div class="card-title">Настройка ротации логов</div>
+                    <div class="card-desc">Внедрение logrotate с архивацией и удалением старых логов</div>
+                </div>
+                <div class="card" data-id="CHG003" data-type="change">
+                    <div class="connector left" data-side="left"></div>
+                    <div class="card-id">CHG003</div>
+                    <div class="card-title">Обновление SSL-сертификата</div>
+                    <div class="card-desc">Выпуск и установка нового сертификата с автопродлением</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button class="btn btn-reset" onclick="resetConnections()">Сбросить</button>
+        <button class="btn btn-check" onclick="checkAnswers()">Проверить</button>
+    </div>
+
+    <div class="result" id="result"></div>
+
+    <div class="legend">
+        <div class="legend-item">
+            <div class="legend-color" style="background: #ff6b6b;"></div>
+            <span>Инцидент — нарушение сервиса</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #ffa502;"></div>
+            <span>Проблема — корневая причина</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #2ed573;"></div>
+            <span>Изменение — устранение причины</span>
+        </div>
+    </div>
+
+    <script>
+        // Правильные связи
+        const correctConnections = {
+            'INC001': 'PRB001', // Сбой почты → Нехватка места
+            'INC002': 'PRB002', // Медленная CRM → Устаревшая БД
+            'INC003': 'PRB003', // VPN ошибка → Истёкший сертификат
+            'PRB001': 'CHG002', // Нехватка места → Ротация логов
+            'PRB002': 'CHG001', // Устаревшая БД → Обновление СУБД
+            'PRB003': 'CHG003'  // Сертификат → Обновление сертификата
+        };
+
+        let connections = [];
+        let selectedConnector = null;
+        let selectedCard = null;
+
+        const svg = document.querySelector('.connections');
+        const workspace = document.querySelector('.workspace');
+
+        // Обработчики для коннекторов
+        document.querySelectorAll('.connector').forEach(connector => {
+            connector.addEventListener('click', handleConnectorClick);
+        });
+
+        function handleConnectorClick(e) {
+            e.stopPropagation();
+            const connector = e.target;
+            const card = connector.closest('.card');
+            const side = connector.dataset.side;
+
+            if (!selectedConnector) {
+                // Первый клик - выбираем источник (только правые коннекторы)
+                if (side === 'right') {
+                    selectedConnector = connector;
+                    selectedCard = card;
+                    card.classList.add('selected');
+                    connector.style.background = '#00ff88';
+                }
+            } else {
+                // Второй клик - выбираем цель (только левые коннекторы)
+                if (side === 'left' && card !== selectedCard) {
+                    createConnection(selectedCard, card);
+                }
+                // Сбрасываем выбор
+                resetSelection();
+            }
+        }
+
+        function resetSelection() {
+            if (selectedConnector) {
+                selectedConnector.style.background = '#00d9ff';
+            }
+            if (selectedCard) {
+                selectedCard.classList.remove('selected');
+            }
+            selectedConnector = null;
+            selectedCard = null;
+        }
+
+        function createConnection(fromCard, toCard) {
+            const fromId = fromCard.dataset.id;
+            const toId = toCard.dataset.id;
+
+            // Проверяем, нет ли уже такой связи
+            const existingIndex = connections.findIndex(c => c.from === fromId);
+            if (existingIndex !== -1) {
+                // Удаляем старую связь от этого элемента
+                removeConnectionLine(connections[existingIndex].lineId);
+                connections.splice(existingIndex, 1);
+            }
+
+            // Создаём линию
+            const lineId = `line-${fromId}-${toId}`;
+            drawLine(fromCard, toCard, lineId);
+
+            connections.push({
+                from: fromId,
+                to: toId,
+                lineId: lineId
+            });
+
+            fromCard.classList.add('connected');
+            toCard.classList.add('connected');
+        }
+
+        function drawLine(fromCard, toCard, lineId) {
+            const fromConnector = fromCard.querySelector('.connector.right');
+            const toConnector = toCard.querySelector('.connector.left');
+
+            const fromRect = fromConnector.getBoundingClientRect();
+            const toRect = toConnector.getBoundingClientRect();
+            const svgRect = svg.getBoundingClientRect();
+
+            const x1 = fromRect.left + fromRect.width / 2 - svgRect.left;
+            const y1 = fromRect.top + fromRect.height / 2 - svgRect.top;
+            const x2 = toRect.left + toRect.width / 2 - svgRect.left;
+            const y2 = toRect.top + toRect.height / 2 - svgRect.top;
+
+            // Создаём кривую Безье для красивой стрелки
+            const midX = (x1 + x2) / 2;
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            path.setAttribute('id', lineId);
+            path.setAttribute('d', `M ${x1} ${y1} C ${midX} ${y1}, ${midX} ${y2}, ${x2} ${y2}`);
+            path.setAttribute('stroke', '#00d9ff');
+            path.setAttribute('stroke-width', '3');
+            path.setAttribute('fill', 'none');
+            path.setAttribute('marker-end', 'url(#arrowhead)');
+            path.style.filter = 'drop-shadow(0 0 5px rgba(0, 217, 255, 0.5))';
+
+            svg.appendChild(path);
+        }
+
+        function removeConnectionLine(lineId) {
+            const line = document.getElementById(lineId);
+            if (line) {
+                line.remove();
+            }
+        }
+
+        function resetConnections() {
+            connections = [];
+            svg.querySelectorAll('path').forEach(path => path.remove());
+            document.querySelectorAll('.card').forEach(card => {
+                card.classList.remove('connected', 'selected');
+            });
+            resetSelection();
+            document.getElementById('result').className = 'result';
+            document.getElementById('result').innerHTML = '';
+        }
+
+        function checkAnswers() {
+            let correct = 0;
+            let total = Object.keys(correctConnections).length;
+            let details = [];
+
+            for (const [from, to] of Object.entries(correctConnections)) {
+                const userConnection = connections.find(c => c.from === from);
+                if (userConnection && userConnection.to === to) {
+                    correct++;
+                    details.push(`✓ ${from} → ${to}`);
+                } else if (userConnection) {
+                    details.push(`✗ ${from} → ${userConnection.to} (верно: ${to})`);
+                } else {
+                    details.push(`✗ ${from} → ? (верно: ${to})`);
+                }
+            }
+
+            const resultDiv = document.getElementById('result');
+            const percentage = Math.round((correct / total) * 100);
+
+            if (correct === total) {
+                resultDiv.className = 'result success';
+                resultDiv.innerHTML = `
+                    <h3>Отлично! Все связи установлены верно!</h3>
+                    <p>Вы правильно понимаете взаимосвязь между инцидентами, проблемами и изменениями в ITIL4.</p>
+                    <p style="margin-top:10px;color:#888;">Результат: ${correct}/${total} (${percentage}%)</p>
+                `;
+            } else {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `
+                    <h3>Есть ошибки. Попробуйте ещё раз!</h3>
+                    <p>Правильных связей: ${correct} из ${total} (${percentage}%)</p>
+                    <p style="margin-top:15px;text-align:left;font-size:0.9rem;">
+                        ${details.join('<br>')}
+                    </p>
+                `;
+            }
+        }
+
+        // Обновление линий при изменении размера окна
+        window.addEventListener('resize', () => {
+            const savedConnections = [...connections];
+            svg.querySelectorAll('path').forEach(path => path.remove());
+
+            savedConnections.forEach(conn => {
+                const fromCard = document.querySelector(`[data-id="${conn.from}"]`);
+                const toCard = document.querySelector(`[data-id="${conn.to}"]`);
+                if (fromCard && toCard) {
+                    drawLine(fromCard, toCard, conn.lineId);
+                }
+            });
+        });
+
+        // Сброс выбора при клике вне карточек
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.connector')) {
+                resetSelection();
+            }
+        });
+    </script>
+</body>
+</html>
