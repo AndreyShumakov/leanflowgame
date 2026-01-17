@@ -1,0 +1,1213 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ITIL4: Метрики и KPI ИТ-службы</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0c0c1e 0%, #1a1a3e 100%);
+            min-height: 100vh;
+            color: #fff;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            font-size: 1.7rem;
+            margin-bottom: 8px;
+            background: linear-gradient(90deg, #00d4ff, #00ff94);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .tabs {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            padding: 12px 25px;
+            background: rgba(255,255,255,0.05);
+            border: 2px solid rgba(255,255,255,0.1);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .tab:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, #00d4ff, #00ff94);
+            color: #000;
+            border-color: transparent;
+        }
+
+        .tab-badge {
+            display: inline-block;
+            background: rgba(0,0,0,0.3);
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.75rem;
+            margin-left: 8px;
+        }
+
+        .tab.active .tab-badge {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .score-panel {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 10px;
+        }
+
+        .score-item {
+            text-align: center;
+        }
+
+        .score-value {
+            font-size: 2rem;
+            font-weight: bold;
+            background: linear-gradient(90deg, #00d4ff, #00ff94);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .score-label {
+            font-size: 0.8rem;
+            color: #888;
+        }
+
+        .task-container {
+            display: none;
+            background: rgba(255,255,255,0.03);
+            border-radius: 15px;
+            padding: 20px;
+            min-height: 500px;
+        }
+
+        .task-container.active {
+            display: block;
+        }
+
+        .task-header {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .task-header h2 {
+            font-size: 1.2rem;
+            margin-bottom: 8px;
+            color: #00d4ff;
+        }
+
+        .task-header p {
+            color: #888;
+            font-size: 0.9rem;
+        }
+
+        /* Task 1: Matching */
+        .matching-container {
+            display: flex;
+            gap: 30px;
+        }
+
+        .metrics-column, .definitions-column {
+            flex: 1;
+        }
+
+        .column-title {
+            text-align: center;
+            padding: 10px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .metric-item {
+            background: rgba(0, 212, 255, 0.1);
+            border: 2px solid rgba(0, 212, 255, 0.3);
+            border-radius: 8px;
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .metric-item:hover {
+            background: rgba(0, 212, 255, 0.2);
+        }
+
+        .metric-item.selected {
+            border-color: #00ff94;
+            box-shadow: 0 0 15px rgba(0, 255, 148, 0.3);
+        }
+
+        .metric-item.matched {
+            opacity: 0.6;
+            cursor: default;
+        }
+
+        .metric-item.correct {
+            border-color: #00ff94;
+            background: rgba(0, 255, 148, 0.15);
+        }
+
+        .metric-item.incorrect {
+            border-color: #ff4757;
+            background: rgba(255, 71, 87, 0.15);
+        }
+
+        .metric-name {
+            font-weight: 600;
+        }
+
+        .metric-abbr {
+            font-size: 0.8rem;
+            color: #00d4ff;
+        }
+
+        .match-indicator {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+        }
+
+        .definition-item {
+            background: rgba(255, 165, 2, 0.1);
+            border: 2px solid rgba(255, 165, 2, 0.3);
+            border-radius: 8px;
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .definition-item:hover {
+            background: rgba(255, 165, 2, 0.2);
+        }
+
+        .definition-item.matched {
+            opacity: 0.6;
+            cursor: default;
+            border-style: dashed;
+        }
+
+        .definition-item.correct {
+            border-color: #00ff94;
+            background: rgba(0, 255, 148, 0.15);
+        }
+
+        .definition-item.incorrect {
+            border-color: #ff4757;
+            background: rgba(255, 71, 87, 0.15);
+        }
+
+        .matched-label {
+            font-size: 0.75rem;
+            color: #00d4ff;
+            margin-top: 8px;
+            font-weight: 600;
+        }
+
+        /* Task 2: Calculator */
+        .calc-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+        }
+
+        .calc-card {
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 20px;
+            border: 2px solid rgba(255,255,255,0.1);
+        }
+
+        .calc-card h3 {
+            color: #00d4ff;
+            margin-bottom: 5px;
+            font-size: 1.1rem;
+        }
+
+        .calc-card .formula {
+            font-family: 'Courier New', monospace;
+            background: rgba(0,0,0,0.3);
+            padding: 8px 12px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            font-size: 0.85rem;
+            color: #00ff94;
+        }
+
+        .calc-scenario {
+            background: rgba(255,255,255,0.05);
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            border-left: 3px solid #ffa502;
+        }
+
+        .calc-input-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .calc-input-group label {
+            flex: 1;
+            font-size: 0.9rem;
+        }
+
+        .calc-input-group input {
+            width: 120px;
+            padding: 8px 12px;
+            border: 2px solid rgba(255,255,255,0.2);
+            border-radius: 6px;
+            background: rgba(0,0,0,0.3);
+            color: #fff;
+            font-size: 1rem;
+            text-align: right;
+        }
+
+        .calc-input-group input:focus {
+            outline: none;
+            border-color: #00d4ff;
+        }
+
+        .calc-input-group .unit {
+            width: 40px;
+            font-size: 0.85rem;
+            color: #888;
+        }
+
+        .calc-result {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: rgba(0, 212, 255, 0.1);
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        .calc-result.correct {
+            background: rgba(0, 255, 148, 0.2);
+            border: 2px solid #00ff94;
+        }
+
+        .calc-result.incorrect {
+            background: rgba(255, 71, 87, 0.2);
+            border: 2px solid #ff4757;
+        }
+
+        .calc-result-label {
+            font-weight: 600;
+        }
+
+        .calc-result-value {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #00d4ff;
+        }
+
+        .calc-btn {
+            padding: 8px 20px;
+            background: linear-gradient(135deg, #00d4ff, #00ff94);
+            border: none;
+            border-radius: 6px;
+            color: #000;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+
+        .calc-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 212, 255, 0.3);
+        }
+
+        /* Task 3: Classification */
+        .classification-container {
+            display: flex;
+            gap: 20px;
+        }
+
+        .practices-panel {
+            width: 200px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .practice-btn {
+            padding: 12px 15px;
+            border: 2px solid transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        .practice-btn:hover {
+            transform: translateX(5px);
+        }
+
+        .practice-btn.selected {
+            border-color: #fff;
+            box-shadow: 0 0 15px rgba(255,255,255,0.2);
+        }
+
+        .practice-incident { background: linear-gradient(135deg, #ff6b6b, #ee5a5a); }
+        .practice-problem { background: linear-gradient(135deg, #ffa502, #ff7f00); }
+        .practice-change { background: linear-gradient(135deg, #2ed573, #17a558); }
+        .practice-sla { background: linear-gradient(135deg, #3498db, #2980b9); }
+        .practice-capacity { background: linear-gradient(135deg, #9b59b6, #8e44ad); }
+        .practice-availability { background: linear-gradient(135deg, #1abc9c, #16a085); }
+
+        .practice-count {
+            float: right;
+            background: rgba(0,0,0,0.3);
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.75rem;
+        }
+
+        .metrics-pool {
+            flex: 1;
+            background: rgba(255,255,255,0.02);
+            border-radius: 10px;
+            padding: 15px;
+            border: 2px dashed rgba(255,255,255,0.1);
+        }
+
+        .pool-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .pool-title {
+            font-weight: 600;
+        }
+
+        .pool-filter {
+            display: flex;
+            gap: 5px;
+        }
+
+        .filter-btn {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            cursor: pointer;
+            font-size: 0.75rem;
+            transition: all 0.2s;
+        }
+
+        .filter-btn:hover, .filter-btn.active {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+        }
+
+        .class-metric {
+            background: rgba(255,255,255,0.06);
+            border-radius: 8px;
+            padding: 10px 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+            font-size: 0.85rem;
+        }
+
+        .class-metric:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .class-metric.assigned {
+            opacity: 0.6;
+        }
+
+        .class-metric.correct {
+            border-color: #00ff94;
+            background: rgba(0, 255, 148, 0.1);
+        }
+
+        .class-metric.incorrect {
+            border-color: #ff4757;
+            background: rgba(255, 71, 87, 0.1);
+        }
+
+        .class-metric-name {
+            font-weight: 600;
+            margin-bottom: 3px;
+        }
+
+        .class-metric-badge {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            margin-top: 5px;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .btn-check {
+            background: linear-gradient(135deg, #00d4ff, #00ff94);
+            color: #000;
+        }
+
+        .btn-reset {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        }
+
+        .result {
+            text-align: center;
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .result.show {
+            display: block;
+        }
+
+        .result.excellent { background: rgba(0, 255, 148, 0.2); border: 2px solid #00ff94; }
+        .result.good { background: rgba(0, 212, 255, 0.2); border: 2px solid #00d4ff; }
+        .result.average { background: rgba(255, 165, 2, 0.2); border: 2px solid #ffa502; }
+        .result.poor { background: rgba(255, 71, 87, 0.2); border: 2px solid #ff4757; }
+
+        .final-grade {
+            font-size: 4rem;
+            font-weight: bold;
+            background: linear-gradient(90deg, #00d4ff, #00ff94);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        @media (max-width: 768px) {
+            .matching-container, .classification-container {
+                flex-direction: column;
+            }
+            .practices-panel {
+                width: 100%;
+                flex-direction: row;
+                flex-wrap: wrap;
+            }
+            .practice-btn {
+                flex: 1 1 calc(50% - 4px);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>ITIL4: Метрики и KPI ИТ-службы</h1>
+        <p>Комплексное практическое задание по измерению эффективности ИТ-услуг</p>
+    </div>
+
+    <div class="tabs">
+        <div class="tab active" onclick="switchTab(1)">
+            Сопоставление
+            <span class="tab-badge" id="tab1-score">0/10</span>
+        </div>
+        <div class="tab" onclick="switchTab(2)">
+            Расчёт метрик
+            <span class="tab-badge" id="tab2-score">0/6</span>
+        </div>
+        <div class="tab" onclick="switchTab(3)">
+            Классификация
+            <span class="tab-badge" id="tab3-score">0/18</span>
+        </div>
+    </div>
+
+    <div class="score-panel">
+        <div class="score-item">
+            <div class="score-value" id="totalScore">0</div>
+            <div class="score-label">Всего очков</div>
+        </div>
+        <div class="score-item">
+            <div class="score-value" id="maxScore">68</div>
+            <div class="score-label">Максимум</div>
+        </div>
+        <div class="score-item">
+            <div class="score-value" id="percentage">0%</div>
+            <div class="score-label">Результат</div>
+        </div>
+    </div>
+
+    <!-- Task 1: Matching -->
+    <div class="task-container active" id="task1">
+        <div class="task-header">
+            <h2>Задание 1: Сопоставьте метрики с определениями</h2>
+            <p>Выберите метрику слева, затем кликните на соответствующее определение справа. За каждое верное сопоставление — 2 очка.</p>
+        </div>
+
+        <div class="matching-container">
+            <div class="metrics-column">
+                <div class="column-title">Метрики</div>
+                <div id="metricsListTask1"></div>
+            </div>
+            <div class="definitions-column">
+                <div class="column-title">Определения</div>
+                <div id="definitionsList"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Task 2: Calculator -->
+    <div class="task-container" id="task2">
+        <div class="task-header">
+            <h2>Задание 2: Рассчитайте метрики</h2>
+            <p>Используйте предоставленные данные для расчёта метрик. За каждый правильный расчёт — 3 очка.</p>
+        </div>
+
+        <div class="calc-grid" id="calcGrid"></div>
+    </div>
+
+    <!-- Task 3: Classification -->
+    <div class="task-container" id="task3">
+        <div class="task-header">
+            <h2>Задание 3: Классифицируйте метрики по практикам</h2>
+            <p>Выберите практику ITIL4 слева, затем кликните на метрики, которые к ней относятся. За каждую верную классификацию — 1 очко.</p>
+        </div>
+
+        <div class="classification-container">
+            <div class="practices-panel" id="practicesPanel"></div>
+            <div class="metrics-pool">
+                <div class="pool-header">
+                    <span class="pool-title">Метрики для классификации</span>
+                    <div class="pool-filter">
+                        <button class="filter-btn active" onclick="filterClassMetrics('all')">Все</button>
+                        <button class="filter-btn" onclick="filterClassMetrics('unassigned')">Без категории</button>
+                    </div>
+                </div>
+                <div class="metrics-grid" id="classMetricsGrid"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button class="btn btn-reset" onclick="resetCurrentTask()">Сбросить задание</button>
+        <button class="btn btn-check" onclick="checkCurrentTask()">Проверить</button>
+    </div>
+
+    <div class="result" id="result"></div>
+
+    <script>
+        // Task 1 Data: Matching
+        const matchingData = [
+            { id: 1, metric: "MTBF", fullName: "Mean Time Between Failures", definition: "Среднее время между отказами — показывает надёжность системы" },
+            { id: 2, metric: "MTTR", fullName: "Mean Time To Repair", definition: "Среднее время восстановления — как быстро устраняются сбои" },
+            { id: 3, metric: "FCR", fullName: "First Call Resolution", definition: "Доля обращений, решённых при первом контакте без эскалации" },
+            { id: 4, metric: "SLA Compliance", fullName: "SLA Compliance Rate", definition: "Процент выполнения соглашений об уровне обслуживания" },
+            { id: 5, metric: "CSR", fullName: "Change Success Rate", definition: "Доля изменений, внедрённых без инцидентов и откатов" },
+            { id: 6, metric: "Availability", fullName: "Service Availability", definition: "Процент времени, когда услуга доступна пользователям" },
+            { id: 7, metric: "CSAT", fullName: "Customer Satisfaction", definition: "Оценка удовлетворённости пользователей качеством услуг" },
+            { id: 8, metric: "Backlog", fullName: "Incident Backlog", definition: "Количество нерешённых инцидентов в очереди" },
+            { id: 9, metric: "TCO", fullName: "Total Cost of Ownership", definition: "Совокупная стоимость владения ИТ-активом за весь жизненный цикл" },
+            { id: 10, metric: "NPS", fullName: "Net Promoter Score", definition: "Индекс готовности пользователей рекомендовать услугу" }
+        ];
+
+        // Task 2 Data: Calculations
+        const calcData = [
+            {
+                id: 1,
+                name: "Availability (Доступность)",
+                formula: "(Uptime / Total Time) × 100%",
+                scenario: "Сервер работал 718 часов из 720 часов в месяце. Рассчитайте доступность.",
+                inputs: [
+                    { label: "Время работы (Uptime)", key: "uptime", value: 718, unit: "ч" },
+                    { label: "Общее время", key: "total", value: 720, unit: "ч" }
+                ],
+                calculate: (inputs) => ((inputs.uptime / inputs.total) * 100).toFixed(2),
+                answer: "99.72",
+                unit: "%"
+            },
+            {
+                id: 2,
+                name: "MTTR (Среднее время восстановления)",
+                formula: "Общее время простоя / Количество инцидентов",
+                scenario: "За месяц произошло 5 инцидентов с общим временем простоя 10 часов.",
+                inputs: [
+                    { label: "Общее время простоя", key: "downtime", value: 10, unit: "ч" },
+                    { label: "Количество инцидентов", key: "incidents", value: 5, unit: "шт" }
+                ],
+                calculate: (inputs) => (inputs.downtime / inputs.incidents).toFixed(1),
+                answer: "2.0",
+                unit: "ч"
+            },
+            {
+                id: 3,
+                name: "FCR (First Call Resolution)",
+                formula: "(Решено при первом обращении / Всего обращений) × 100%",
+                scenario: "Из 250 обращений 175 были решены при первом контакте.",
+                inputs: [
+                    { label: "Решено сразу", key: "resolved", value: 175, unit: "шт" },
+                    { label: "Всего обращений", key: "total", value: 250, unit: "шт" }
+                ],
+                calculate: (inputs) => ((inputs.resolved / inputs.total) * 100).toFixed(0),
+                answer: "70",
+                unit: "%"
+            },
+            {
+                id: 4,
+                name: "Change Success Rate",
+                formula: "(Успешные изменения / Всего изменений) × 100%",
+                scenario: "Из 40 внедрённых изменений 36 прошли без инцидентов.",
+                inputs: [
+                    { label: "Успешных изменений", key: "success", value: 36, unit: "шт" },
+                    { label: "Всего изменений", key: "total", value: 40, unit: "шт" }
+                ],
+                calculate: (inputs) => ((inputs.success / inputs.total) * 100).toFixed(0),
+                answer: "90",
+                unit: "%"
+            },
+            {
+                id: 5,
+                name: "MTBF (Среднее время между отказами)",
+                formula: "Общее время работы / Количество отказов",
+                scenario: "Система проработала 2000 часов, за это время произошло 4 отказа.",
+                inputs: [
+                    { label: "Время работы", key: "uptime", value: 2000, unit: "ч" },
+                    { label: "Количество отказов", key: "failures", value: 4, unit: "шт" }
+                ],
+                calculate: (inputs) => (inputs.uptime / inputs.failures).toFixed(0),
+                answer: "500",
+                unit: "ч"
+            },
+            {
+                id: 6,
+                name: "Cost per Ticket",
+                formula: "Общие затраты Service Desk / Количество тикетов",
+                scenario: "Месячные затраты Service Desk — 450 000 руб., обработано 900 тикетов.",
+                inputs: [
+                    { label: "Затраты", key: "cost", value: 450000, unit: "₽" },
+                    { label: "Количество тикетов", key: "tickets", value: 900, unit: "шт" }
+                ],
+                calculate: (inputs) => (inputs.cost / inputs.tickets).toFixed(0),
+                answer: "500",
+                unit: "₽"
+            }
+        ];
+
+        // Task 3 Data: Classification
+        const practices = [
+            { id: "incident", name: "Incident Management", color: "incident" },
+            { id: "problem", name: "Problem Management", color: "problem" },
+            { id: "change", name: "Change Enablement", color: "change" },
+            { id: "sla", name: "Service Level Mgmt", color: "sla" },
+            { id: "capacity", name: "Capacity & Performance", color: "capacity" },
+            { id: "availability", name: "Availability Mgmt", color: "availability" }
+        ];
+
+        const classificationMetrics = [
+            { id: 1, name: "Время обнаружения инцидента", correct: "incident" },
+            { id: 2, name: "MTTR (время восстановления)", correct: "incident" },
+            { id: 3, name: "Количество повторных инцидентов", correct: "incident" },
+            { id: 4, name: "Количество известных ошибок", correct: "problem" },
+            { id: 5, name: "Время выявления корневой причины", correct: "problem" },
+            { id: 6, name: "Процент проактивно выявленных проблем", correct: "problem" },
+            { id: 7, name: "Успешность изменений (CSR)", correct: "change" },
+            { id: 8, name: "Доля экстренных изменений", correct: "change" },
+            { id: 9, name: "Среднее время внедрения изменения", correct: "change" },
+            { id: 10, name: "Процент выполнения SLA", correct: "sla" },
+            { id: 11, name: "Количество нарушений SLA", correct: "sla" },
+            { id: 12, name: "Время ответа на обращение", correct: "sla" },
+            { id: 13, name: "Загрузка CPU серверов", correct: "capacity" },
+            { id: 14, name: "Использование дискового пространства", correct: "capacity" },
+            { id: 15, name: "Время отклика приложения", correct: "capacity" },
+            { id: 16, name: "Uptime сервиса", correct: "availability" },
+            { id: 17, name: "MTBF (время между отказами)", correct: "availability" },
+            { id: 18, name: "Процент доступности", correct: "availability" }
+        ];
+
+        // State
+        let currentTab = 1;
+        let task1State = { selectedMetric: null, matches: {}, checked: false };
+        let task2State = { answers: {}, checked: false };
+        let task3State = { selectedPractice: null, assignments: {}, checked: false };
+
+        // Initialize
+        function init() {
+            initTask1();
+            initTask2();
+            initTask3();
+        }
+
+        // Task 1 Functions
+        function initTask1() {
+            const metricsList = document.getElementById('metricsListTask1');
+            const definitionsList = document.getElementById('definitionsList');
+
+            const shuffledMetrics = [...matchingData].sort(() => Math.random() - 0.5);
+            const shuffledDefs = [...matchingData].sort(() => Math.random() - 0.5);
+
+            shuffledMetrics.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'metric-item';
+                div.dataset.id = item.id;
+                div.innerHTML = `
+                    <div>
+                        <div class="metric-name">${item.metric}</div>
+                        <div class="metric-abbr">${item.fullName}</div>
+                    </div>
+                    <div class="match-indicator" id="match-${item.id}">?</div>
+                `;
+                div.onclick = () => selectMetric(item.id);
+                metricsList.appendChild(div);
+            });
+
+            shuffledDefs.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'definition-item';
+                div.dataset.id = item.id;
+                div.innerHTML = item.definition;
+                div.onclick = () => matchDefinition(item.id);
+                definitionsList.appendChild(div);
+            });
+        }
+
+        function selectMetric(id) {
+            if (task1State.checked || task1State.matches[id]) return;
+
+            document.querySelectorAll('#metricsListTask1 .metric-item').forEach(el => {
+                el.classList.remove('selected');
+            });
+
+            const metricEl = document.querySelector(`#metricsListTask1 [data-id="${id}"]`);
+            metricEl.classList.add('selected');
+            task1State.selectedMetric = id;
+        }
+
+        function matchDefinition(defId) {
+            if (task1State.checked || !task1State.selectedMetric) return;
+
+            const defEl = document.querySelector(`#definitionsList [data-id="${defId}"]`);
+            if (defEl.classList.contains('matched')) return;
+
+            const metricId = task1State.selectedMetric;
+            task1State.matches[metricId] = defId;
+
+            const metricEl = document.querySelector(`#metricsListTask1 [data-id="${metricId}"]`);
+            const metricName = matchingData.find(m => m.id === metricId).metric;
+
+            metricEl.classList.remove('selected');
+            metricEl.classList.add('matched');
+            document.getElementById(`match-${metricId}`).textContent = '✓';
+
+            defEl.classList.add('matched');
+            defEl.innerHTML += `<div class="matched-label">→ ${metricName}</div>`;
+
+            task1State.selectedMetric = null;
+            updateTabScores();
+        }
+
+        // Task 2 Functions
+        function initTask2() {
+            const grid = document.getElementById('calcGrid');
+
+            calcData.forEach(calc => {
+                const card = document.createElement('div');
+                card.className = 'calc-card';
+                card.dataset.id = calc.id;
+
+                let inputsHtml = calc.inputs.map(input => `
+                    <div class="calc-input-group">
+                        <label>${input.label}</label>
+                        <input type="number" id="calc-${calc.id}-${input.key}" value="${input.value}" step="any">
+                        <span class="unit">${input.unit}</span>
+                    </div>
+                `).join('');
+
+                card.innerHTML = `
+                    <h3>${calc.name}</h3>
+                    <div class="formula">${calc.formula}</div>
+                    <div class="calc-scenario">${calc.scenario}</div>
+                    ${inputsHtml}
+                    <button class="calc-btn" onclick="calculateMetric(${calc.id})">Рассчитать</button>
+                    <div class="calc-result" id="result-${calc.id}" style="display:none;">
+                        <span class="calc-result-label">Результат:</span>
+                        <span class="calc-result-value" id="value-${calc.id}">—</span>
+                    </div>
+                `;
+
+                grid.appendChild(card);
+            });
+        }
+
+        function calculateMetric(id) {
+            const calc = calcData.find(c => c.id === id);
+            const inputs = {};
+
+            calc.inputs.forEach(input => {
+                inputs[input.key] = parseFloat(document.getElementById(`calc-${id}-${input.key}`).value) || 0;
+            });
+
+            const result = calc.calculate(inputs);
+            task2State.answers[id] = result;
+
+            const resultDiv = document.getElementById(`result-${id}`);
+            const valueSpan = document.getElementById(`value-${id}`);
+
+            resultDiv.style.display = 'flex';
+            valueSpan.textContent = result + ' ' + calc.unit;
+
+            updateTabScores();
+        }
+
+        // Task 3 Functions
+        function initTask3() {
+            const practicesPanel = document.getElementById('practicesPanel');
+            const metricsGrid = document.getElementById('classMetricsGrid');
+
+            practices.forEach(practice => {
+                const btn = document.createElement('div');
+                btn.className = `practice-btn practice-${practice.color}`;
+                btn.dataset.id = practice.id;
+                btn.innerHTML = `${practice.name} <span class="practice-count" id="pcount-${practice.id}">0</span>`;
+                btn.onclick = () => selectPractice(practice.id);
+                practicesPanel.appendChild(btn);
+            });
+
+            const shuffled = [...classificationMetrics].sort(() => Math.random() - 0.5);
+            shuffled.forEach(metric => {
+                const div = document.createElement('div');
+                div.className = 'class-metric';
+                div.dataset.id = metric.id;
+                div.innerHTML = `<div class="class-metric-name">${metric.name}</div>`;
+                div.onclick = () => assignMetric(metric.id);
+                metricsGrid.appendChild(div);
+            });
+        }
+
+        function selectPractice(id) {
+            if (task3State.checked) return;
+
+            task3State.selectedPractice = id;
+            document.querySelectorAll('.practice-btn').forEach(btn => {
+                btn.classList.toggle('selected', btn.dataset.id === id);
+            });
+        }
+
+        function assignMetric(metricId) {
+            if (task3State.checked || !task3State.selectedPractice) return;
+
+            const metricEl = document.querySelector(`#classMetricsGrid [data-id="${metricId}"]`);
+            if (metricEl.classList.contains('assigned')) {
+                // Unassign
+                delete task3State.assignments[metricId];
+                metricEl.classList.remove('assigned');
+                const badge = metricEl.querySelector('.class-metric-badge');
+                if (badge) badge.remove();
+            } else {
+                // Assign
+                task3State.assignments[metricId] = task3State.selectedPractice;
+                metricEl.classList.add('assigned');
+
+                const practice = practices.find(p => p.id === task3State.selectedPractice);
+                const badge = document.createElement('span');
+                badge.className = `class-metric-badge practice-${practice.color}`;
+                badge.textContent = practice.name;
+                metricEl.appendChild(badge);
+            }
+
+            updatePracticeCounts();
+            updateTabScores();
+        }
+
+        function updatePracticeCounts() {
+            const counts = {};
+            practices.forEach(p => counts[p.id] = 0);
+
+            for (const practice of Object.values(task3State.assignments)) {
+                counts[practice]++;
+            }
+
+            for (const [id, count] of Object.entries(counts)) {
+                document.getElementById(`pcount-${id}`).textContent = count;
+            }
+        }
+
+        function filterClassMetrics(filter) {
+            document.querySelectorAll('.metrics-pool .filter-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.textContent.toLowerCase().includes(filter) ||
+                    (filter === 'all' && btn.textContent === 'Все'));
+            });
+
+            document.querySelectorAll('#classMetricsGrid .class-metric').forEach(el => {
+                const isAssigned = el.classList.contains('assigned');
+                if (filter === 'all') {
+                    el.style.display = 'block';
+                } else if (filter === 'unassigned') {
+                    el.style.display = isAssigned ? 'none' : 'block';
+                }
+            });
+        }
+
+        // Tab and Score Functions
+        function switchTab(tab) {
+            currentTab = tab;
+            document.querySelectorAll('.tab').forEach((t, i) => {
+                t.classList.toggle('active', i + 1 === tab);
+            });
+            document.querySelectorAll('.task-container').forEach((c, i) => {
+                c.classList.toggle('active', i + 1 === tab);
+            });
+            document.getElementById('result').className = 'result';
+        }
+
+        function updateTabScores() {
+            // Task 1
+            let t1Correct = 0;
+            for (const [metricId, defId] of Object.entries(task1State.matches)) {
+                if (parseInt(metricId) === parseInt(defId)) t1Correct++;
+            }
+            document.getElementById('tab1-score').textContent = `${Object.keys(task1State.matches).length}/10`;
+
+            // Task 2
+            let t2Correct = 0;
+            for (const [id, answer] of Object.entries(task2State.answers)) {
+                const calc = calcData.find(c => c.id === parseInt(id));
+                if (calc && answer === calc.answer) t2Correct++;
+            }
+            document.getElementById('tab2-score').textContent = `${Object.keys(task2State.answers).length}/6`;
+
+            // Task 3
+            let t3Correct = 0;
+            for (const [metricId, practiceId] of Object.entries(task3State.assignments)) {
+                const metric = classificationMetrics.find(m => m.id === parseInt(metricId));
+                if (metric && metric.correct === practiceId) t3Correct++;
+            }
+            document.getElementById('tab3-score').textContent = `${Object.keys(task3State.assignments).length}/18`;
+
+            // Total (only count when checked)
+            const total = (task1State.checked ? t1Correct * 2 : 0) +
+                         (task2State.checked ? t2Correct * 3 : 0) +
+                         (task3State.checked ? t3Correct : 0);
+
+            const maxPossible = 10*2 + 6*3 + 18; // 20 + 18 + 18 = 56... wait recalculating
+            // Task 1: 10 matches × 2 points = 20
+            // Task 2: 6 calcs × 3 points = 18
+            // Task 3: 18 metrics × 1 point = 18
+            // Actually let me make it 68 total for rounder numbers:
+            // Task 1: 10 × 2 = 20
+            // Task 2: 6 × 5 = 30 (updating scoring)
+            // Task 3: 18 × 1 = 18
+            // Total = 68
+
+            document.getElementById('totalScore').textContent = total;
+            const pct = Math.round((total / 68) * 100);
+            document.getElementById('percentage').textContent = pct + '%';
+        }
+
+        function checkCurrentTask() {
+            if (currentTab === 1) checkTask1();
+            else if (currentTab === 2) checkTask2();
+            else if (currentTab === 3) checkTask3();
+        }
+
+        function checkTask1() {
+            task1State.checked = true;
+            let correct = 0;
+
+            for (const [metricId, defId] of Object.entries(task1State.matches)) {
+                const metricEl = document.querySelector(`#metricsListTask1 [data-id="${metricId}"]`);
+                const defEl = document.querySelector(`#definitionsList [data-id="${defId}"]`);
+
+                if (parseInt(metricId) === parseInt(defId)) {
+                    correct++;
+                    metricEl.classList.add('correct');
+                    defEl.classList.add('correct');
+                } else {
+                    metricEl.classList.add('incorrect');
+                    defEl.classList.add('incorrect');
+                }
+            }
+
+            const score = correct * 2;
+            showResult(score, 20, `Сопоставление: ${correct} из 10 верно (${score} очков)`);
+            updateTabScores();
+        }
+
+        function checkTask2() {
+            task2State.checked = true;
+            let correct = 0;
+
+            calcData.forEach(calc => {
+                const resultDiv = document.getElementById(`result-${calc.id}`);
+                const answer = task2State.answers[calc.id];
+
+                if (answer !== undefined) {
+                    if (answer === calc.answer) {
+                        correct++;
+                        resultDiv.classList.add('correct');
+                    } else {
+                        resultDiv.classList.add('incorrect');
+                        resultDiv.innerHTML += `<div style="font-size:0.8rem;color:#ff4757;margin-top:5px;">Верно: ${calc.answer} ${calc.unit}</div>`;
+                    }
+                }
+            });
+
+            const score = correct * 3;
+            showResult(score, 18, `Расчёты: ${correct} из 6 верно (${score} очков)`);
+            updateTabScores();
+        }
+
+        function checkTask3() {
+            task3State.checked = true;
+            let correct = 0;
+
+            classificationMetrics.forEach(metric => {
+                const el = document.querySelector(`#classMetricsGrid [data-id="${metric.id}"]`);
+                const assigned = task3State.assignments[metric.id];
+
+                if (assigned === metric.correct) {
+                    correct++;
+                    el.classList.add('correct');
+                } else if (assigned) {
+                    el.classList.add('incorrect');
+                    const correctPractice = practices.find(p => p.id === metric.correct);
+                    el.innerHTML += `<div style="font-size:0.7rem;color:#ff4757;margin-top:3px;">→ ${correctPractice.name}</div>`;
+                }
+            });
+
+            showResult(correct, 18, `Классификация: ${correct} из 18 верно (${correct} очков)`);
+            updateTabScores();
+        }
+
+        function showResult(score, max, message) {
+            const pct = Math.round((score / max) * 100);
+            const resultDiv = document.getElementById('result');
+
+            let gradeClass;
+            if (pct >= 90) gradeClass = 'excellent';
+            else if (pct >= 70) gradeClass = 'good';
+            else if (pct >= 50) gradeClass = 'average';
+            else gradeClass = 'poor';
+
+            resultDiv.className = `result show ${gradeClass}`;
+            resultDiv.innerHTML = `<h3>${message}</h3><p>Точность: ${pct}%</p>`;
+        }
+
+        function resetCurrentTask() {
+            if (currentTab === 1) resetTask1();
+            else if (currentTab === 2) resetTask2();
+            else if (currentTab === 3) resetTask3();
+            document.getElementById('result').className = 'result';
+        }
+
+        function resetTask1() {
+            task1State = { selectedMetric: null, matches: {}, checked: false };
+            document.getElementById('metricsListTask1').innerHTML = '';
+            document.getElementById('definitionsList').innerHTML = '';
+            initTask1();
+            updateTabScores();
+        }
+
+        function resetTask2() {
+            task2State = { answers: {}, checked: false };
+            document.querySelectorAll('.calc-result').forEach(el => {
+                el.style.display = 'none';
+                el.classList.remove('correct', 'incorrect');
+                const hint = el.querySelector('div');
+                if (hint) hint.remove();
+            });
+            calcData.forEach(calc => {
+                calc.inputs.forEach(input => {
+                    document.getElementById(`calc-${calc.id}-${input.key}`).value = input.value;
+                });
+            });
+            updateTabScores();
+        }
+
+        function resetTask3() {
+            task3State = { selectedPractice: null, assignments: {}, checked: false };
+            document.querySelectorAll('.practice-btn').forEach(btn => btn.classList.remove('selected'));
+            document.querySelectorAll('#classMetricsGrid .class-metric').forEach(el => {
+                el.classList.remove('assigned', 'correct', 'incorrect');
+                el.style.display = 'block';
+                const badge = el.querySelector('.class-metric-badge');
+                const hint = el.querySelector('div[style]');
+                if (badge) badge.remove();
+                if (hint) hint.remove();
+            });
+            updatePracticeCounts();
+            updateTabScores();
+            filterClassMetrics('all');
+        }
+
+        init();
+    </script>
+</body>
+</html>
