@@ -1,0 +1,1689 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ITIL4: Архитектор Ценности - Бизнес-симуляция</title>
+    <link href="https://fonts.googleapis.com/css2?family=Russo+One&family=Exo+2:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0a0e14;
+            --bg-card: #131920;
+            --bg-panel: #1a2028;
+            --bg-hover: #252d38;
+            --text-primary: #e6edf3;
+            --text-secondary: #8b949e;
+            --text-muted: #6e7681;
+            --accent: #00d4ff;
+            --accent-dim: rgba(0, 212, 255, 0.15);
+            --success: #00ff88;
+            --warning: #ffaa00;
+            --danger: #ff4466;
+            --purple: #a855f7;
+            --gold: #ffd700;
+            --border: #2d3640;
+            --glow: 0 0 20px rgba(0, 212, 255, 0.3);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Exo 2', sans-serif;
+            background: var(--bg-dark);
+            background-image:
+                radial-gradient(ellipse at 20% 80%, rgba(0, 212, 255, 0.05) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 20%, rgba(168, 85, 247, 0.05) 0%, transparent 50%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 15px;
+        }
+
+        header {
+            text-align: center;
+            padding: 20px 0;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-family: 'Russo One', sans-serif;
+            font-size: 2rem;
+            margin-bottom: 5px;
+            background: linear-gradient(135deg, var(--accent), var(--purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: var(--glow);
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        /* Score Dashboard */
+        .dashboard {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 15px 0;
+            flex-wrap: wrap;
+        }
+
+        .dash-item {
+            text-align: center;
+            padding: 10px 20px;
+            background: var(--bg-card);
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            min-width: 100px;
+        }
+
+        .dash-value {
+            font-family: 'Russo One', sans-serif;
+            font-size: 1.6rem;
+            color: var(--accent);
+        }
+
+        .dash-value.gold { color: var(--gold); }
+        .dash-value.success { color: var(--success); }
+        .dash-value.danger { color: var(--danger); }
+
+        .dash-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            margin: 15px 0;
+            padding: 15px;
+            background: var(--bg-card);
+            border-radius: 10px;
+            border: 1px solid var(--border);
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.85rem;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: var(--bg-hover);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), var(--purple));
+            transition: width 0.5s ease;
+            border-radius: 4px;
+        }
+
+        .progress-zones {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 5px;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+        }
+
+        .zone { text-align: center; }
+        .zone.fail { color: var(--danger); }
+        .zone.pass { color: var(--warning); }
+        .zone.good { color: var(--success); }
+        .zone.expert { color: var(--gold); }
+
+        /* Main Game Layout */
+        .game-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 1100px) {
+            .game-layout { grid-template-columns: 1fr; }
+        }
+
+        .panel {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid var(--border);
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .panel-title {
+            font-family: 'Russo One', sans-serif;
+            font-size: 1.1rem;
+            color: var(--accent);
+        }
+
+        .phase-badge {
+            font-size: 0.75rem;
+            padding: 4px 10px;
+            border-radius: 15px;
+            background: var(--accent-dim);
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        /* Case Panel */
+        .case-meta {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .case-tag {
+            font-size: 0.75rem;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-weight: 600;
+        }
+
+        .tag-round { background: rgba(168, 85, 247, 0.2); color: var(--purple); }
+        .tag-industry { background: rgba(0, 212, 255, 0.15); color: var(--accent); }
+        .tag-difficulty { background: rgba(255, 170, 0, 0.2); color: var(--warning); }
+
+        .case-title {
+            font-family: 'Russo One', sans-serif;
+            font-size: 1.3rem;
+            margin-bottom: 12px;
+            line-height: 1.3;
+        }
+
+        .case-description {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.7;
+            margin-bottom: 15px;
+        }
+
+        .case-context {
+            background: var(--bg-panel);
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .context-title {
+            font-size: 0.8rem;
+            color: var(--warning);
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .context-list {
+            list-style: none;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        .context-list li {
+            padding: 3px 0;
+            padding-left: 15px;
+            position: relative;
+        }
+
+        .context-list li::before {
+            content: "▸";
+            position: absolute;
+            left: 0;
+            color: var(--accent);
+        }
+
+        .case-challenge {
+            background: linear-gradient(135deg, rgba(255, 68, 102, 0.1), rgba(168, 85, 247, 0.1));
+            padding: 12px 15px;
+            border-radius: 8px;
+            border-left: 3px solid var(--danger);
+            margin-bottom: 15px;
+        }
+
+        .challenge-title {
+            font-size: 0.8rem;
+            color: var(--danger);
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .challenge-text {
+            color: var(--text-primary);
+            font-size: 0.9rem;
+        }
+
+        /* Selection Sections */
+        .selection-section {
+            margin-bottom: 20px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .section-title {
+            font-size: 0.85rem;
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .section-hint {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .selection-counter {
+            font-size: 0.8rem;
+            color: var(--purple);
+            font-weight: 600;
+        }
+
+        .options-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .option-btn {
+            padding: 8px 14px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--bg-panel);
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: 'Exo 2', sans-serif;
+        }
+
+        .option-btn:hover:not(:disabled):not(.selected) {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+            border-color: var(--accent);
+        }
+
+        .option-btn.selected {
+            background: var(--accent-dim);
+            border-color: var(--accent);
+            color: var(--accent);
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.2);
+        }
+
+        .option-btn.correct {
+            background: rgba(0, 255, 136, 0.15);
+            border-color: var(--success);
+            color: var(--success);
+        }
+
+        .option-btn.incorrect {
+            background: rgba(255, 68, 102, 0.15);
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+
+        .option-btn.missed {
+            background: rgba(255, 170, 0, 0.15);
+            border-color: var(--warning);
+            color: var(--warning);
+        }
+
+        .option-btn:disabled {
+            cursor: default;
+            opacity: 0.8;
+        }
+
+        /* Creative Section */
+        .creative-section {
+            margin-top: 20px;
+        }
+
+        .creative-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .creative-title {
+            font-size: 0.9rem;
+            color: var(--gold);
+            font-weight: 600;
+        }
+
+        .bonus-hint {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            background: rgba(255, 215, 0, 0.1);
+            padding: 3px 8px;
+            border-radius: 10px;
+        }
+
+        .creative-field {
+            margin-bottom: 12px;
+        }
+
+        .creative-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 5px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .char-count {
+            color: var(--text-muted);
+        }
+
+        .creative-input {
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--bg-panel);
+            color: var(--text-primary);
+            font-family: 'Exo 2', sans-serif;
+            font-size: 0.85rem;
+            resize: vertical;
+            min-height: 60px;
+            transition: border-color 0.2s;
+        }
+
+        .creative-input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .creative-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        /* Actions */
+        .actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border-radius: 8px;
+            border: none;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: 'Exo 2', sans-serif;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent), #0095b3);
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 212, 255, 0.3);
+        }
+
+        .btn-primary:disabled {
+            background: var(--bg-panel);
+            color: var(--text-muted);
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: var(--bg-panel);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-hover);
+        }
+
+        .btn-gold {
+            background: linear-gradient(135deg, var(--gold), #cc9900);
+            color: #000;
+        }
+
+        /* Result Panel */
+        .result-panel {
+            margin-top: 20px;
+            padding: 18px;
+            border-radius: 12px;
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+
+        .result-panel.show { display: block; }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result-panel.excellent {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(0, 255, 136, 0.05));
+            border: 1px solid var(--gold);
+        }
+
+        .result-panel.good {
+            background: rgba(0, 255, 136, 0.08);
+            border: 1px solid var(--success);
+        }
+
+        .result-panel.partial {
+            background: rgba(255, 170, 0, 0.08);
+            border: 1px solid var(--warning);
+        }
+
+        .result-panel.poor {
+            background: rgba(255, 68, 102, 0.08);
+            border: 1px solid var(--danger);
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .result-title {
+            font-family: 'Russo One', sans-serif;
+            font-size: 1.2rem;
+        }
+
+        .result-points {
+            font-family: 'Russo One', sans-serif;
+            font-size: 1.5rem;
+            color: var(--gold);
+        }
+
+        .points-breakdown {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .breakdown-item {
+            background: var(--bg-panel);
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .breakdown-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 3px;
+        }
+
+        .breakdown-value {
+            font-family: 'Russo One', sans-serif;
+            font-size: 1.1rem;
+        }
+
+        .breakdown-value.green { color: var(--success); }
+        .breakdown-value.orange { color: var(--warning); }
+        .breakdown-value.red { color: var(--danger); }
+
+        .expert-feedback {
+            background: var(--bg-panel);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        .feedback-title {
+            font-size: 0.85rem;
+            color: var(--accent);
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .feedback-section {
+            margin-bottom: 12px;
+        }
+
+        .feedback-section:last-child { margin-bottom: 0; }
+
+        .feedback-label {
+            font-size: 0.75rem;
+            color: var(--success);
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+
+        .feedback-list {
+            list-style: none;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .feedback-list li {
+            padding: 2px 0;
+        }
+
+        .feedback-list li::before {
+            content: "✓ ";
+            color: var(--success);
+        }
+
+        /* Start/End Screens */
+        .screen {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .screen h2 {
+            font-family: 'Russo One', sans-serif;
+            font-size: 2rem;
+            margin-bottom: 15px;
+            background: linear-gradient(135deg, var(--accent), var(--purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .screen p {
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .rules-box {
+            text-align: left;
+            background: var(--bg-card);
+            padding: 25px;
+            border-radius: 12px;
+            max-width: 800px;
+            margin: 0 auto 25px;
+            border: 1px solid var(--border);
+        }
+
+        .rules-box h3 {
+            color: var(--accent);
+            font-family: 'Russo One', sans-serif;
+            margin-bottom: 15px;
+        }
+
+        .rules-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 600px) {
+            .rules-grid { grid-template-columns: 1fr; }
+        }
+
+        .rule-section h4 {
+            color: var(--purple);
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        .rule-section ul {
+            color: var(--text-secondary);
+            margin-left: 18px;
+            font-size: 0.85rem;
+        }
+
+        .rule-section li {
+            margin-bottom: 5px;
+        }
+
+        .scoring-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 0.85rem;
+        }
+
+        .scoring-table th, .scoring-table td {
+            padding: 8px 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .scoring-table th {
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .scoring-table td:last-child {
+            text-align: right;
+            color: var(--gold);
+            font-weight: 600;
+        }
+
+        /* Final Score */
+        .final-score-display {
+            margin: 30px 0;
+        }
+
+        .final-score-number {
+            font-family: 'Russo One', sans-serif;
+            font-size: 5rem;
+            background: linear-gradient(135deg, var(--gold), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .final-score-max {
+            font-size: 1.5rem;
+            color: var(--text-muted);
+        }
+
+        .verdict {
+            font-family: 'Russo One', sans-serif;
+            font-size: 1.5rem;
+            margin: 20px 0;
+            padding: 15px 30px;
+            border-radius: 10px;
+            display: inline-block;
+        }
+
+        .verdict.fail { background: rgba(255, 68, 102, 0.2); color: var(--danger); }
+        .verdict.pass { background: rgba(255, 170, 0, 0.2); color: var(--warning); }
+        .verdict.good { background: rgba(0, 255, 136, 0.2); color: var(--success); }
+        .verdict.expert { background: rgba(255, 215, 0, 0.2); color: var(--gold); }
+
+        .final-stats {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+
+        .final-stat {
+            text-align: center;
+        }
+
+        .final-stat-value {
+            font-family: 'Russo One', sans-serif;
+            font-size: 2.5rem;
+        }
+
+        .final-stat-label {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            border-top: 1px solid var(--border);
+            margin-top: 30px;
+        }
+
+        /* Animations */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        .pulse { animation: pulse 2s infinite; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>ITIL4: Архитектор Ценности</h1>
+            <p class="subtitle">Комплексная бизнес-симуляция по управлению ИТ-услугами</p>
+
+            <div class="dashboard" id="dashboard" style="display: none;">
+                <div class="dash-item">
+                    <div class="dash-value gold" id="total-score">0</div>
+                    <div class="dash-label">Очки</div>
+                </div>
+                <div class="dash-item">
+                    <div class="dash-value" id="current-round">1</div>
+                    <div class="dash-label">Раунд</div>
+                </div>
+                <div class="dash-item">
+                    <div class="dash-value" id="total-rounds">6</div>
+                    <div class="dash-label">Всего</div>
+                </div>
+                <div class="dash-item">
+                    <div class="dash-value success" id="round-potential">450</div>
+                    <div class="dash-label">Макс. за раунд</div>
+                </div>
+            </div>
+
+            <div class="progress-container" id="progress-container" style="display: none;">
+                <div class="progress-header">
+                    <span>Прогресс к квалификации</span>
+                    <span id="progress-percent">0%</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+                </div>
+                <div class="progress-zones">
+                    <div class="zone fail">0-999: Не сдано</div>
+                    <div class="zone pass">1000-1499: Зачёт</div>
+                    <div class="zone good">1500-1999: Хорошо</div>
+                    <div class="zone expert">2000+: Эксперт</div>
+                </div>
+            </div>
+        </header>
+
+        <main id="game-container">
+            <!-- Start Screen -->
+            <div id="start-screen" class="screen">
+                <h2>Добро пожаловать, Архитектор!</h2>
+                <p>Вы — ITSM-консультант высшего уровня. Ваша миссия — помочь организациям трансформировать их ИТ, применяя фреймворк ITIL 4. Каждый клиент — уникальный вызов, требующий глубокого понимания принципов, практик и системы создания ценности.</p>
+
+                <div class="rules-box">
+                    <h3>Правила игры</h3>
+                    <div class="rules-grid">
+                        <div class="rule-section">
+                            <h4>Структура раунда</h4>
+                            <ul>
+                                <li>Изучите бизнес-кейс клиента</li>
+                                <li>Выберите 2 Руководящих принципа</li>
+                                <li>Выберите 2 активности Value Chain</li>
+                                <li>Выберите 1 ключевое Измерение</li>
+                                <li>Выберите 3 Практики ITIL4</li>
+                                <li>Напишите план действий (бонус)</li>
+                            </ul>
+                        </div>
+                        <div class="rule-section">
+                            <h4>Критерии успеха</h4>
+                            <ul>
+                                <li><strong>< 1000</strong> — Квалификация не пройдена</li>
+                                <li><strong>1000-1499</strong> — Зачёт (базовый уровень)</li>
+                                <li><strong>1500-1999</strong> — Хорошо (продвинутый)</li>
+                                <li><strong>2000+</strong> — Эксперт ITIL4</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <table class="scoring-table">
+                        <tr>
+                            <th>Элемент</th>
+                            <th>Очки</th>
+                        </tr>
+                        <tr>
+                            <td>Правильный Руководящий принцип</td>
+                            <td>+50</td>
+                        </tr>
+                        <tr>
+                            <td>Правильная активность Value Chain</td>
+                            <td>+50</td>
+                        </tr>
+                        <tr>
+                            <td>Правильное Измерение</td>
+                            <td>+60</td>
+                        </tr>
+                        <tr>
+                            <td>Правильная Практика</td>
+                            <td>+40</td>
+                        </tr>
+                        <tr>
+                            <td>Бонус за творческий план</td>
+                            <td>до +90</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Максимум за раунд</strong></td>
+                            <td><strong>450</strong></td>
+                        </tr>
+                    </table>
+                </div>
+
+                <button class="btn btn-primary" onclick="startGame()">Начать консультацию</button>
+            </div>
+
+            <!-- Game Screen -->
+            <div id="game-screen" style="display: none;">
+                <div class="game-layout">
+                    <!-- Left Panel: Case -->
+                    <div class="panel">
+                        <div class="panel-header">
+                            <span class="panel-title">Бизнес-кейс</span>
+                            <span class="phase-badge" id="phase-badge">Фаза анализа</span>
+                        </div>
+
+                        <div class="case-meta">
+                            <span class="case-tag tag-round" id="round-tag">Раунд 1/6</span>
+                            <span class="case-tag tag-industry" id="industry-tag">Финтех</span>
+                            <span class="case-tag tag-difficulty" id="difficulty-tag">Сложный</span>
+                        </div>
+
+                        <h2 class="case-title" id="case-title">Загрузка...</h2>
+                        <p class="case-description" id="case-description"></p>
+
+                        <div class="case-context">
+                            <div class="context-title">Контекст организации</div>
+                            <ul class="context-list" id="context-list"></ul>
+                        </div>
+
+                        <div class="case-challenge">
+                            <div class="challenge-title">Главный вызов</div>
+                            <p class="challenge-text" id="challenge-text"></p>
+                        </div>
+
+                        <!-- Creative Section -->
+                        <div class="creative-section">
+                            <div class="creative-header">
+                                <span class="creative-title">Творческий бонус</span>
+                                <span class="bonus-hint">до +90 очков</span>
+                            </div>
+
+                            <div class="creative-field">
+                                <div class="creative-label">
+                                    <span>План действий (что вы рекомендуете?)</span>
+                                    <span class="char-count" id="plan-count">0/300</span>
+                                </div>
+                                <textarea class="creative-input" id="action-plan" placeholder="Опишите ваш план: первые шаги, приоритеты, как именно применить выбранные элементы ITIL4..." maxlength="300" oninput="updateCharCount('action-plan', 'plan-count', 300)"></textarea>
+                            </div>
+
+                            <div class="creative-field">
+                                <div class="creative-label">
+                                    <span>Ключевые метрики успеха</span>
+                                    <span class="char-count" id="metrics-count">0/150</span>
+                                </div>
+                                <textarea class="creative-input" id="success-metrics" placeholder="Какие KPI вы будете отслеживать?" maxlength="150" style="min-height: 45px;" oninput="updateCharCount('success-metrics', 'metrics-count', 150)"></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Result Panel -->
+                        <div class="result-panel" id="result-panel">
+                            <div class="result-header">
+                                <span class="result-title" id="result-title">Отлично!</span>
+                                <span class="result-points" id="result-points">+320</span>
+                            </div>
+
+                            <div class="points-breakdown" id="points-breakdown"></div>
+
+                            <div class="expert-feedback" id="expert-feedback"></div>
+                        </div>
+
+                        <div class="actions">
+                            <button class="btn btn-primary" id="submit-btn" onclick="submitAnswer()" disabled>
+                                Отправить решение
+                            </button>
+                            <button class="btn btn-gold" id="next-btn" onclick="nextRound()" style="display: none;">
+                                Следующий клиент →
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Right Panel: Selections -->
+                    <div class="panel">
+                        <div class="panel-header">
+                            <span class="panel-title">Ваше решение</span>
+                            <span class="selection-counter" id="total-selected">Выбрано: 0/8</span>
+                        </div>
+
+                        <!-- Guiding Principles -->
+                        <div class="selection-section">
+                            <div class="section-header">
+                                <div>
+                                    <span class="section-title">7 Руководящих принципов</span>
+                                    <div class="section-hint">Какие принципы наиболее релевантны?</div>
+                                </div>
+                                <span class="selection-counter" id="principles-count">0/2</span>
+                            </div>
+                            <div class="options-grid" id="principles-grid"></div>
+                        </div>
+
+                        <!-- Value Chain Activities -->
+                        <div class="selection-section">
+                            <div class="section-header">
+                                <div>
+                                    <span class="section-title">Service Value Chain</span>
+                                    <div class="section-hint">Какие активности ключевые?</div>
+                                </div>
+                                <span class="selection-counter" id="activities-count">0/2</span>
+                            </div>
+                            <div class="options-grid" id="activities-grid"></div>
+                        </div>
+
+                        <!-- Four Dimensions -->
+                        <div class="selection-section">
+                            <div class="section-header">
+                                <div>
+                                    <span class="section-title">4 Измерения</span>
+                                    <div class="section-hint">Какое измерение в фокусе?</div>
+                                </div>
+                                <span class="selection-counter" id="dimensions-count">0/1</span>
+                            </div>
+                            <div class="options-grid" id="dimensions-grid"></div>
+                        </div>
+
+                        <!-- Practices -->
+                        <div class="selection-section">
+                            <div class="section-header">
+                                <div>
+                                    <span class="section-title">Практики ITIL4</span>
+                                    <div class="section-hint">Какие практики применить?</div>
+                                </div>
+                                <span class="selection-counter" id="practices-count">0/3</span>
+                            </div>
+                            <div class="options-grid" id="practices-grid"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- End Screen -->
+            <div id="end-screen" class="screen" style="display: none;">
+                <h2>Консультация завершена!</h2>
+
+                <div class="final-score-display">
+                    <div class="final-score-number" id="final-score">0</div>
+                    <div class="final-score-max">/ 2700 очков</div>
+                </div>
+
+                <div class="verdict" id="verdict">Эксперт ITIL4</div>
+
+                <div class="final-stats">
+                    <div class="final-stat">
+                        <div class="final-stat-value" style="color: var(--success)" id="stat-excellent">0</div>
+                        <div class="final-stat-label">Отличных раундов</div>
+                    </div>
+                    <div class="final-stat">
+                        <div class="final-stat-value" style="color: var(--warning)" id="stat-good">0</div>
+                        <div class="final-stat-label">Хороших раундов</div>
+                    </div>
+                    <div class="final-stat">
+                        <div class="final-stat-value" style="color: var(--danger)" id="stat-poor">0</div>
+                        <div class="final-stat-label">Слабых раундов</div>
+                    </div>
+                    <div class="final-stat">
+                        <div class="final-stat-value" style="color: var(--gold)" id="stat-creative">0</div>
+                        <div class="final-stat-label">Творч. бонусы</div>
+                    </div>
+                </div>
+
+                <button class="btn btn-primary" onclick="restartGame()">Пройти снова</button>
+            </div>
+        </main>
+
+        <footer>
+            ITIL4: Архитектор Ценности | Комплексная бизнес-симуляция | Service Value System
+        </footer>
+    </div>
+
+    <script>
+        // ==================== DATA ====================
+
+        const guidingPrinciples = [
+            "Фокус на ценности",
+            "Начинай там, где ты сейчас",
+            "Продвигайся итеративно с обратной связью",
+            "Сотрудничай и повышай прозрачность",
+            "Думай и работай целостно",
+            "Сохраняй простоту и практичность",
+            "Оптимизируй и автоматизируй"
+        ];
+
+        const valueChainActivities = [
+            "Plan (Планирование)",
+            "Improve (Улучшение)",
+            "Engage (Взаимодействие)",
+            "Design & Transition (Проектирование)",
+            "Obtain/Build (Получение/Создание)",
+            "Deliver & Support (Поставка)"
+        ];
+
+        const fourDimensions = [
+            "Организации и люди",
+            "Информация и технологии",
+            "Партнёры и поставщики",
+            "Потоки ценности и процессы"
+        ];
+
+        const practices = [
+            "Управление инцидентами",
+            "Управление проблемами",
+            "Управление изменениями",
+            "Управление релизами",
+            "Управление конфигурацией",
+            "Service Desk",
+            "Мониторинг и события",
+            "Управление уровнем услуг",
+            "Управление доступностью",
+            "Управление мощностями",
+            "Управление непрерывностью",
+            "Управление ИБ",
+            "Непрерывное улучшение",
+            "Управление знаниями",
+            "Управление взаимоотношениями",
+            "Управление поставщиками",
+            "Финансовое управление",
+            "Управление портфелем",
+            "Управление проектами",
+            "Бизнес-анализ",
+            "Проектирование услуг",
+            "Каталог услуг",
+            "Управление запросами",
+            "Валидация и тестирование",
+            "Управление развёртыванием",
+            "Управление ИТ-активами",
+            "Управление архитектурой",
+            "Управление рисками",
+            "Стратегическое управление",
+            "Управление персоналом"
+        ];
+
+        // Business Cases
+        const cases = [
+            {
+                title: "Цифровая трансформация страховой компании",
+                industry: "Страхование",
+                difficulty: "Эксперт",
+                description: "Крупная страховая компания с 50-летней историей теряет рынок из-за insurtech-стартапов. Клиенты уходят к конкурентам, предлагающим мобильные приложения и мгновенное оформление полисов. Legacy-системы на COBOL не позволяют быстро внедрять инновации. Совет директоров требует полной цифровой трансформации за 18 месяцев.",
+                context: [
+                    "2000+ сотрудников, 15 филиалов по стране",
+                    "Критичные системы работают 24/7",
+                    "Бюджет трансформации: $15M",
+                    "Текучка кадров IT: 25% в год"
+                ],
+                challenge: "Как провести масштабную трансформацию без нарушения текущих операций и с ограниченными ресурсами?",
+                answers: {
+                    principles: ["Начинай там, где ты сейчас", "Продвигайся итеративно с обратной связью"],
+                    activities: ["Plan (Планирование)", "Design & Transition (Проектирование)"],
+                    dimension: "Информация и технологии",
+                    practices: ["Управление изменениями", "Управление портфелем", "Управление архитектурой"]
+                },
+                feedback: {
+                    principles: "Принцип 'Начинай там, где ты сейчас' критичен для legacy-трансформации — нужно оценить текущее состояние. Итеративный подход минимизирует риски.",
+                    activities: "Планирование необходимо для стратегии трансформации. Проектирование и переход — ключ к модернизации архитектуры.",
+                    dimension: "Фокус на 'Информация и технологии' обусловлен устаревшими COBOL-системами как главным блокером.",
+                    practices: "Управление изменениями контролирует трансформацию. Портфель приоритизирует инициативы. Архитектура обеспечивает целевое состояние."
+                }
+            },
+            {
+                title: "Слияние двух IT-организаций",
+                industry: "M&A / Retail",
+                difficulty: "Эксперт",
+                description: "Две крупные розничные сети объявили о слиянии. Обе имеют собственные IT-подразделения с разной культурой и инструментами. Нужно объединить команды, унифицировать процессы и сократить затраты на 30% за год. Существует конфликт между командами — каждая считает свои практики лучшими.",
+                context: [
+                    "Компания А: 200 IT-сотрудников, ITIL v3, ServiceNow",
+                    "Компания Б: 150 IT-сотрудников, Agile/DevOps, Jira",
+                    "Дублирующиеся системы и роли",
+                    "Deadline синергии: 12 месяцев"
+                ],
+                challenge: "Как объединить разные IT-культуры и достичь синергии без потери ключевых специалистов?",
+                answers: {
+                    principles: ["Сотрудничай и повышай прозрачность", "Фокус на ценности"],
+                    activities: ["Engage (Взаимодействие)", "Improve (Улучшение)"],
+                    dimension: "Организации и люди",
+                    practices: ["Управление персоналом", "Непрерывное улучшение", "Управление взаимоотношениями"]
+                },
+                feedback: {
+                    principles: "Сотрудничество и прозрачность — ключ к преодолению конфликтов между командами. Фокус на ценности помогает избежать политических игр.",
+                    activities: "Взаимодействие критично для вовлечения обеих команд. Улучшение позволяет выбрать лучшие практики из обеих культур.",
+                    dimension: "'Организации и люди' — главный фокус при слиянии IT-команд с разными культурами.",
+                    practices: "Управление персоналом решает кадровые вопросы. Непрерывное улучшение гармонизирует процессы. Взаимоотношения строят мосты между командами."
+                }
+            },
+            {
+                title: "Запуск платёжной платформы",
+                industry: "Финтех",
+                difficulty: "Сложный",
+                description: "Финтех-стартап получил банковскую лицензию и готовится к запуску платёжной платформы. Регулятор требует соответствия PCI DSS и 99.99% доступности. Первые 100 000 клиентов ожидаются в первый месяц. Команда состоит из талантливых разработчиков, но без опыта работы в регулируемой среде.",
+                context: [
+                    "Команда: 40 разработчиков, 5 DevOps",
+                    "Срок до запуска: 3 месяца",
+                    "Требования регулятора жёсткие",
+                    "Конкуренты уже на рынке"
+                ],
+                challenge: "Как обеспечить compliance и надёжность при стартап-скорости разработки?",
+                answers: {
+                    principles: ["Думай и работай целостно", "Оптимизируй и автоматизируй"],
+                    activities: ["Obtain/Build (Получение/Создание)", "Deliver & Support (Поставка)"],
+                    dimension: "Потоки ценности и процессы",
+                    practices: ["Управление ИБ", "Управление доступностью", "Управление релизами"]
+                },
+                feedback: {
+                    principles: "Целостный подход учитывает все требования комплаенса. Автоматизация критична для CI/CD в финтехе.",
+                    activities: "Получение/создание — строим платформу. Поставка — запускаем и поддерживаем с высоким SLA.",
+                    dimension: "'Потоки ценности и процессы' — нужно выстроить процессы, соответствующие регуляторным требованиям.",
+                    practices: "ИБ обеспечивает PCI DSS. Доступность — 99.99% SLA. Релизы — контролируемые выкатки без простоев."
+                }
+            },
+            {
+                title: "Кризис после кибератаки",
+                industry: "Здравоохранение",
+                difficulty: "Критический",
+                description: "Сеть частных клиник подверглась ransomware-атаке. Системы зашифрованы, резервные копии частично повреждены. Медицинские записи 500 000 пациентов недоступны. Регулятор начал проверку. СМИ активно освещают инцидент. Врачи работают на бумаге, пациенты переносят операции.",
+                context: [
+                    "20 клиник, 3000 сотрудников",
+                    "Время простоя уже 72 часа",
+                    "Хакеры требуют $5M выкупа",
+                    "Репутационные потери растут"
+                ],
+                challenge: "Как восстановить операции, минимизировать ущерб и предотвратить повторение?",
+                answers: {
+                    principles: ["Фокус на ценности", "Сохраняй простоту и практичность"],
+                    activities: ["Deliver & Support (Поставка)", "Improve (Улучшение)"],
+                    dimension: "Информация и технологии",
+                    practices: ["Управление инцидентами", "Управление непрерывностью", "Управление ИБ"]
+                },
+                feedback: {
+                    principles: "Фокус на ценности — приоритет жизни пациентов. Простота — быстрые решения в кризисе.",
+                    activities: "Поставка — восстановить критичные сервисы. Улучшение — усилить защиту после инцидента.",
+                    dimension: "'Информация и технологии' — атакованы именно IT-системы и данные.",
+                    practices: "Инциденты — координация восстановления. Непрерывность — планы DR. ИБ — расследование и усиление защиты."
+                }
+            },
+            {
+                title: "Внедрение AI в контактный центр",
+                industry: "Телеком",
+                difficulty: "Сложный",
+                description: "Телеком-оператор планирует внедрить AI-ботов для обработки 70% обращений клиентов. Профсоюз обеспокоен сокращениями. Операторы контактного центра демотивированы. При этом клиенты ждут ответа в среднем 15 минут, NPS падает.",
+                context: [
+                    "Контактный центр: 800 операторов",
+                    "5 млн клиентов, 200К обращений/день",
+                    "Текущий FCR: 65%, цель: 85%",
+                    "Бюджет AI-проекта: $3M"
+                ],
+                challenge: "Как внедрить AI без саботажа персонала и с реальным улучшением клиентского опыта?",
+                answers: {
+                    principles: ["Сотрудничай и повышай прозрачность", "Продвигайся итеративно с обратной связью"],
+                    activities: ["Engage (Взаимодействие)", "Design & Transition (Проектирование)"],
+                    dimension: "Организации и люди",
+                    practices: ["Управление персоналом", "Service Desk", "Управление уровнем услуг"]
+                },
+                feedback: {
+                    principles: "Прозрачность с персоналом критична для принятия изменений. Итеративность позволяет обучать AI на реальных данных.",
+                    activities: "Взаимодействие — вовлечь операторов как экспертов для AI. Проектирование — создать гибридную модель человек+AI.",
+                    dimension: "'Организации и люди' — главный риск в сопротивлении персонала.",
+                    practices: "Персонал — переквалификация операторов. Service Desk — новая модель работы. Уровень услуг — контроль NPS и FCR."
+                }
+            },
+            {
+                title: "Мультиоблачная миграция",
+                industry: "E-commerce",
+                difficulty: "Сложный",
+                description: "Маркетплейс решил перейти от собственных дата-центров к мультиоблачной архитектуре (AWS + Azure). Цель — снизить costs на 40% и повысить отказоустойчивость. Текущая архитектура — монолит на VMware. В сезон распродаж нагрузка растёт в 10 раз.",
+                context: [
+                    "200+ серверов, 50TB данных",
+                    "Монолитное приложение 15 лет",
+                    "Команда не имеет облачного опыта",
+                    "Сезонные пики нагрузки критичны"
+                ],
+                challenge: "Как мигрировать в облако без простоев и подготовить команду к новой парадигме?",
+                answers: {
+                    principles: ["Начинай там, где ты сейчас", "Оптимизируй и автоматизируй"],
+                    activities: ["Design & Transition (Проектирование)", "Obtain/Build (Получение/Создание)"],
+                    dimension: "Информация и технологии",
+                    practices: ["Управление архитектурой", "Управление мощностями", "Управление знаниями"]
+                },
+                feedback: {
+                    principles: "'Начинай там, где ты сейчас' — оценить текущую архитектуру для плана миграции. Автоматизация — IaC и DevOps для облака.",
+                    activities: "Проектирование — целевая облачная архитектура. Получение/создание — развёртывание облачной инфраструктуры.",
+                    dimension: "'Информация и технологии' — фокус на инфраструктурной трансформации.",
+                    practices: "Архитектура — целевое состояние. Мощности — автоскейлинг для пиков. Знания — обучение команды облачным технологиям."
+                }
+            }
+        ];
+
+        // ==================== GAME STATE ====================
+
+        let gameState = {
+            currentRound: 0,
+            totalScore: 0,
+            roundScores: [],
+            selections: {
+                principles: [],
+                activities: [],
+                dimension: null,
+                practices: []
+            },
+            answered: false,
+            stats: {
+                excellent: 0,
+                good: 0,
+                poor: 0,
+                creativeBonus: 0
+            }
+        };
+
+        const MAX_SELECTIONS = {
+            principles: 2,
+            activities: 2,
+            dimension: 1,
+            practices: 3
+        };
+
+        const POINTS = {
+            principle: 50,
+            activity: 50,
+            dimension: 60,
+            practice: 40,
+            creativeMax: 90
+        };
+
+        // ==================== INITIALIZATION ====================
+
+        function initializeOptions() {
+            renderOptions('principles-grid', guidingPrinciples, 'principles');
+            renderOptions('activities-grid', valueChainActivities, 'activities');
+            renderOptions('dimensions-grid', fourDimensions, 'dimension');
+            renderOptions('practices-grid', practices, 'practices');
+        }
+
+        function renderOptions(containerId, items, category) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = items.map(item =>
+                `<button class="option-btn" onclick="toggleOption(this, '${category}', '${item.replace(/'/g, "\\'")}')">${item}</button>`
+            ).join('');
+        }
+
+        // ==================== SELECTION LOGIC ====================
+
+        function toggleOption(btn, category, value) {
+            if (gameState.answered) return;
+
+            const maxSelections = MAX_SELECTIONS[category];
+            const currentSelections = category === 'dimension'
+                ? (gameState.selections.dimension ? 1 : 0)
+                : gameState.selections[category].length;
+
+            if (btn.classList.contains('selected')) {
+                btn.classList.remove('selected');
+                if (category === 'dimension') {
+                    gameState.selections.dimension = null;
+                } else {
+                    gameState.selections[category] = gameState.selections[category].filter(v => v !== value);
+                }
+            } else if (currentSelections < maxSelections) {
+                btn.classList.add('selected');
+                if (category === 'dimension') {
+                    // Deselect previous dimension
+                    document.querySelectorAll('#dimensions-grid .option-btn').forEach(b => b.classList.remove('selected'));
+                    btn.classList.add('selected');
+                    gameState.selections.dimension = value;
+                } else {
+                    gameState.selections[category].push(value);
+                }
+            }
+
+            updateSelectionUI();
+            checkSubmitReady();
+        }
+
+        function updateSelectionUI() {
+            const s = gameState.selections;
+            document.getElementById('principles-count').textContent = `${s.principles.length}/2`;
+            document.getElementById('activities-count').textContent = `${s.activities.length}/2`;
+            document.getElementById('dimensions-count').textContent = `${s.dimension ? 1 : 0}/1`;
+            document.getElementById('practices-count').textContent = `${s.practices.length}/3`;
+
+            const total = s.principles.length + s.activities.length + (s.dimension ? 1 : 0) + s.practices.length;
+            document.getElementById('total-selected').textContent = `Выбрано: ${total}/8`;
+        }
+
+        function checkSubmitReady() {
+            const s = gameState.selections;
+            const ready = s.principles.length === 2 &&
+                          s.activities.length === 2 &&
+                          s.dimension !== null &&
+                          s.practices.length === 3;
+
+            document.getElementById('submit-btn').disabled = !ready;
+        }
+
+        // ==================== GAME FLOW ====================
+
+        function startGame() {
+            gameState = {
+                currentRound: 0,
+                totalScore: 0,
+                roundScores: [],
+                selections: { principles: [], activities: [], dimension: null, practices: [] },
+                answered: false,
+                stats: { excellent: 0, good: 0, poor: 0, creativeBonus: 0 }
+            };
+
+            document.getElementById('start-screen').style.display = 'none';
+            document.getElementById('game-screen').style.display = 'block';
+            document.getElementById('dashboard').style.display = 'flex';
+            document.getElementById('progress-container').style.display = 'block';
+
+            initializeOptions();
+            loadRound();
+        }
+
+        function loadRound() {
+            const caseData = cases[gameState.currentRound];
+
+            // Update UI
+            document.getElementById('round-tag').textContent = `Раунд ${gameState.currentRound + 1}/${cases.length}`;
+            document.getElementById('industry-tag').textContent = caseData.industry;
+            document.getElementById('difficulty-tag').textContent = caseData.difficulty;
+            document.getElementById('case-title').textContent = caseData.title;
+            document.getElementById('case-description').textContent = caseData.description;
+            document.getElementById('challenge-text').textContent = caseData.challenge;
+            document.getElementById('current-round').textContent = gameState.currentRound + 1;
+
+            // Context list
+            const contextList = document.getElementById('context-list');
+            contextList.innerHTML = caseData.context.map(c => `<li>${c}</li>`).join('');
+
+            // Reset selections
+            gameState.selections = { principles: [], activities: [], dimension: null, practices: [] };
+            gameState.answered = false;
+
+            // Reset option buttons
+            document.querySelectorAll('.option-btn').forEach(btn => {
+                btn.classList.remove('selected', 'correct', 'incorrect', 'missed');
+                btn.disabled = false;
+            });
+
+            // Reset creative fields
+            document.getElementById('action-plan').value = '';
+            document.getElementById('success-metrics').value = '';
+            document.getElementById('plan-count').textContent = '0/300';
+            document.getElementById('metrics-count').textContent = '0/150';
+
+            // Hide result panel
+            document.getElementById('result-panel').classList.remove('show', 'excellent', 'good', 'partial', 'poor');
+            document.getElementById('submit-btn').style.display = 'inline-block';
+            document.getElementById('submit-btn').disabled = true;
+            document.getElementById('next-btn').style.display = 'none';
+
+            updateSelectionUI();
+        }
+
+        function submitAnswer() {
+            gameState.answered = true;
+            const caseData = cases[gameState.currentRound];
+            const answers = caseData.answers;
+
+            let roundPoints = 0;
+            let breakdown = [];
+
+            // Score principles
+            let principlesCorrect = 0;
+            document.querySelectorAll('#principles-grid .option-btn').forEach(btn => {
+                btn.disabled = true;
+                const value = btn.textContent;
+                const isCorrect = answers.principles.includes(value);
+                const isSelected = gameState.selections.principles.includes(value);
+
+                if (isCorrect && isSelected) {
+                    btn.classList.add('correct');
+                    principlesCorrect++;
+                } else if (isSelected && !isCorrect) {
+                    btn.classList.add('incorrect');
+                } else if (isCorrect && !isSelected) {
+                    btn.classList.add('missed');
+                }
+            });
+            const principlesPoints = principlesCorrect * POINTS.principle;
+            roundPoints += principlesPoints;
+            breakdown.push({ label: 'Принципы', value: principlesPoints, max: POINTS.principle * 2, correct: principlesCorrect, total: 2 });
+
+            // Score activities
+            let activitiesCorrect = 0;
+            document.querySelectorAll('#activities-grid .option-btn').forEach(btn => {
+                btn.disabled = true;
+                const value = btn.textContent;
+                const isCorrect = answers.activities.includes(value);
+                const isSelected = gameState.selections.activities.includes(value);
+
+                if (isCorrect && isSelected) {
+                    btn.classList.add('correct');
+                    activitiesCorrect++;
+                } else if (isSelected && !isCorrect) {
+                    btn.classList.add('incorrect');
+                } else if (isCorrect && !isSelected) {
+                    btn.classList.add('missed');
+                }
+            });
+            const activitiesPoints = activitiesCorrect * POINTS.activity;
+            roundPoints += activitiesPoints;
+            breakdown.push({ label: 'Value Chain', value: activitiesPoints, max: POINTS.activity * 2, correct: activitiesCorrect, total: 2 });
+
+            // Score dimension
+            let dimensionCorrect = 0;
+            document.querySelectorAll('#dimensions-grid .option-btn').forEach(btn => {
+                btn.disabled = true;
+                const value = btn.textContent;
+                const isCorrect = value === answers.dimension;
+                const isSelected = value === gameState.selections.dimension;
+
+                if (isCorrect && isSelected) {
+                    btn.classList.add('correct');
+                    dimensionCorrect = 1;
+                } else if (isSelected && !isCorrect) {
+                    btn.classList.add('incorrect');
+                } else if (isCorrect && !isSelected) {
+                    btn.classList.add('missed');
+                }
+            });
+            const dimensionPoints = dimensionCorrect * POINTS.dimension;
+            roundPoints += dimensionPoints;
+            breakdown.push({ label: 'Измерение', value: dimensionPoints, max: POINTS.dimension, correct: dimensionCorrect, total: 1 });
+
+            // Score practices
+            let practicesCorrect = 0;
+            document.querySelectorAll('#practices-grid .option-btn').forEach(btn => {
+                btn.disabled = true;
+                const value = btn.textContent;
+                const isCorrect = answers.practices.includes(value);
+                const isSelected = gameState.selections.practices.includes(value);
+
+                if (isCorrect && isSelected) {
+                    btn.classList.add('correct');
+                    practicesCorrect++;
+                } else if (isSelected && !isCorrect) {
+                    btn.classList.add('incorrect');
+                } else if (isCorrect && !isSelected) {
+                    btn.classList.add('missed');
+                }
+            });
+            const practicesPoints = practicesCorrect * POINTS.practice;
+            roundPoints += practicesPoints;
+            breakdown.push({ label: 'Практики', value: practicesPoints, max: POINTS.practice * 3, correct: practicesCorrect, total: 3 });
+
+            // Score creative bonus
+            const planText = document.getElementById('action-plan').value.trim();
+            const metricsText = document.getElementById('success-metrics').value.trim();
+
+            let creativePoints = 0;
+            if (planText.length >= 50) creativePoints += 30;
+            else if (planText.length >= 20) creativePoints += 15;
+
+            if (metricsText.length >= 30) creativePoints += 30;
+            else if (metricsText.length >= 10) creativePoints += 15;
+
+            // Bonus for using relevant terms
+            const relevantTerms = [...answers.principles, ...answers.activities, answers.dimension, ...answers.practices];
+            const combinedText = (planText + ' ' + metricsText).toLowerCase();
+            let termsFound = 0;
+            relevantTerms.forEach(term => {
+                if (combinedText.includes(term.toLowerCase().split(' ')[0])) termsFound++;
+            });
+            if (termsFound >= 3) creativePoints += 30;
+            else if (termsFound >= 1) creativePoints += 15;
+
+            creativePoints = Math.min(creativePoints, POINTS.creativeMax);
+            roundPoints += creativePoints;
+            breakdown.push({ label: 'Творческий бонус', value: creativePoints, max: POINTS.creativeMax, isCreative: true });
+
+            if (creativePoints > 0) gameState.stats.creativeBonus += creativePoints;
+
+            // Update stats
+            if (roundPoints >= 350) gameState.stats.excellent++;
+            else if (roundPoints >= 200) gameState.stats.good++;
+            else gameState.stats.poor++;
+
+            // Update total score
+            gameState.totalScore += roundPoints;
+            gameState.roundScores.push(roundPoints);
+
+            // Update UI
+            document.getElementById('total-score').textContent = gameState.totalScore;
+            updateProgress();
+
+            // Show result panel
+            showResultPanel(roundPoints, breakdown, caseData);
+        }
+
+        function showResultPanel(points, breakdown, caseData) {
+            const panel = document.getElementById('result-panel');
+            panel.classList.remove('excellent', 'good', 'partial', 'poor');
+
+            let resultClass, resultTitle;
+            if (points >= 350) {
+                resultClass = 'excellent';
+                resultTitle = 'Превосходно!';
+            } else if (points >= 250) {
+                resultClass = 'good';
+                resultTitle = 'Хорошая работа!';
+            } else if (points >= 150) {
+                resultClass = 'partial';
+                resultTitle = 'Неплохо';
+            } else {
+                resultClass = 'poor';
+                resultTitle = 'Нужно улучшить';
+            }
+
+            panel.classList.add('show', resultClass);
+            document.getElementById('result-title').textContent = resultTitle;
+            document.getElementById('result-points').textContent = `+${points}`;
+
+            // Breakdown
+            const breakdownHTML = breakdown.map(item => {
+                let colorClass = '';
+                if (item.isCreative) {
+                    colorClass = item.value >= 60 ? 'green' : item.value >= 30 ? 'orange' : 'red';
+                } else {
+                    const ratio = item.correct / item.total;
+                    colorClass = ratio >= 1 ? 'green' : ratio >= 0.5 ? 'orange' : 'red';
+                }
+                return `
+                    <div class="breakdown-item">
+                        <div class="breakdown-label">${item.label}</div>
+                        <div class="breakdown-value ${colorClass}">${item.value}/${item.max}</div>
+                    </div>
+                `;
+            }).join('');
+            document.getElementById('points-breakdown').innerHTML = breakdownHTML;
+
+            // Expert feedback
+            const feedbackHTML = `
+                <div class="feedback-title">Экспертный разбор</div>
+                <div class="feedback-section">
+                    <div class="feedback-label">Руководящие принципы</div>
+                    <p style="color: var(--text-secondary); font-size: 0.85rem;">${caseData.feedback.principles}</p>
+                </div>
+                <div class="feedback-section">
+                    <div class="feedback-label">Value Chain</div>
+                    <p style="color: var(--text-secondary); font-size: 0.85rem;">${caseData.feedback.activities}</p>
+                </div>
+                <div class="feedback-section">
+                    <div class="feedback-label">Измерение</div>
+                    <p style="color: var(--text-secondary); font-size: 0.85rem;">${caseData.feedback.dimension}</p>
+                </div>
+                <div class="feedback-section">
+                    <div class="feedback-label">Практики</div>
+                    <p style="color: var(--text-secondary); font-size: 0.85rem;">${caseData.feedback.practices}</p>
+                </div>
+            `;
+            document.getElementById('expert-feedback').innerHTML = feedbackHTML;
+
+            // Show next button
+            document.getElementById('submit-btn').style.display = 'none';
+            document.getElementById('next-btn').style.display = 'inline-block';
+            document.getElementById('next-btn').textContent =
+                gameState.currentRound < cases.length - 1 ? 'Следующий клиент →' : 'Завершить консультацию';
+        }
+
+        function nextRound() {
+            gameState.currentRound++;
+
+            if (gameState.currentRound >= cases.length) {
+                endGame();
+            } else {
+                loadRound();
+            }
+        }
+
+        function endGame() {
+            document.getElementById('game-screen').style.display = 'none';
+            document.getElementById('end-screen').style.display = 'block';
+
+            const maxPossible = cases.length * 450;
+            document.getElementById('final-score').textContent = gameState.totalScore;
+
+            const verdict = document.getElementById('verdict');
+            verdict.classList.remove('fail', 'pass', 'good', 'expert');
+
+            if (gameState.totalScore >= 2000) {
+                verdict.textContent = 'ЭКСПЕРТ ITIL4';
+                verdict.classList.add('expert');
+            } else if (gameState.totalScore >= 1500) {
+                verdict.textContent = 'ХОРОШИЙ РЕЗУЛЬТАТ';
+                verdict.classList.add('good');
+            } else if (gameState.totalScore >= 1000) {
+                verdict.textContent = 'ЗАЧЁТ';
+                verdict.classList.add('pass');
+            } else {
+                verdict.textContent = 'НЕ СДАНО';
+                verdict.classList.add('fail');
+            }
+
+            document.getElementById('stat-excellent').textContent = gameState.stats.excellent;
+            document.getElementById('stat-good').textContent = gameState.stats.good;
+            document.getElementById('stat-poor').textContent = gameState.stats.poor;
+            document.getElementById('stat-creative').textContent = gameState.stats.creativeBonus;
+        }
+
+        function restartGame() {
+            document.getElementById('end-screen').style.display = 'none';
+            startGame();
+        }
+
+        function updateProgress() {
+            const maxTarget = 2000;
+            const percent = Math.min((gameState.totalScore / maxTarget) * 100, 100);
+            document.getElementById('progress-fill').style.width = `${percent}%`;
+            document.getElementById('progress-percent').textContent = `${Math.round(percent)}%`;
+        }
+
+        function updateCharCount(inputId, countId, max) {
+            const input = document.getElementById(inputId);
+            const count = document.getElementById(countId);
+            count.textContent = `${input.value.length}/${max}`;
+        }
+    </script>
+</body>
+</html>
