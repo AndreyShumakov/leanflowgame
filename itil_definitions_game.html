@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ITIL4 Определения — Полезность, Гарантия, Ценность</title>
+    <link href="https://fonts.googleapis.com/css2?family=Russo+One&family=Exo+2:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0d1117;
+            --bg-card: #161b22;
+            --bg-panel: #21262d;
+            --bg-hover: #30363d;
+            --text-primary: #e6edf3;
+            --text-secondary: #8b949e;
+            --text-muted: #6e7681;
+            --accent: #58a6ff;
+            --success: #3fb950;
+            --warning: #d29922;
+            --danger: #f85149;
+            --purple: #a371f7;
+            --cyan: #39d2c0;
+            --orange: #f0883e;
+            --border: #30363d;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Exo 2', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            padding: 25px 0;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 25px;
+        }
+
+        h1 {
+            font-family: 'Russo One', sans-serif;
+            font-size: 2rem;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, var(--cyan), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        .score-board {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .score-item {
+            text-align: center;
+            padding: 12px 25px;
+            background: var(--bg-card);
+            border-radius: 10px;
+            border: 1px solid var(--border);
+        }
+
+        .score-value {
+            font-family: 'Russo One', sans-serif;
+            font-size: 1.8rem;
+            color: var(--accent);
+        }
+
+        .score-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        /* ---- Start Screen ---- */
+        .start-screen, .end-screen {
+            text-align: center;
+            padding: 50px 20px;
+        }
+
+        .start-screen h2, .end-screen h2 {
+            font-family: 'Russo One', sans-serif;
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+        }
+
+        .start-screen p {
+            color: var(--text-secondary);
+            margin-bottom: 25px;
+            max-width: 650px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .concepts-preview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 12px;
+            max-width: 750px;
+            margin: 0 auto 30px;
+        }
+
+        .concept-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: left;
+        }
+
+        .concept-card .icon {
+            font-size: 1.5rem;
+            margin-bottom: 6px;
+        }
+
+        .concept-card h4 {
+            font-family: 'Russo One', sans-serif;
+            font-size: 0.9rem;
+            margin-bottom: 4px;
+        }
+
+        .concept-card p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        .rules {
+            text-align: left;
+            background: var(--bg-card);
+            padding: 25px;
+            border-radius: 12px;
+            max-width: 600px;
+            margin: 0 auto 25px;
+            border: 1px solid var(--border);
+        }
+
+        .rules h3 {
+            margin-bottom: 15px;
+            color: var(--accent);
+            font-family: 'Russo One', sans-serif;
+        }
+
+        .rules ul {
+            color: var(--text-secondary);
+            margin-left: 20px;
+        }
+
+        .rules li { margin-bottom: 8px; }
+
+        /* ---- Game Screen ---- */
+        .game-area {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            align-items: start;
+        }
+
+        @media (max-width: 900px) {
+            .game-area { grid-template-columns: 1fr; }
+        }
+
+        .panel {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid var(--border);
+        }
+
+        .case-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .case-number {
+            font-size: 0.85rem;
+            color: var(--purple);
+            background: rgba(163, 113, 247, 0.15);
+            padding: 5px 12px;
+            border-radius: 20px;
+        }
+
+        .case-category {
+            font-size: 0.8rem;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            background: rgba(57, 210, 192, 0.15);
+            color: var(--cyan);
+        }
+
+        .case-title {
+            font-family: 'Russo One', sans-serif;
+            font-size: 1.2rem;
+            margin-bottom: 12px;
+            color: var(--text-primary);
+        }
+
+        .case-scenario {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.7;
+            margin-bottom: 15px;
+        }
+
+        .case-scenario .highlight {
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .case-question {
+            background: var(--bg-panel);
+            padding: 14px 16px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            color: var(--text-primary);
+            border-left: 3px solid var(--cyan);
+            font-weight: 600;
+        }
+
+        /* ---- Answer Options ---- */
+        .answers-panel h3 {
+            font-family: 'Russo One', sans-serif;
+            font-size: 1rem;
+            color: var(--accent);
+            margin-bottom: 15px;
+        }
+
+        .answer-option {
+            display: block;
+            width: 100%;
+            text-align: left;
+            padding: 14px 16px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: var(--bg-panel);
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: 'Exo 2', sans-serif;
+            margin-bottom: 10px;
+        }
+
+        .answer-option:hover:not(:disabled) {
+            background: var(--bg-hover);
+            border-color: var(--accent);
+            transform: translateX(4px);
+        }
+
+        .answer-option .option-term {
+            font-weight: 700;
+            display: block;
+            margin-bottom: 3px;
+        }
+
+        .answer-option .option-hint {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+        }
+
+        .answer-option.selected {
+            background: rgba(88, 166, 255, 0.15);
+            border-color: var(--accent);
+        }
+
+        .answer-option.correct {
+            background: rgba(63, 185, 80, 0.15);
+            border-color: var(--success);
+        }
+
+        .answer-option.correct .option-term { color: var(--success); }
+
+        .answer-option.wrong {
+            background: rgba(248, 81, 73, 0.15);
+            border-color: var(--danger);
+        }
+
+        .answer-option.wrong .option-term { color: var(--danger); }
+
+        .answer-option:disabled {
+            cursor: not-allowed;
+            opacity: 0.8;
+        }
+
+        /* ---- Result ---- */
+        .result-panel {
+            margin-top: 20px;
+            padding: 18px;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .result-panel.show { display: block; animation: slideIn 0.3s ease; }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result-panel.success {
+            background: rgba(63, 185, 80, 0.1);
+            border: 1px solid var(--success);
+        }
+
+        .result-panel.fail {
+            background: rgba(248, 81, 73, 0.1);
+            border: 1px solid var(--danger);
+        }
+
+        .result-title {
+            font-family: 'Russo One', sans-serif;
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+        }
+
+        .result-title.success { color: var(--success); }
+        .result-title.fail { color: var(--danger); }
+
+        .result-text {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        .definition-box {
+            margin-top: 12px;
+            padding: 12px;
+            background: var(--bg-panel);
+            border-radius: 8px;
+            border-left: 3px solid var(--cyan);
+        }
+
+        .definition-box .term {
+            font-family: 'Russo One', sans-serif;
+            font-size: 0.95rem;
+            color: var(--cyan);
+            margin-bottom: 4px;
+        }
+
+        .definition-box .def {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* ---- Buttons ---- */
+        .actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 12px 28px;
+            border-radius: 8px;
+            border: none;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: 'Exo 2', sans-serif;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--cyan), var(--accent));
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(57, 210, 192, 0.3);
+        }
+
+        .btn-primary:disabled {
+            background: var(--bg-panel);
+            color: var(--text-muted);
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: var(--bg-panel);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-hover);
+        }
+
+        /* ---- Progress Bar ---- */
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: var(--bg-panel);
+            border-radius: 3px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--cyan), var(--accent));
+            border-radius: 3px;
+            transition: width 0.4s ease;
+        }
+
+        /* ---- End Screen ---- */
+        .final-score {
+            font-family: 'Russo One', sans-serif;
+            font-size: 4rem;
+            color: var(--cyan);
+            margin: 25px 0;
+        }
+
+        .final-score span {
+            font-size: 2rem;
+            color: var(--text-muted);
+        }
+
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin: 25px 0;
+            flex-wrap: wrap;
+        }
+
+        .stat { text-align: center; }
+
+        .stat-value {
+            font-family: 'Russo One', sans-serif;
+            font-size: 2rem;
+        }
+
+        .stat-value.green { color: var(--success); }
+        .stat-value.red { color: var(--danger); }
+
+        .stat-label {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .grade {
+            font-family: 'Russo One', sans-serif;
+            font-size: 1.2rem;
+            padding: 10px 25px;
+            border-radius: 10px;
+            display: inline-block;
+            margin-bottom: 25px;
+        }
+
+        .grade.excellent { background: rgba(63, 185, 80, 0.15); color: var(--success); }
+        .grade.good { background: rgba(88, 166, 255, 0.15); color: var(--accent); }
+        .grade.average { background: rgba(210, 153, 34, 0.15); color: var(--warning); }
+        .grade.poor { background: rgba(248, 81, 73, 0.15); color: var(--danger); }
+
+        /* ---- Concept breakdown ---- */
+        .concept-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 10px;
+            max-width: 800px;
+            margin: 20px auto;
+        }
+
+        .concept-stat {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .concept-stat .name {
+            font-family: 'Russo One', sans-serif;
+            font-size: 0.85rem;
+            margin-bottom: 4px;
+        }
+
+        .concept-stat .ratio {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        footer {
+            text-align: center;
+            padding: 25px;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            border-top: 1px solid var(--border);
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>ITIL4: Ценность услуг</h1>
+            <p class="subtitle">Полезность, гарантия, ценность, стоимость — бизнес-кейсы</p>
+            <div class="score-board">
+                <div class="score-item">
+                    <div class="score-value" id="current-score">0</div>
+                    <div class="score-label">Очки</div>
+                </div>
+                <div class="score-item">
+                    <div class="score-value" id="current-case">0</div>
+                    <div class="score-label">Кейс</div>
+                </div>
+                <div class="score-item">
+                    <div class="score-value" id="total-cases">15</div>
+                    <div class="score-label">Всего</div>
+                </div>
+            </div>
+        </header>
+
+        <main id="game-container">
+            <!-- Start Screen -->
+            <div id="start-screen" class="start-screen">
+                <h2>Ключевые концепции ITIL4</h2>
+                <p>Научитесь различать базовые термины ITIL через реальные бизнес-ситуации. Каждый кейс описывает конкретную ситуацию — определите, о каком понятии идёт речь.</p>
+
+                <div class="concepts-preview">
+                    <div class="concept-card">
+                        <div class="icon">&#9881;</div>
+                        <h4>Полезность (Utility)</h4>
+                        <p>Функциональность услуги. «Подходит для цели» — что услуга делает</p>
+                    </div>
+                    <div class="concept-card">
+                        <div class="icon">&#128737;</div>
+                        <h4>Гарантия (Warranty)</h4>
+                        <p>Уверенность в услуге. «Подходит для использования» — как она работает</p>
+                    </div>
+                    <div class="concept-card">
+                        <div class="icon">&#11088;</div>
+                        <h4>Ценность (Value)</h4>
+                        <p>Воспринимаемые выгоды, полезность и важность чего-либо</p>
+                    </div>
+                    <div class="concept-card">
+                        <div class="icon">&#128176;</div>
+                        <h4>Стоимость (Cost)</h4>
+                        <p>Сумма затрат на создание или предоставление услуги</p>
+                    </div>
+                    <div class="concept-card">
+                        <div class="icon">&#127919;</div>
+                        <h4>Результат (Outcome)</h4>
+                        <p>Результат для заинтересованной стороны, обеспеченный выходами</p>
+                    </div>
+                    <div class="concept-card">
+                        <div class="icon">&#128230;</div>
+                        <h4>Выход (Output)</h4>
+                        <p>Материальный или нематериальный продукт деятельности</p>
+                    </div>
+                    <div class="concept-card">
+                        <div class="icon">&#9888;</div>
+                        <h4>Риск (Risk)</h4>
+                        <p>Возможное событие, способное повлиять на достижение целей</p>
+                    </div>
+                    <div class="concept-card">
+                        <div class="icon">&#128101;</div>
+                        <h4>Услуга (Service)</h4>
+                        <p>Средство совместного создания ценности без управления затратами и рисками</p>
+                    </div>
+                </div>
+
+                <div class="rules">
+                    <h3>Как играть:</h3>
+                    <ul>
+                        <li>Прочитайте бизнес-кейс и вопрос</li>
+                        <li>Выберите один правильный ITIL-термин из предложенных</li>
+                        <li>Получите обратную связь и определение термина</li>
+                        <li>За правильный ответ — 1 очко</li>
+                        <li>Пройдите все 15 кейсов</li>
+                    </ul>
+                </div>
+
+                <button class="btn btn-primary" onclick="startGame()">Начать игру</button>
+            </div>
+
+            <!-- Game Screen -->
+            <div id="game-screen" style="display: none;">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+                </div>
+
+                <div class="game-area">
+                    <div class="panel">
+                        <div class="case-header">
+                            <span class="case-number" id="case-number">Кейс 1/15</span>
+                            <span class="case-category" id="case-category">Ценность</span>
+                        </div>
+                        <h2 class="case-title" id="case-title">Загрузка...</h2>
+                        <p class="case-scenario" id="case-scenario"></p>
+                        <div class="case-question" id="case-question"></div>
+
+                        <div class="result-panel" id="result-panel">
+                            <h3 class="result-title" id="result-title"></h3>
+                            <p class="result-text" id="result-text"></p>
+                            <div class="definition-box">
+                                <div class="term" id="def-term"></div>
+                                <div class="def" id="def-text"></div>
+                            </div>
+                        </div>
+
+                        <div class="actions">
+                            <button class="btn btn-primary" id="next-btn" onclick="nextCase()" style="display: none;">
+                                Следующий кейс
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="panel answers-panel">
+                        <h3>Выберите термин ITIL4:</h3>
+                        <div id="answers-container"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- End Screen -->
+            <div id="end-screen" class="end-screen" style="display: none;">
+                <h2>Игра завершена!</h2>
+                <div class="final-score">
+                    <span id="final-score">0</span> <span>/ 15</span>
+                </div>
+                <div id="grade-container"></div>
+                <div class="stats">
+                    <div class="stat">
+                        <div class="stat-value green" id="correct-count">0</div>
+                        <div class="stat-label">Правильно</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value red" id="wrong-count">0</div>
+                        <div class="stat-label">Неправильно</div>
+                    </div>
+                </div>
+                <div id="concept-stats-container" class="concept-stats"></div>
+                <br>
+                <button class="btn btn-primary" onclick="restartGame()">Играть снова</button>
+            </div>
+        </main>
+
+        <footer>
+            ITIL4: Ценность услуг | Полезность, Гарантия, Ценность, Стоимость
+        </footer>
+    </div>
+
+    <script>
+        // Определения терминов ITIL4
+        const definitions = {
+            "Полезность (Utility)": {
+                short: "Полезность (Utility)",
+                definition: "Функциональность, предлагаемая продуктом или услугой для удовлетворения определённой потребности. «Подходит для цели» (fit for purpose). Полезность определяет, ЧТО услуга делает — её функции и возможности.",
+                hint: "Что услуга делает"
+            },
+            "Гарантия (Warranty)": {
+                short: "Гарантия (Warranty)",
+                definition: "Уверенность в том, что продукт или услуга будут соответствовать согласованным требованиям. «Подходит для использования» (fit for use). Гарантия покрывает доступность, мощность, непрерывность и безопасность — КАК услуга работает.",
+                hint: "Как услуга работает"
+            },
+            "Ценность (Value)": {
+                short: "Ценность (Value)",
+                definition: "Воспринимаемые выгоды, полезность и важность чего-либо. Ценность определяется заинтересованными сторонами — это не объективная метрика, а субъективное восприятие того, что получает потребитель от услуги.",
+                hint: "Воспринимаемые выгоды"
+            },
+            "Стоимость (Cost)": {
+                short: "Стоимость (Cost)",
+                definition: "Сумма денег, потраченных на определённую деятельность или ресурс. В ITIL различают два типа: стоимость, которую услуга снимает с потребителя, и стоимость, которую она налагает на потребителя (цена услуги, обучение и пр.).",
+                hint: "Затраты и расходы"
+            },
+            "Результат (Outcome)": {
+                short: "Результат (Outcome)",
+                definition: "Результат для заинтересованной стороны, обеспеченный одним или несколькими выходами (outputs). Результат — это бизнес-эффект: не сам отчёт, а решения, принятые на его основе; не код, а автоматизация процесса.",
+                hint: "Бизнес-эффект"
+            },
+            "Выход (Output)": {
+                short: "Выход (Output)",
+                definition: "Материальный или нематериальный продукт деятельности. Выход — это конкретный артефакт: отчёт, обновлённый сервер, написанный код, настроенная система. Выходы обеспечивают достижение результатов.",
+                hint: "Конкретный продукт деятельности"
+            },
+            "Риск (Risk)": {
+                short: "Риск (Risk)",
+                definition: "Возможное событие, которое может причинить ущерб или убытки, либо затруднить достижение целей. Риск также может представлять возможность. В ITIL услуги могут как снимать риски потребителя, так и создавать новые.",
+                hint: "Возможное негативное событие"
+            },
+            "Услуга (Service)": {
+                short: "Услуга (Service)",
+                definition: "Средство обеспечения совместного создания ценности путём содействия получению результатов, которых хотят достичь заказчики, без необходимости управления специфическими затратами и рисками.",
+                hint: "Совместное создание ценности"
+            }
+        };
+
+        // 15 кейсов
+        const cases = [
+            {
+                title: "Новый модуль CRM-системы",
+                category: "Функциональность",
+                scenario: "Компания «АвтоТрейд» внедряет CRM-систему для отдела продаж. Менеджер оценивает, позволяет ли система <span class='highlight'>отслеживать воронку продаж, фиксировать контакты клиентов и формировать коммерческие предложения</span>. Его интересует набор функций — то, что система способна делать для бизнеса.",
+                question: "Какой ITIL-термин описывает оценку функциональности системы — того, ЧТО она делает?",
+                answer: "Полезность (Utility)",
+                options: ["Полезность (Utility)", "Гарантия (Warranty)", "Ценность (Value)", "Выход (Output)"],
+                explanation: "Менеджер оценивает функциональные возможности системы — что она может делать. Это классический пример полезности: fit for purpose."
+            },
+            {
+                title: "SLA облачного провайдера",
+                category: "Надёжность",
+                scenario: "Банк «Финсервис» выбирает облачного провайдера для размещения платёжной системы. Ключевое требование — <span class='highlight'>доступность 99.99%, шифрование данных, автоматическое резервное копирование и возможность восстановления за 15 минут</span>. Банк должен быть уверен, что услуга будет работать надёжно.",
+                question: "Какой ITIL-термин описывает требования к надёжности, доступности и безопасности услуги?",
+                answer: "Гарантия (Warranty)",
+                options: ["Гарантия (Warranty)", "Полезность (Utility)", "Стоимость (Cost)", "Риск (Risk)"],
+                explanation: "Доступность, безопасность, мощность и непрерывность — четыре аспекта гарантии. Банк оценивает, КАК услуга будет работать: fit for use."
+            },
+            {
+                title: "Оценка ERP-системы",
+                category: "Восприятие",
+                scenario: "CFO компании «ТехноПром» анализирует результаты первого года работы ERP-системы. Финансовый отдел <span class='highlight'>тратит на 60% меньше времени на отчёты, ошибок в расчётах стало на 90% меньше, а руководство получает данные в реальном времени</span>. CFO считает, что выгоды значительно превышают затраты на внедрение.",
+                question: "Какой ITIL-термин описывает воспринимаемые выгоды от использования услуги?",
+                answer: "Ценность (Value)",
+                options: ["Ценность (Value)", "Результат (Outcome)", "Полезность (Utility)", "Стоимость (Cost)"],
+                explanation: "Ценность — субъективное восприятие выгод. CFO оценивает общую картину: выгоды против затрат. Это не отдельный результат, а совокупное восприятие пользы."
+            },
+            {
+                title: "Бюджет на IT-инфраструктуру",
+                category: "Финансы",
+                scenario: "IT-директор составляет бюджет на следующий год. В калькуляцию входят: <span class='highlight'>лицензии на ПО — 2 млн руб., зарплаты команды — 8 млн руб., аренда серверов — 3 млн руб., обучение персонала — 500 тыс. руб.</span>. Часть этих расходов будет включена в цену услуг для бизнес-подразделений.",
+                question: "Какой ITIL-термин описывает денежные затраты на предоставление услуги?",
+                answer: "Стоимость (Cost)",
+                options: ["Стоимость (Cost)", "Ценность (Value)", "Риск (Risk)", "Гарантия (Warranty)"],
+                explanation: "Стоимость — это сумма затрат. В ITIL различают стоимость, которую услуга снимает (автоматизация экономит деньги), и стоимость, которую она налагает (цена услуги, обучение)."
+            },
+            {
+                title: "Управляемая почта для компании",
+                category: "Сервисная модель",
+                scenario: "Малый бизнес «ДизайнСтудия» переходит с собственного почтового сервера на облачный сервис. Теперь <span class='highlight'>компании не нужно содержать администратора почтового сервера, покупать оборудование и беспокоиться о безопасности и обновлениях</span>. Провайдер берёт все технические заботы на себя.",
+                question: "Какой ITIL-термин описывает способ совместного создания ценности без управления затратами и рисками потребителем?",
+                answer: "Услуга (Service)",
+                options: ["Услуга (Service)", "Ценность (Value)", "Гарантия (Warranty)", "Полезность (Utility)"],
+                explanation: "Услуга — средство совместного создания ценности, при котором потребитель получает результаты без необходимости управлять специфическими затратами и рисками."
+            },
+            {
+                title: "Автоматизация склада",
+                category: "Бизнес-эффект",
+                scenario: "Логистическая компания «СкладЛогистик» внедрила WMS-систему. Через 6 месяцев <span class='highlight'>скорость комплектации заказов выросла на 40%, количество ошибок при отгрузке снизилось с 5% до 0.3%, и клиенты стали получать заказы на день раньше</span>. Бизнес-цели по улучшению клиентского опыта были достигнуты.",
+                question: "Какой ITIL-термин описывает достигнутый бизнес-эффект для заинтересованных сторон?",
+                answer: "Результат (Outcome)",
+                options: ["Результат (Outcome)", "Выход (Output)", "Ценность (Value)", "Полезность (Utility)"],
+                explanation: "Результат (outcome) — это бизнес-эффект для стейкхолдеров. Не сама система (output), а то, что она обеспечила: быстрые отгрузки, довольные клиенты."
+            },
+            {
+                title: "Работа команды разработки",
+                category: "Артефакты",
+                scenario: "Команда разработки компании «КодБаза» за спринт создала: <span class='highlight'>10 новых API-эндпоинтов, обновлённую документацию на 45 страниц, 3 исправления безопасности и миграцию базы данных</span>. Все эти артефакты были переданы команде эксплуатации для развёртывания.",
+                question: "Какой ITIL-термин описывает конкретные артефакты — продукты деятельности?",
+                answer: "Выход (Output)",
+                options: ["Выход (Output)", "Результат (Outcome)", "Услуга (Service)", "Полезность (Utility)"],
+                explanation: "Выход (output) — это конкретные артефакты: код, документация, патчи, скрипты. Выходы обеспечивают достижение результатов (outcomes), но сами ими не являются."
+            },
+            {
+                title: "Миграция в новый дата-центр",
+                category: "Угрозы",
+                scenario: "Компания «МегаРитейл» планирует перенести IT-инфраструктуру в новый дата-центр. Менеджер проекта составляет реестр: <span class='highlight'>возможная потеря данных при переносе, простой систем от 4 до 8 часов, несовместимость с legacy-приложениями, увольнение ключевых сотрудников в процессе</span>. Каждому пункту присваивается вероятность и степень воздействия.",
+                question: "Какой ITIL-термин описывает возможные события, способные повлиять на достижение целей?",
+                answer: "Риск (Risk)",
+                options: ["Риск (Risk)", "Стоимость (Cost)", "Гарантия (Warranty)", "Результат (Outcome)"],
+                explanation: "Риск — возможное событие, способное причинить ущерб. Менеджер оценивает вероятность и воздействие потенциальных проблем — это классическое управление рисками."
+            },
+            {
+                title: "Мониторинг vs. Функции",
+                category: "Функциональность",
+                scenario: "Стартап «ФинТех» сравнивает две платформы аналитики. Платформа А <span class='highlight'>умеет строить прогнозные модели, проводить когортный анализ и визуализировать данные в реальном времени</span>. Платформа Б предлагает только базовые отчёты. Команда выбирает по тому, какая платформа лучше решает бизнес-задачи.",
+                question: "Команда оценивает платформы по функциональным возможностям. Какой это ITIL-термин?",
+                answer: "Полезность (Utility)",
+                options: ["Полезность (Utility)", "Ценность (Value)", "Выход (Output)", "Услуга (Service)"],
+                explanation: "Полезность — это ЧТО услуга делает: её функции и возможности. Команда сравнивает функциональность (прогнозы, визуализация) — это fit for purpose."
+            },
+            {
+                title: "Аптечная сеть и 1С",
+                category: "Надёжность",
+                scenario: "Аптечная сеть «ЗдоровьеПлюс» с 200 точками зависит от 1С для учёта лекарств. После обновления системы <span class='highlight'>скорость обработки операций упала в 3 раза, а в пиковые часы система зависает на 10-15 минут</span>. Функции системы не изменились — она по-прежнему делает то же самое, но качество работы резко ухудшилось.",
+                question: "Функционал не изменился, но качество предоставления услуги упало. Какой аспект пострадал?",
+                answer: "Гарантия (Warranty)",
+                options: ["Гарантия (Warranty)", "Полезность (Utility)", "Ценность (Value)", "Риск (Risk)"],
+                explanation: "Гарантия — это КАК услуга работает: производительность, доступность. Функциональность (utility) осталась прежней, но качество предоставления (warranty) упало."
+            },
+            {
+                title: "Страховая компания и аутсорсинг",
+                category: "Сервисная модель",
+                scenario: "Страховая «НадёжнаяЗащита» передаёт IT-поддержку 1-й и 2-й линий внешнему провайдеру. Теперь <span class='highlight'>компании не нужно нанимать и обучать специалистов, покупать системы мониторинга и управлять инцидентами самостоятельно</span>. Провайдер обеспечивает поддержку 24/7 по фиксированной цене.",
+                question: "Компания получает поддержку, не управляя связанными затратами и рисками. Какой это ITIL-термин?",
+                answer: "Услуга (Service)",
+                options: ["Услуга (Service)", "Стоимость (Cost)", "Гарантия (Warranty)", "Результат (Outcome)"],
+                explanation: "Это определение услуги в ITIL: совместное создание ценности, при котором потребитель не управляет специфическими затратами и рисками."
+            },
+            {
+                title: "Отчёт vs. решение",
+                category: "Артефакты / Эффект",
+                scenario: "BI-система ежедневно генерирует <span class='highlight'>отчёт о продажах в формате PDF на 12 страниц с графиками и таблицами</span>. Этот файл отправляется руководителю отдела продаж. Это конкретный продукт, который создаёт система.",
+                question: "Сгенерированный PDF-отчёт — это конкретный продукт деятельности. Какой ITIL-термин?",
+                answer: "Выход (Output)",
+                options: ["Выход (Output)", "Результат (Outcome)", "Полезность (Utility)", "Ценность (Value)"],
+                explanation: "PDF-отчёт — это выход (output), конкретный артефакт. А решения, принятые на основе отчёта (оптимизация ассортимента, новые скидки) — это уже результат (outcome)."
+            },
+            {
+                title: "Скрытые издержки облака",
+                category: "Финансы",
+                scenario: "Компания «ДатаПро» мигрировала в облако. Через полгода выяснилось, что помимо подписки есть <span class='highlight'>затраты на трафик — 200 тыс. руб./мес., переобучение команды — 1.5 млн руб., интеграцию с legacy-системами — 3 млн руб.</span>. IT-директор составляет полную картину затрат, которые услуга наложила на компанию.",
+                question: "IT-директор анализирует совокупные затраты, наложенные услугой. Какой ITIL-термин?",
+                answer: "Стоимость (Cost)",
+                options: ["Стоимость (Cost)", "Риск (Risk)", "Ценность (Value)", "Гарантия (Warranty)"],
+                explanation: "В ITIL стоимость бывает двух видов: стоимость, которую услуга снимает (экономия), и стоимость, которую она налагает (цена, обучение). Здесь речь о наложенных затратах."
+            },
+            {
+                title: "Цифровая трансформация ресторана",
+                category: "Бизнес-эффект",
+                scenario: "Сеть ресторанов «ВкусноТут» внедрила систему онлайн-заказов. Система сама по себе — это ПО с определёнными функциями. Но бизнес оценивает другое: <span class='highlight'>средний чек вырос на 20%, время ожидания сократилось с 40 до 15 минут, а лояльность клиентов (NPS) поднялась с 35 до 72</span>.",
+                question: "Рост среднего чека и лояльности — это бизнес-эффект. Какой ITIL-термин?",
+                answer: "Результат (Outcome)",
+                options: ["Результат (Outcome)", "Выход (Output)", "Ценность (Value)", "Полезность (Utility)"],
+                explanation: "Результат (outcome) — это то, чего хотела достичь заинтересованная сторона: рост чека, лояльности, скорости. Сама система и её функции — это utility и output."
+            },
+            {
+                title: "Вендор-лок и новые угрозы",
+                category: "Угрозы",
+                scenario: "Университет «ОбразованиеПро» внедрил LMS-платформу от одного вендора. Через 2 года вендор <span class='highlight'>поднял цену на 300%, а весь контент хранится в проприетарном формате — перенести его невозможно</span>. Университет оказался в зависимости: услуга не только сняла риски (не нужен свой хостинг), но и создала новые.",
+                question: "Зависимость от вендора — это угроза, которую создала услуга. Какой ITIL-термин?",
+                answer: "Риск (Risk)",
+                options: ["Риск (Risk)", "Стоимость (Cost)", "Гарантия (Warranty)", "Услуга (Service)"],
+                explanation: "В ITIL услуги могут как снимать риски (не нужно управлять инфраструктурой), так и создавать новые (вендор-лок, зависимость). Это двойственная природа риска."
+            }
+        ];
+
+        // Состояние игры
+        let currentCase = 0;
+        let score = 0;
+        let answered = false;
+        let correctCount = 0;
+        let wrongCount = 0;
+        let shuffledCases = [];
+        let conceptStats = {};
+
+        function initConceptStats() {
+            conceptStats = {};
+            Object.keys(definitions).forEach(key => {
+                conceptStats[key] = { total: 0, correct: 0 };
+            });
+        }
+
+        function startGame() {
+            shuffledCases = [...cases].sort(() => Math.random() - 0.5);
+            currentCase = 0;
+            score = 0;
+            correctCount = 0;
+            wrongCount = 0;
+            initConceptStats();
+
+            document.getElementById('start-screen').style.display = 'none';
+            document.getElementById('game-screen').style.display = 'block';
+            document.getElementById('total-cases').textContent = shuffledCases.length;
+            document.getElementById('current-score').textContent = '0';
+
+            loadCase();
+        }
+
+        function loadCase() {
+            const c = shuffledCases[currentCase];
+
+            document.getElementById('case-number').textContent = `Кейс ${currentCase + 1}/${shuffledCases.length}`;
+            document.getElementById('current-case').textContent = currentCase + 1;
+            document.getElementById('case-category').textContent = c.category;
+            document.getElementById('case-title').textContent = c.title;
+            document.getElementById('case-scenario').innerHTML = c.scenario;
+            document.getElementById('case-question').textContent = c.question;
+
+            // Progress bar
+            document.getElementById('progress-fill').style.width =
+                ((currentCase) / shuffledCases.length * 100) + '%';
+
+            // Reset result
+            const resultPanel = document.getElementById('result-panel');
+            resultPanel.classList.remove('show', 'success', 'fail');
+            document.getElementById('next-btn').style.display = 'none';
+
+            answered = false;
+
+            // Render answer options (shuffled)
+            const shuffledOptions = [...c.options].sort(() => Math.random() - 0.5);
+            const container = document.getElementById('answers-container');
+            container.innerHTML = '';
+
+            shuffledOptions.forEach(option => {
+                const btn = document.createElement('button');
+                btn.className = 'answer-option';
+                btn.innerHTML = `
+                    <span class="option-term">${option}</span>
+                    <span class="option-hint">${definitions[option].hint}</span>
+                `;
+                btn.onclick = () => selectAnswer(btn, option);
+                container.appendChild(btn);
+            });
+        }
+
+        function selectAnswer(btn, selected) {
+            if (answered) return;
+            answered = true;
+
+            const c = shuffledCases[currentCase];
+            const isCorrect = selected === c.answer;
+
+            // Track concept stats
+            conceptStats[c.answer].total++;
+            if (isCorrect) conceptStats[c.answer].correct++;
+
+            // Disable all buttons
+            document.querySelectorAll('.answer-option').forEach(b => {
+                b.disabled = true;
+                const term = b.querySelector('.option-term').textContent;
+                if (term === c.answer) {
+                    b.classList.add('correct');
+                } else if (term === selected && !isCorrect) {
+                    b.classList.add('wrong');
+                }
+            });
+
+            // Update score
+            if (isCorrect) {
+                score++;
+                correctCount++;
+            } else {
+                wrongCount++;
+            }
+
+            document.getElementById('current-score').textContent = score;
+
+            // Show result
+            const resultPanel = document.getElementById('result-panel');
+            resultPanel.className = `result-panel show ${isCorrect ? 'success' : 'fail'}`;
+
+            const resultTitle = document.getElementById('result-title');
+            resultTitle.textContent = isCorrect ? 'Правильно!' : 'Неправильно';
+            resultTitle.className = `result-title ${isCorrect ? 'success' : 'fail'}`;
+
+            document.getElementById('result-text').textContent = c.explanation;
+
+            // Show definition
+            const def = definitions[c.answer];
+            document.getElementById('def-term').textContent = def.short;
+            document.getElementById('def-text').textContent = def.definition;
+
+            // Show next button
+            const nextBtn = document.getElementById('next-btn');
+            nextBtn.style.display = 'inline-block';
+            nextBtn.textContent = currentCase < shuffledCases.length - 1
+                ? 'Следующий кейс \u2192' : 'Завершить игру';
+        }
+
+        function nextCase() {
+            currentCase++;
+            if (currentCase >= shuffledCases.length) {
+                endGame();
+            } else {
+                loadCase();
+            }
+        }
+
+        function endGame() {
+            document.getElementById('game-screen').style.display = 'none';
+            document.getElementById('end-screen').style.display = 'block';
+
+            document.getElementById('final-score').textContent = score;
+            document.getElementById('correct-count').textContent = correctCount;
+            document.getElementById('wrong-count').textContent = wrongCount;
+
+            // Progress bar full
+            document.getElementById('progress-fill').style.width = '100%';
+
+            // Grade
+            const pct = score / shuffledCases.length * 100;
+            const gradeEl = document.getElementById('grade-container');
+            let gradeClass, gradeText;
+            if (pct >= 90) { gradeClass = 'excellent'; gradeText = 'Превосходно! Вы отлично знаете базовые термины ITIL4'; }
+            else if (pct >= 70) { gradeClass = 'good'; gradeText = 'Хорошо! Основы усвоены, есть куда расти'; }
+            else if (pct >= 50) { gradeClass = 'average'; gradeText = 'Средне. Стоит повторить определения'; }
+            else { gradeClass = 'poor'; gradeText = 'Нужна доработка. Перечитайте определения и попробуйте снова'; }
+            gradeEl.innerHTML = `<div class="grade ${gradeClass}">${gradeText}</div>`;
+
+            // Concept breakdown
+            const statsContainer = document.getElementById('concept-stats-container');
+            statsContainer.innerHTML = '';
+            Object.keys(conceptStats).forEach(key => {
+                const s = conceptStats[key];
+                if (s.total > 0) {
+                    const div = document.createElement('div');
+                    div.className = 'concept-stat';
+                    const color = s.correct === s.total ? 'var(--success)' :
+                                  s.correct > 0 ? 'var(--warning)' : 'var(--danger)';
+                    div.innerHTML = `
+                        <div class="name" style="color: ${color}">${definitions[key].short}</div>
+                        <div class="ratio">${s.correct} / ${s.total}</div>
+                    `;
+                    statsContainer.appendChild(div);
+                }
+            });
+        }
+
+        function restartGame() {
+            document.getElementById('end-screen').style.display = 'none';
+            startGame();
+        }
+    </script>
+</body>
+</html>
