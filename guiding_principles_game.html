@@ -1,0 +1,1712 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ITIL4: Руководящие принципы — Бизнес-кейсы</title>
+    <link href="https://fonts.googleapis.com/css2?family=Russo+One&family=Exo+2:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0a0e14;
+            --bg-card: #131920;
+            --bg-panel: #1a2028;
+            --bg-hover: #252d38;
+            --text-primary: #e6edf3;
+            --text-secondary: #8b949e;
+            --text-muted: #6e7681;
+            --accent: #00d4ff;
+            --accent-dim: rgba(0, 212, 255, 0.15);
+            --success: #00ff88;
+            --warning: #ffaa00;
+            --danger: #ff4466;
+            --purple: #a855f7;
+            --gold: #ffd700;
+            --border: #2d3640;
+            --glow: 0 0 20px rgba(0, 212, 255, 0.3);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Exo 2', sans-serif;
+            background: var(--bg-dark);
+            background-image:
+                radial-gradient(ellipse at 20% 80%, rgba(0, 212, 255, 0.05) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 20%, rgba(168, 85, 247, 0.05) 0%, transparent 50%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 15px;
+        }
+
+        header {
+            text-align: center;
+            padding: 20px 0;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-family: 'Russo One', sans-serif;
+            font-size: 2rem;
+            margin-bottom: 5px;
+            background: linear-gradient(135deg, var(--accent), var(--purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        /* Dashboard */
+        .dashboard {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 15px 0;
+            flex-wrap: wrap;
+        }
+
+        .dash-item {
+            text-align: center;
+            padding: 10px 20px;
+            background: var(--bg-card);
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            min-width: 100px;
+        }
+
+        .dash-value {
+            font-family: 'Russo One', sans-serif;
+            font-size: 1.6rem;
+            color: var(--accent);
+        }
+
+        .dash-value.gold { color: var(--gold); }
+        .dash-value.success { color: var(--success); }
+
+        .dash-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Progress */
+        .progress-container {
+            margin: 15px 0;
+            padding: 15px;
+            background: var(--bg-card);
+            border-radius: 10px;
+            border: 1px solid var(--border);
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.85rem;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: var(--bg-hover);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), var(--purple));
+            transition: width 0.5s ease;
+            border-radius: 4px;
+        }
+
+        /* Game Layout */
+        .game-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 1100px) {
+            .game-layout { grid-template-columns: 1fr; }
+        }
+
+        .panel {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid var(--border);
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .panel-title {
+            font-family: 'Russo One', sans-serif;
+            font-size: 1.1rem;
+            color: var(--accent);
+        }
+
+        .phase-badge {
+            font-size: 0.75rem;
+            padding: 4px 10px;
+            border-radius: 15px;
+            background: var(--accent-dim);
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        /* Case */
+        .case-meta {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+
+        .case-tag {
+            font-size: 0.75rem;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-weight: 600;
+        }
+
+        .tag-round { background: rgba(168, 85, 247, 0.2); color: var(--purple); }
+        .tag-industry { background: rgba(0, 212, 255, 0.15); color: var(--accent); }
+        .tag-difficulty { background: rgba(255, 170, 0, 0.2); color: var(--warning); }
+
+        .case-title {
+            font-family: 'Russo One', sans-serif;
+            font-size: 1.3rem;
+            margin-bottom: 12px;
+            line-height: 1.3;
+        }
+
+        .case-description {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.7;
+            margin-bottom: 15px;
+        }
+
+        .case-context {
+            background: var(--bg-panel);
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .context-title {
+            font-size: 0.8rem;
+            color: var(--warning);
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .context-list {
+            list-style: none;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        .context-list li {
+            padding: 3px 0;
+            padding-left: 15px;
+            position: relative;
+        }
+
+        .context-list li::before {
+            content: "▸";
+            position: absolute;
+            left: 0;
+            color: var(--accent);
+        }
+
+        .case-challenge {
+            background: linear-gradient(135deg, rgba(255, 68, 102, 0.1), rgba(168, 85, 247, 0.1));
+            padding: 12px 15px;
+            border-radius: 8px;
+            border-left: 3px solid var(--danger);
+            margin-bottom: 15px;
+        }
+
+        .challenge-title {
+            font-size: 0.8rem;
+            color: var(--danger);
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .challenge-text {
+            color: var(--text-primary);
+            font-size: 0.9rem;
+        }
+
+        /* Dilemma */
+        .dilemma-section {
+            margin-top: 15px;
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.08), rgba(0, 212, 255, 0.08));
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid rgba(168, 85, 247, 0.2);
+        }
+
+        .dilemma-title {
+            font-family: 'Russo One', sans-serif;
+            font-size: 0.95rem;
+            color: var(--purple);
+            margin-bottom: 10px;
+        }
+
+        .dilemma-options {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .dilemma-btn {
+            padding: 12px 16px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--bg-panel);
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: 'Exo 2', sans-serif;
+            text-align: left;
+            line-height: 1.4;
+        }
+
+        .dilemma-btn:hover:not(:disabled) {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+            border-color: var(--purple);
+        }
+
+        .dilemma-btn.selected {
+            background: rgba(168, 85, 247, 0.15);
+            border-color: var(--purple);
+            color: var(--purple);
+        }
+
+        .dilemma-btn.correct {
+            background: rgba(0, 255, 136, 0.15);
+            border-color: var(--success);
+            color: var(--success);
+        }
+
+        .dilemma-btn.incorrect {
+            background: rgba(255, 68, 102, 0.15);
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+
+        .dilemma-btn:disabled {
+            cursor: default;
+        }
+
+        /* Principle Cards */
+        .principles-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .principle-card {
+            padding: 14px 16px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: var(--bg-panel);
+            cursor: pointer;
+            transition: all 0.25s ease;
+            position: relative;
+        }
+
+        .principle-card:hover:not(.disabled) {
+            border-color: var(--accent);
+            background: var(--bg-hover);
+        }
+
+        .principle-card.selected {
+            border-color: var(--accent);
+            background: var(--accent-dim);
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.15);
+        }
+
+        .principle-card.correct {
+            border-color: var(--success);
+            background: rgba(0, 255, 136, 0.1);
+        }
+
+        .principle-card.incorrect {
+            border-color: var(--danger);
+            background: rgba(255, 68, 102, 0.1);
+        }
+
+        .principle-card.missed {
+            border-color: var(--warning);
+            background: rgba(255, 170, 0, 0.1);
+        }
+
+        .principle-card.disabled {
+            cursor: default;
+            opacity: 0.85;
+        }
+
+        .principle-num {
+            font-family: 'Russo One', sans-serif;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+
+        .principle-name {
+            font-weight: 600;
+            font-size: 0.95rem;
+            margin-bottom: 4px;
+            color: var(--text-primary);
+        }
+
+        .principle-card.selected .principle-name { color: var(--accent); }
+        .principle-card.correct .principle-name { color: var(--success); }
+        .principle-card.incorrect .principle-name { color: var(--danger); }
+        .principle-card.missed .principle-name { color: var(--warning); }
+
+        .principle-hint {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            line-height: 1.3;
+        }
+
+        .principle-check {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            border: 2px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            transition: all 0.2s;
+        }
+
+        .principle-card.selected .principle-check {
+            border-color: var(--accent);
+            background: var(--accent);
+            color: #000;
+        }
+
+        .principle-card.correct .principle-check {
+            border-color: var(--success);
+            background: var(--success);
+            color: #000;
+        }
+
+        .principle-card.incorrect .principle-check {
+            border-color: var(--danger);
+            background: var(--danger);
+            color: #fff;
+        }
+
+        .principle-card.missed .principle-check {
+            border-color: var(--warning);
+            background: var(--warning);
+            color: #000;
+        }
+
+        /* Actions */
+        .actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border-radius: 8px;
+            border: none;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: 'Exo 2', sans-serif;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent), #0095b3);
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 212, 255, 0.3);
+        }
+
+        .btn-primary:disabled {
+            background: var(--bg-panel);
+            color: var(--text-muted);
+            cursor: not-allowed;
+        }
+
+        .btn-gold {
+            background: linear-gradient(135deg, var(--gold), #cc9900);
+            color: #000;
+        }
+
+        .btn-gold:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(255, 215, 0, 0.3);
+        }
+
+        /* Result */
+        .result-panel {
+            margin-top: 20px;
+            padding: 18px;
+            border-radius: 12px;
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+
+        .result-panel.show { display: block; }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result-panel.excellent {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(0, 255, 136, 0.05));
+            border: 1px solid var(--gold);
+        }
+
+        .result-panel.good {
+            background: rgba(0, 255, 136, 0.08);
+            border: 1px solid var(--success);
+        }
+
+        .result-panel.partial {
+            background: rgba(255, 170, 0, 0.08);
+            border: 1px solid var(--warning);
+        }
+
+        .result-panel.poor {
+            background: rgba(255, 68, 102, 0.08);
+            border: 1px solid var(--danger);
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .result-title {
+            font-family: 'Russo One', sans-serif;
+            font-size: 1.2rem;
+        }
+
+        .result-points {
+            font-family: 'Russo One', sans-serif;
+            font-size: 1.5rem;
+            color: var(--gold);
+        }
+
+        .points-breakdown {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .breakdown-item {
+            background: var(--bg-panel);
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .breakdown-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 3px;
+        }
+
+        .breakdown-value {
+            font-family: 'Russo One', sans-serif;
+            font-size: 1.1rem;
+        }
+
+        .breakdown-value.green { color: var(--success); }
+        .breakdown-value.orange { color: var(--warning); }
+        .breakdown-value.red { color: var(--danger); }
+
+        .expert-feedback {
+            background: var(--bg-panel);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        .feedback-title {
+            font-size: 0.85rem;
+            color: var(--accent);
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .feedback-text {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
+        .feedback-text:last-child { margin-bottom: 0; }
+
+        .feedback-label {
+            font-size: 0.75rem;
+            color: var(--success);
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .feedback-section {
+            margin-bottom: 12px;
+        }
+
+        .feedback-section:last-child { margin-bottom: 0; }
+
+        /* Anti-patterns */
+        .antipattern-label {
+            color: var(--danger);
+        }
+
+        /* Start/End Screens */
+        .screen {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .screen h2 {
+            font-family: 'Russo One', sans-serif;
+            font-size: 2rem;
+            margin-bottom: 15px;
+            background: linear-gradient(135deg, var(--accent), var(--purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .screen p {
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .rules-box {
+            text-align: left;
+            background: var(--bg-card);
+            padding: 25px;
+            border-radius: 12px;
+            max-width: 900px;
+            margin: 0 auto 25px;
+            border: 1px solid var(--border);
+        }
+
+        .rules-box h3 {
+            color: var(--accent);
+            font-family: 'Russo One', sans-serif;
+            margin-bottom: 15px;
+        }
+
+        .principles-overview {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 600px) {
+            .principles-overview { grid-template-columns: 1fr; }
+        }
+
+        .po-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background: var(--bg-panel);
+            border-radius: 8px;
+            font-size: 0.85rem;
+        }
+
+        .po-num {
+            font-family: 'Russo One', sans-serif;
+            color: var(--accent);
+            font-size: 1.1rem;
+            min-width: 28px;
+        }
+
+        .po-name {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .rules-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 600px) {
+            .rules-grid { grid-template-columns: 1fr; }
+        }
+
+        .rule-section h4 {
+            color: var(--purple);
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        .rule-section ul {
+            color: var(--text-secondary);
+            margin-left: 18px;
+            font-size: 0.85rem;
+        }
+
+        .rule-section li {
+            margin-bottom: 5px;
+        }
+
+        .scoring-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 0.85rem;
+        }
+
+        .scoring-table th, .scoring-table td {
+            padding: 8px 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .scoring-table th {
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .scoring-table td:last-child {
+            text-align: right;
+            color: var(--gold);
+            font-weight: 600;
+        }
+
+        /* Final Score */
+        .final-score-display {
+            margin: 30px 0;
+        }
+
+        .final-score-number {
+            font-family: 'Russo One', sans-serif;
+            font-size: 5rem;
+            background: linear-gradient(135deg, var(--gold), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .final-score-max {
+            font-size: 1.5rem;
+            color: var(--text-muted);
+        }
+
+        .verdict {
+            font-family: 'Russo One', sans-serif;
+            font-size: 1.5rem;
+            margin: 20px 0;
+            padding: 15px 30px;
+            border-radius: 10px;
+            display: inline-block;
+        }
+
+        .verdict.fail { background: rgba(255, 68, 102, 0.2); color: var(--danger); }
+        .verdict.pass { background: rgba(255, 170, 0, 0.2); color: var(--warning); }
+        .verdict.good { background: rgba(0, 255, 136, 0.2); color: var(--success); }
+        .verdict.expert { background: rgba(255, 215, 0, 0.2); color: var(--gold); }
+
+        .final-stats {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+
+        .final-stat {
+            text-align: center;
+        }
+
+        .final-stat-value {
+            font-family: 'Russo One', sans-serif;
+            font-size: 2.5rem;
+        }
+
+        .final-stat-label {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        /* Principle mastery chart */
+        .mastery-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
+            max-width: 600px;
+            margin: 20px auto;
+            text-align: left;
+        }
+
+        .mastery-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: var(--bg-card);
+            padding: 10px 15px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        .mastery-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            min-width: 200px;
+        }
+
+        .mastery-bar {
+            flex: 1;
+            height: 8px;
+            background: var(--bg-hover);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .mastery-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+
+        .mastery-pct {
+            font-family: 'Russo One', sans-serif;
+            font-size: 0.85rem;
+            min-width: 40px;
+            text-align: right;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            border-top: 1px solid var(--border);
+            margin-top: 30px;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        .pulse { animation: pulse 2s infinite; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>ITIL4: Руководящие принципы</h1>
+            <p class="subtitle">Бизнес-кейсы и ситуационные дилеммы</p>
+
+            <div class="dashboard" id="dashboard" style="display: none;">
+                <div class="dash-item">
+                    <div class="dash-value gold" id="total-score">0</div>
+                    <div class="dash-label">Очки</div>
+                </div>
+                <div class="dash-item">
+                    <div class="dash-value" id="current-round">1</div>
+                    <div class="dash-label">Кейс</div>
+                </div>
+                <div class="dash-item">
+                    <div class="dash-value" id="total-rounds">10</div>
+                    <div class="dash-label">Всего</div>
+                </div>
+                <div class="dash-item">
+                    <div class="dash-value success" id="streak">0</div>
+                    <div class="dash-label">Серия</div>
+                </div>
+            </div>
+
+            <div class="progress-container" id="progress-container" style="display: none;">
+                <div class="progress-header">
+                    <span>Прогресс</span>
+                    <span id="progress-percent">0%</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+                </div>
+            </div>
+        </header>
+
+        <main id="game-container">
+            <!-- Start Screen -->
+            <div id="start-screen" class="screen">
+                <h2>7 Руководящих принципов ITIL 4</h2>
+                <p>Руководящие принципы — универсальные рекомендации, которые направляют организацию в любых обстоятельствах. Проверьте, насколько хорошо вы умеете применять их на практике!</p>
+
+                <div class="rules-box">
+                    <h3>Принципы ITIL 4</h3>
+                    <div class="principles-overview">
+                        <div class="po-item"><span class="po-num">1</span><span class="po-name">Фокус на ценности</span></div>
+                        <div class="po-item"><span class="po-num">2</span><span class="po-name">Начинай с того, что есть</span></div>
+                        <div class="po-item"><span class="po-num">3</span><span class="po-name">Продвигайся итеративно</span></div>
+                        <div class="po-item"><span class="po-num">4</span><span class="po-name">Сотрудничай и будь прозрачен</span></div>
+                        <div class="po-item"><span class="po-num">5</span><span class="po-name">Думай и работай целостно</span></div>
+                        <div class="po-item"><span class="po-num">6</span><span class="po-name">Будь проще и практичнее</span></div>
+                        <div class="po-item"><span class="po-num">7</span><span class="po-name">Оптимизируй и автоматизируй</span></div>
+                    </div>
+
+                    <div class="rules-grid">
+                        <div class="rule-section">
+                            <h4>Структура раунда</h4>
+                            <ul>
+                                <li>Изучите бизнес-кейс компании</li>
+                                <li>Выберите 2 ключевых принципа</li>
+                                <li>Решите ситуационную дилемму</li>
+                                <li>Получите экспертный разбор</li>
+                            </ul>
+                        </div>
+                        <div class="rule-section">
+                            <h4>Начисление очков</h4>
+                            <ul>
+                                <li>Правильный принцип: <strong>+50</strong></li>
+                                <li>Верная дилемма: <strong>+60</strong></li>
+                                <li>Бонус за серию: <strong>+20</strong></li>
+                                <li>Макс. за раунд: <strong>180</strong></li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <table class="scoring-table">
+                        <tr><th>Результат</th><th>Уровень</th></tr>
+                        <tr><td>0 — 599</td><td>Новичок</td></tr>
+                        <tr><td>600 — 999</td><td>Практик</td></tr>
+                        <tr><td>1000 — 1399</td><td>Консультант</td></tr>
+                        <tr><td>1400+</td><td>Эксперт GP</td></tr>
+                    </table>
+                </div>
+
+                <button class="btn btn-primary" onclick="startGame()">Начать игру</button>
+            </div>
+
+            <!-- Game Screen -->
+            <div id="game-screen" style="display: none;">
+                <div class="game-layout">
+                    <!-- Left: Case -->
+                    <div class="panel">
+                        <div class="panel-header">
+                            <span class="panel-title">Бизнес-кейс</span>
+                            <span class="phase-badge" id="phase-badge">Анализ ситуации</span>
+                        </div>
+
+                        <div class="case-meta">
+                            <span class="case-tag tag-round" id="round-tag">Кейс 1/10</span>
+                            <span class="case-tag tag-industry" id="industry-tag">Финтех</span>
+                            <span class="case-tag tag-difficulty" id="difficulty-tag">Средний</span>
+                        </div>
+
+                        <h2 class="case-title" id="case-title">Загрузка...</h2>
+                        <p class="case-description" id="case-description"></p>
+
+                        <div class="case-context">
+                            <div class="context-title">Контекст и факты</div>
+                            <ul class="context-list" id="context-list"></ul>
+                        </div>
+
+                        <div class="case-challenge">
+                            <div class="challenge-title">Ключевой вопрос</div>
+                            <p class="challenge-text" id="challenge-text"></p>
+                        </div>
+
+                        <!-- Dilemma -->
+                        <div class="dilemma-section" id="dilemma-section">
+                            <div class="dilemma-title">Ситуационная дилемма</div>
+                            <p id="dilemma-question" style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 12px;"></p>
+                            <div class="dilemma-options" id="dilemma-options"></div>
+                        </div>
+
+                        <!-- Result -->
+                        <div class="result-panel" id="result-panel">
+                            <div class="result-header">
+                                <span class="result-title" id="result-title">Отлично!</span>
+                                <span class="result-points" id="result-points">+160</span>
+                            </div>
+                            <div class="points-breakdown" id="points-breakdown"></div>
+                            <div class="expert-feedback" id="expert-feedback"></div>
+                        </div>
+
+                        <div class="actions">
+                            <button class="btn btn-primary" id="submit-btn" onclick="submitAnswer()" disabled>
+                                Проверить решение
+                            </button>
+                            <button class="btn btn-gold" id="next-btn" onclick="nextRound()" style="display: none;">
+                                Следующий кейс →
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Right: Principles -->
+                    <div class="panel">
+                        <div class="panel-header">
+                            <span class="panel-title">Выберите 2 принципа</span>
+                            <span class="phase-badge" id="selection-counter">0 / 2</span>
+                        </div>
+                        <div class="principles-grid" id="principles-grid"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- End Screen -->
+            <div id="end-screen" class="screen" style="display: none;">
+                <h2>Игра завершена!</h2>
+
+                <div class="final-score-display">
+                    <div class="final-score-number" id="final-score">0</div>
+                    <div class="final-score-max" id="final-max">/ 1800</div>
+                </div>
+
+                <div class="verdict" id="verdict">Эксперт</div>
+
+                <div class="final-stats">
+                    <div class="final-stat">
+                        <div class="final-stat-value" style="color: var(--success)" id="stat-principles">0</div>
+                        <div class="final-stat-label">Принципов верно</div>
+                    </div>
+                    <div class="final-stat">
+                        <div class="final-stat-value" style="color: var(--purple)" id="stat-dilemmas">0</div>
+                        <div class="final-stat-label">Дилемм верно</div>
+                    </div>
+                    <div class="final-stat">
+                        <div class="final-stat-value" style="color: var(--gold)" id="stat-streak">0</div>
+                        <div class="final-stat-label">Макс. серия</div>
+                    </div>
+                </div>
+
+                <div class="mastery-grid" id="mastery-grid"></div>
+
+                <br>
+                <button class="btn btn-primary" onclick="restartGame()">Пройти снова</button>
+            </div>
+        </main>
+
+        <footer>
+            ITIL4: Руководящие принципы | Бизнес-кейсы и ситуационные дилеммы
+        </footer>
+    </div>
+
+    <script>
+        // ==================== DATA ====================
+
+        const principles = [
+            {
+                id: 'value',
+                name: 'Фокус на ценности',
+                hint: 'Всё, что делает организация, должно прямо или косвенно создавать ценность для стейкхолдеров.'
+            },
+            {
+                id: 'start',
+                name: 'Начинай с того, что есть',
+                hint: 'Не начинай с нуля — оцени текущее состояние и используй существующие ресурсы.'
+            },
+            {
+                id: 'iterate',
+                name: 'Продвигайся итеративно с обратной связью',
+                hint: 'Работай небольшими шагами, получая обратную связь после каждой итерации.'
+            },
+            {
+                id: 'collaborate',
+                name: 'Сотрудничай и повышай прозрачность',
+                hint: 'Вовлекай людей, делись информацией, стройте доверие через открытость.'
+            },
+            {
+                id: 'holistic',
+                name: 'Думай и работай целостно',
+                hint: 'Ни один элемент не работает изолированно — учитывай систему в целом.'
+            },
+            {
+                id: 'simple',
+                name: 'Будь проще и практичнее',
+                hint: 'Минимум шагов для результата. Если процесс не создаёт ценности — убери его.'
+            },
+            {
+                id: 'optimize',
+                name: 'Оптимизируй и автоматизируй',
+                hint: 'Сначала оптимизируй процесс, затем автоматизируй. Не автоматизируй хаос.'
+            }
+        ];
+
+        const cases = [
+            {
+                title: 'Банк теряет клиентов из-за мобильного приложения',
+                industry: 'Банкинг',
+                difficulty: 'Средний',
+                description: 'Крупный банк запустил новое мобильное приложение, но NPS упал с 45 до 12. Клиенты жалуются, что новый интерфейс неудобен — убрали привычные функции, добавили много ненужных. IT-отдел гордится «передовой архитектурой». Бизнес требует срочного решения.',
+                context: [
+                    'Приложением пользуются 2 млн клиентов',
+                    'Отток вырос на 15% за квартал',
+                    'IT команда не проводила UX-исследования',
+                    'Конкуренты активно переманивают клиентов'
+                ],
+                challenge: 'Как вернуть удовлетворённость клиентов и восстановить NPS?',
+                correctPrinciples: ['value', 'iterate'],
+                dilemma: {
+                    question: 'IT-директор предлагает два варианта: A) полностью переписать приложение с нуля на новом фреймворке (6 месяцев), Б) вернуть старые функции и постепенно улучшать по отзывам клиентов. Как поступить?',
+                    options: [
+                        'Переписать с нуля — нужна правильная архитектура',
+                        'Вернуть старые функции и итеративно улучшать по фидбеку',
+                        'Нанять внешнюю компанию для полного аудита',
+                        'Запустить параллельно два приложения для A/B теста'
+                    ],
+                    correct: 1,
+                    explanation: 'Принцип «Фокус на ценности» требует сфокусироваться на потребностях клиентов, а «Итеративный подход» — быстро вернуть нужные функции и улучшать по обратной связи, а не начинать с нуля.'
+                },
+                feedback: {
+                    principles: 'Фокус на ценности — ключевой, потому что проблема в игнорировании потребностей клиентов. Итеративный подход позволяет быстро исправить ситуацию, не тратя 6 месяцев на переписывание.',
+                    antipattern: 'Главный антипаттерн: IT-команда решала техническую задачу вместо бизнес-проблемы. Красивая архитектура без ценности для клиента — пустая трата ресурсов.'
+                }
+            },
+            {
+                title: 'Слияние IT-отделов двух компаний',
+                industry: 'Ритейл / M&A',
+                difficulty: 'Сложный',
+                description: 'Две розничные сети объединились. В каждой — свой IT: разные ITSM-платформы, процессы, культура. Руководство хочет «единый IT» за 6 месяцев. Команды конфликтуют: каждая считает свои практики лучшими. Сотрудники боятся сокращений.',
+                context: [
+                    'Компания А: ServiceNow + ITIL v3, 180 человек',
+                    'Компания Б: Jira + Agile, 120 человек',
+                    'Дублирование ролей и систем',
+                    'Уже уволились 15 ключевых специалистов'
+                ],
+                challenge: 'Как объединить IT без потери людей и качества сервиса?',
+                correctPrinciples: ['collaborate', 'start'],
+                dilemma: {
+                    question: 'CIO хочет выбрать одну платформу (ServiceNow) и перевести всех на неё за 3 месяца, закрыв Jira. Agile-команда угрожает массовым увольнением. Ваше решение?',
+                    options: [
+                        'Перевести всех на ServiceNow — нужен единый стандарт',
+                        'Оставить обе системы навсегда — пусть каждый работает как привык',
+                        'Провести совместные воркшопы, выявить лучшие практики из обоих подходов и поэтапно интегрировать',
+                        'Нанять внешних консультантов для принятия решения'
+                    ],
+                    correct: 2,
+                    explanation: '«Сотрудничай и повышай прозрачность» — вовлечь обе команды в поиск решения. «Начинай с того, что есть» — использовать лучшее из обоих подходов, а не навязывать один.'
+                },
+                feedback: {
+                    principles: 'Сотрудничество критично, чтобы преодолеть конфликт культур. Принцип «Начинай с того, что есть» предотвращает ошибку отбрасывания работающих практик ради унификации.',
+                    antipattern: 'Навязывание одного инструмента без вовлечения команд — прямое нарушение принципа сотрудничества. Результат: потеря людей и знаний.'
+                }
+            },
+            {
+                title: 'Автоматизация сервис-деска провалилась',
+                industry: 'Телеком',
+                difficulty: 'Средний',
+                description: 'Телеком-оператор внедрил AI-чатбота для сервис-деска. Цель — снизить нагрузку на операторов на 60%. Результат: чатбот обрабатывает только 15% обращений, клиенты злятся на бесполезного бота и требуют «живого человека». Затраты на проект: $2M.',
+                context: [
+                    'Чатбот обучен на устаревшей базе знаний',
+                    'Процессы обработки обращений не были оптимизированы до автоматизации',
+                    '200 000 обращений в день, FCR: 55%',
+                    'Операторы демотивированы и считают бота помехой'
+                ],
+                challenge: 'Как спасти проект автоматизации и достичь целевых показателей?',
+                correctPrinciples: ['optimize', 'simple'],
+                dilemma: {
+                    question: 'Руководитель проекта предлагает купить более дорогой AI-движок за $1M. Вы как ITSM-консультант рекомендуете:',
+                    options: [
+                        'Купить новый AI-движок — текущий просто слабый',
+                        'Сначала оптимизировать процессы и базу знаний, затем переобучить текущего бота',
+                        'Полностью отказаться от автоматизации — люди лучше',
+                        'Добавить больше операторов и уменьшить роль бота'
+                    ],
+                    correct: 1,
+                    explanation: '«Оптимизируй и автоматизируй» учит: сначала оптимизируй процесс, потом автоматизируй. Автоматизация хаоса даёт автоматизированный хаос. «Будь проще» — начни с обновления базы знаний.'
+                },
+                feedback: {
+                    principles: 'Принцип «Оптимизируй и автоматизируй» был нарушен: автоматизировали неоптимизированный процесс. «Будь проще» — не нужен дорогой AI, нужна хорошая база знаний.',
+                    antipattern: 'Автоматизация хаоса — один из самых дорогих антипаттернов. Новый AI-движок на тех же плохих данных даст тот же плохой результат.'
+                }
+            },
+            {
+                title: 'Глобальная миграция в облако',
+                industry: 'E-commerce',
+                difficulty: 'Сложный',
+                description: 'Маркетплейс решил мигрировать все 200 серверов из собственного дата-центра в облако за 4 месяца. План: Big Bang миграция в один выходной. Команда инфраструктуры против — говорят о рисках. Менеджмент настаивает ради экономии.',
+                context: [
+                    '200 серверов, 50 TB данных, монолитное приложение',
+                    'У команды нет опыта облачных технологий',
+                    'Сезон распродаж через 5 месяцев',
+                    'Экономия от облака: $500K/год'
+                ],
+                challenge: 'Как провести миграцию без катастрофических рисков?',
+                correctPrinciples: ['iterate', 'start'],
+                dilemma: {
+                    question: 'CEO настаивает на Big Bang миграции за один выходной. Вы предлагаете:',
+                    options: [
+                        'Поддержать Big Bang — так быстрее и дешевле',
+                        'Начать с аудита текущей инфраструктуры, затем мигрировать итеративно — группами серверов с тестированием после каждого этапа',
+                        'Отложить миграцию на 2 года, пока команда обучится',
+                        'Нанять подрядчика и переложить на него всю ответственность'
+                    ],
+                    correct: 1,
+                    explanation: '«Начинай с того, что есть» — сначала аудит. «Итеративный подход» — мигрировать порциями, тестируя каждый этап. Big Bang для неопытной команды с монолитом — рецепт катастрофы.'
+                },
+                feedback: {
+                    principles: '«Начинай с того, что есть» требует оценить текущее состояние перед миграцией. «Итеративный подход» снижает риски — каждая группа серверов мигрируется и проверяется отдельно.',
+                    antipattern: 'Big Bang миграция без опыта и аудита — игнорирование обоих принципов. Статистика: 70% Big Bang миграций терпят критические сбои.'
+                }
+            },
+            {
+                title: 'Новый ITSM-процесс в 200 страниц',
+                industry: 'Госсектор',
+                difficulty: 'Средний',
+                description: 'Государственное агентство наняло консультантов, которые разработали ITSM-процесс управления изменениями на 200 страниц. Документ включает 47 шагов согласования, 12 форм и 8 уровней утверждения. Результат: среднее время одобрения change — 45 дней. Сотрудники обходят процесс.',
+                context: [
+                    'IT-отдел: 500 сотрудников',
+                    '85% изменений — стандартные и рутинные',
+                    'Сотрудники создают «теневые» каналы для обхода процесса',
+                    'Аудиторы довольны документацией, но бизнес парализован'
+                ],
+                challenge: 'Как упростить процесс, сохранив контроль и compliance?',
+                correctPrinciples: ['simple', 'value'],
+                dilemma: {
+                    question: 'Руководитель IT хочет нанять ещё консультантов для «доработки» процесса. Ваша рекомендация:',
+                    options: [
+                        'Классифицировать изменения на стандартные, нормальные и экстренные, упростив процесс для каждого типа',
+                        'Добавить ещё один уровень согласования для контроля качества',
+                        'Автоматизировать все 47 шагов через workflow-систему',
+                        'Оставить как есть — compliance важнее скорости'
+                    ],
+                    correct: 0,
+                    explanation: '«Будь проще и практичнее» — 85% изменений стандартные и не требуют 47 шагов. «Фокус на ценности» — процесс должен помогать, а не мешать работе.'
+                },
+                feedback: {
+                    principles: '«Будь проще» — процесс из 47 шагов для стандартного изменения уничтожает ценность. «Фокус на ценности» — если люди обходят процесс, он не создаёт ценности.',
+                    antipattern: 'Перепроектирование (over-engineering) процессов — типичная ошибка. ITIL рекомендует модели изменений: предавторизованные стандартные изменения проходят по упрощённому пути.'
+                }
+            },
+            {
+                title: 'SRE-команда в изоляции',
+                industry: 'Финтех',
+                difficulty: 'Средний',
+                description: 'Финтех-стартап создал SRE-команду для повышения надёжности. Через год: SRE работает в изоляции, создаёт свои инструменты, не делится знаниями с разработчиками. Разработчики не понимают, почему их релизы блокируются. SRE считает dev «безответственными». Количество инцидентов не снижается.',
+                context: [
+                    'SRE: 8 человек, Dev: 60 человек',
+                    'SRE создали 15 внутренних инструментов, не задокументированных',
+                    'Время от кода до продакшена: 3 недели (было 2 дня)',
+                    'Конфликт эскалируется до уровня CTO'
+                ],
+                challenge: 'Как наладить взаимодействие между SRE и Dev?',
+                correctPrinciples: ['collaborate', 'holistic'],
+                dilemma: {
+                    question: 'CTO предлагает расформировать SRE и распределить инженеров по dev-командам. Ваша рекомендация:',
+                    options: [
+                        'Расформировать SRE — отдельная команда надёжности не нужна',
+                        'Удвоить SRE-команду и дать ей больше полномочий',
+                        'Внедрить модель embedded SRE: SRE-инженеры работают внутри dev-команд, shared ownership на надёжность, совместные on-call ротации',
+                        'Заменить SRE-команду на покупку платформы мониторинга'
+                    ],
+                    correct: 2,
+                    explanation: '«Сотрудничай» — SRE и Dev должны работать вместе, а не как враждующие команды. «Думай целостно» — надёжность — ответственность всей системы, а не одной команды.'
+                },
+                feedback: {
+                    principles: '«Сотрудничай и повышай прозрачность» — знания SRE должны быть доступны Dev. «Думай целостно» — надёжность не изолированная функция, а свойство всей системы.',
+                    antipattern: 'Силосное мышление — команда создаёт барьеры вместо мостов. Embedded SRE + shared ownership решает проблему системно.'
+                }
+            },
+            {
+                title: 'Кризис после обновления ERP',
+                industry: 'Производство',
+                difficulty: 'Критический',
+                description: 'Производственная компания обновила ERP-систему. В результате: остановился учёт складских запасов, бухгалтерия не может закрыть месяц, 3 завода работают «вслепую». Оказалось, что при обновлении не учли кастомизации, сделанные за 10 лет. Откат невозможен — старая версия не поддерживается.',
+                context: [
+                    '3 завода, 5000 сотрудников зависят от ERP',
+                    '150+ кастомных модулей за 10 лет',
+                    'Аудит кастомизаций не проводился',
+                    'Потери: $200K/день из-за простоя'
+                ],
+                challenge: 'Как стабилизировать ситуацию и предотвратить подобное в будущем?',
+                correctPrinciples: ['start', 'holistic'],
+                dilemma: {
+                    question: 'Вендор ERP предлагает патч, который «может починить» 70% проблем, но требует ещё одного обновления. Команда боится повторения. Что делаете?',
+                    options: [
+                        'Немедленно ставить патч — каждый день стоит $200K',
+                        'Сначала провести полный аудит всех кастомизаций и их зависимостей, затем тестировать патч на staging-среде, и только потом применять',
+                        'Нанять другого вендора для полной замены ERP',
+                        'Перевести все заводы на ручной учёт на время разбора'
+                    ],
+                    correct: 1,
+                    explanation: '«Начинай с того, что есть» — нужен полный аудит текущего состояния, понимание 150 кастомизаций. «Думай целостно» — нельзя ставить патч без понимания зависимостей в системе.'
+                },
+                feedback: {
+                    principles: '«Начинай с того, что есть» был нарушен при обновлении — не провели аудит. «Думай целостно» — 150 кастомных модулей формируют сложную систему зависимостей.',
+                    antipattern: 'Обновление без аудита текущего состояния — классическое нарушение принципа. Каждая кастомизация — потенциальная точка отказа.'
+                }
+            },
+            {
+                title: 'Внедрение DevOps «по учебнику»',
+                industry: 'Страхование',
+                difficulty: 'Средний',
+                description: 'Страховая компания решила «внедрить DevOps». Купили все инструменты: Kubernetes, Jenkins, Terraform, Prometheus. Потратили $3M на лицензии и инфраструктуру. Через год: ни один разработчик не умеет пользоваться K8s, пайплайны ломаются, а deployment стал дольше, чем был.',
+                context: [
+                    '100 разработчиков, большинство с опытом только on-premise',
+                    'Куплены 12 новых инструментов за год',
+                    'Нет ни одного DevOps-инженера в штате',
+                    'Старый процесс деплоя: 2 часа, новый: 8 часов (+ дебаг K8s)'
+                ],
+                challenge: 'Как спасти DevOps-трансформацию?',
+                correctPrinciples: ['simple', 'iterate'],
+                dilemma: {
+                    question: 'VP Engineering хочет нанять 10 DevOps-инженеров и отправить всех разработчиков на курсы K8s. Ваше мнение:',
+                    options: [
+                        'Нанять DevOps-инженеров — это решит все проблемы',
+                        'Начать с простого: CI/CD для одного проекта, без K8s, и постепенно усложнять по мере роста компетенций',
+                        'Вернуться к старому процессу — DevOps не для нас',
+                        'Передать весь деплой на аутсорс'
+                    ],
+                    correct: 1,
+                    explanation: '«Будь проще» — начни с простого CI/CD, а не с Kubernetes. «Итеративно» — усложняй инструменты по мере роста экспертизы команды.'
+                },
+                feedback: {
+                    principles: '«Будь проще» — K8s для команды без DevOps-опыта — оверинжиниринг. «Итеративный подход» — начни с простого CI/CD и наращивай сложность.',
+                    antipattern: 'Cargo cult DevOps: покупка инструментов без изменения культуры и компетенций. DevOps — это прежде всего культура, а не набор технологий.'
+                }
+            },
+            {
+                title: 'Мониторинг ради мониторинга',
+                industry: 'SaaS',
+                difficulty: 'Средний',
+                description: 'SaaS-компания настроила мониторинг: 15 000 алертов в день. Команда дежурных перестала реагировать на алерты — «alert fatigue». В результате пропустили реальный инцидент, который привёл к 4-часовому даунтайму и потере клиента на $500K/год.',
+                context: [
+                    '15 000 алертов/день, из них 95% — шум',
+                    'Команда on-call: 6 человек, работают в хроническом стрессе',
+                    'Нет приоритизации алертов',
+                    'Дашбордов 150+, актуальных — около 10'
+                ],
+                challenge: 'Как сделать мониторинг полезным, а не вредным?',
+                correctPrinciples: ['value', 'simple'],
+                dilemma: {
+                    question: 'Тимлид SRE предлагает купить AIOps-платформу за $500K для автокорреляции алертов. Ваш совет:',
+                    options: [
+                        'Купить AIOps — AI справится с 15 000 алертов',
+                        'Сначала удалить 95% бесполезных алертов, оставить только те, которые требуют действий, и пересмотреть пороги',
+                        'Нанять ещё 6 дежурных для распределения нагрузки',
+                        'Отключить мониторинг и полагаться на жалобы клиентов'
+                    ],
+                    correct: 1,
+                    explanation: '«Фокус на ценности» — алерт ценен только если требует действия. «Будь проще» — не добавляй AI поверх хаоса, а убери хаос.'
+                },
+                feedback: {
+                    principles: '«Фокус на ценности» — каждый алерт должен требовать конкретного действия. Если нет — удаляй. «Будь проще» — 150 дашбордов при 10 актуальных = 140 лишних.',
+                    antipattern: 'Alert fatigue — прямое следствие нарушения принципов ценности и простоты. Правило: если алерт не требует действия в течение 5 минут — он не нужен.'
+                }
+            },
+            {
+                title: 'Каждый отдел — своя IT-вселенная',
+                industry: 'Корпорация',
+                difficulty: 'Сложный',
+                description: 'В крупной корпорации каждый бизнес-юнит создал собственный IT: свои серверы, свой сервис-деск, свои процессы. Маркетинг использует Salesforce, HR — SAP, финансы — Oracle, логистика — самописное ПО. Данные дублируются в 5 системах, отчёты противоречат друг другу. CEO требует «единую картину бизнеса».',
+                context: [
+                    '4 бизнес-юнита, у каждого свой IT-директор',
+                    '12 дублирующихся систем',
+                    'Общие IT-затраты на 40% выше рынка',
+                    'Невозможно получить сквозной отчёт по компании'
+                ],
+                challenge: 'Как объединить разрозненное IT без революции?',
+                correctPrinciples: ['holistic', 'iterate'],
+                dilemma: {
+                    question: 'CEO хочет назначить «суперCIO» с правом централизовать всё IT за 6 месяцев. Ваша рекомендация:',
+                    options: [
+                        'Поддержать — нужна сильная рука для порядка',
+                        'Начать с общей шины данных (integration layer), объединяя данные поэтапно, сохраняя рабочие системы юнитов',
+                        'Оставить как есть — каждый юнит знает свои потребности лучше',
+                        'Заменить все системы на одну ERP'
+                    ],
+                    correct: 1,
+                    explanation: '«Думай целостно» — нужна общая картина, но не ценой разрушения работающих систем. «Итеративно» — начни с интеграции данных, потом унифицируй процессы.'
+                },
+                feedback: {
+                    principles: '«Думай целостно» — корпорация — единый организм, и IT должно отражать это. «Итеративный подход» — поэтапная интеграция вместо рискованной революции.',
+                    antipattern: 'Силосы данных — каждый юнит оптимизирует локально, ухудшая глобальный результат. Integration layer — первый шаг к целостному подходу.'
+                }
+            }
+        ];
+
+        // ==================== STATE ====================
+
+        let G = {
+            round: 0,
+            score: 0,
+            streak: 0,
+            maxStreak: 0,
+            selectedPrinciples: [],
+            selectedDilemma: null,
+            answered: false,
+            stats: {
+                principlesCorrect: 0,
+                dilemmasCorrect: 0,
+                principleHits: {}
+            }
+        };
+
+        // ==================== INIT ====================
+
+        function renderPrinciples() {
+            const grid = document.getElementById('principles-grid');
+            grid.innerHTML = principles.map((p, i) => `
+                <div class="principle-card" id="principle-${p.id}" onclick="togglePrinciple('${p.id}')">
+                    <div class="principle-check"></div>
+                    <div class="principle-num">Принцип ${i + 1}</div>
+                    <div class="principle-name">${p.name}</div>
+                    <div class="principle-hint">${p.hint}</div>
+                </div>
+            `).join('');
+        }
+
+        // ==================== SELECTION ====================
+
+        function togglePrinciple(id) {
+            if (G.answered) return;
+
+            const idx = G.selectedPrinciples.indexOf(id);
+            if (idx !== -1) {
+                G.selectedPrinciples.splice(idx, 1);
+            } else if (G.selectedPrinciples.length < 2) {
+                G.selectedPrinciples.push(id);
+            }
+
+            principles.forEach(p => {
+                const card = document.getElementById('principle-' + p.id);
+                card.classList.toggle('selected', G.selectedPrinciples.includes(p.id));
+                const check = card.querySelector('.principle-check');
+                check.textContent = G.selectedPrinciples.includes(p.id) ? '✓' : '';
+            });
+
+            document.getElementById('selection-counter').textContent = `${G.selectedPrinciples.length} / 2`;
+            checkReady();
+        }
+
+        function selectDilemma(idx) {
+            if (G.answered) return;
+
+            G.selectedDilemma = idx;
+            document.querySelectorAll('.dilemma-btn').forEach((btn, i) => {
+                btn.classList.toggle('selected', i === idx);
+            });
+            checkReady();
+        }
+
+        function checkReady() {
+            const ready = G.selectedPrinciples.length === 2 && G.selectedDilemma !== null;
+            document.getElementById('submit-btn').disabled = !ready;
+        }
+
+        // ==================== GAME FLOW ====================
+
+        function startGame() {
+            G = {
+                round: 0,
+                score: 0,
+                streak: 0,
+                maxStreak: 0,
+                selectedPrinciples: [],
+                selectedDilemma: null,
+                answered: false,
+                stats: {
+                    principlesCorrect: 0,
+                    dilemmasCorrect: 0,
+                    principleHits: {}
+                }
+            };
+            principles.forEach(p => G.stats.principleHits[p.id] = { shown: 0, hit: 0 });
+
+            document.getElementById('start-screen').style.display = 'none';
+            document.getElementById('game-screen').style.display = 'block';
+            document.getElementById('dashboard').style.display = 'flex';
+            document.getElementById('progress-container').style.display = 'block';
+            document.getElementById('total-rounds').textContent = cases.length;
+
+            renderPrinciples();
+            loadRound();
+        }
+
+        function loadRound() {
+            const c = cases[G.round];
+
+            document.getElementById('round-tag').textContent = `Кейс ${G.round + 1}/${cases.length}`;
+            document.getElementById('industry-tag').textContent = c.industry;
+            document.getElementById('difficulty-tag').textContent = c.difficulty;
+            document.getElementById('case-title').textContent = c.title;
+            document.getElementById('case-description').textContent = c.description;
+            document.getElementById('challenge-text').textContent = c.challenge;
+            document.getElementById('current-round').textContent = G.round + 1;
+
+            document.getElementById('context-list').innerHTML =
+                c.context.map(t => `<li>${t}</li>`).join('');
+
+            // Dilemma
+            document.getElementById('dilemma-question').textContent = c.dilemma.question;
+            document.getElementById('dilemma-options').innerHTML =
+                c.dilemma.options.map((opt, i) => `
+                    <button class="dilemma-btn" onclick="selectDilemma(${i})">${String.fromCharCode(65 + i)}) ${opt}</button>
+                `).join('');
+
+            // Reset
+            G.selectedPrinciples = [];
+            G.selectedDilemma = null;
+            G.answered = false;
+
+            principles.forEach(p => {
+                const card = document.getElementById('principle-' + p.id);
+                card.className = 'principle-card';
+                card.querySelector('.principle-check').textContent = '';
+            });
+
+            document.getElementById('selection-counter').textContent = '0 / 2';
+            document.getElementById('result-panel').classList.remove('show', 'excellent', 'good', 'partial', 'poor');
+            document.getElementById('submit-btn').style.display = 'inline-block';
+            document.getElementById('submit-btn').disabled = true;
+            document.getElementById('next-btn').style.display = 'none';
+            document.getElementById('phase-badge').textContent = 'Анализ ситуации';
+
+            // Track which principles appear as correct
+            c.correctPrinciples.forEach(pid => {
+                G.stats.principleHits[pid].shown++;
+            });
+
+            updateProgress();
+        }
+
+        function submitAnswer() {
+            G.answered = true;
+            const c = cases[G.round];
+            let roundScore = 0;
+            let breakdown = [];
+
+            // Score principles
+            let pCorrect = 0;
+            principles.forEach(p => {
+                const card = document.getElementById('principle-' + p.id);
+                card.classList.add('disabled');
+                const isCorrect = c.correctPrinciples.includes(p.id);
+                const isSelected = G.selectedPrinciples.includes(p.id);
+
+                if (isCorrect && isSelected) {
+                    card.classList.add('correct');
+                    card.querySelector('.principle-check').textContent = '✓';
+                    pCorrect++;
+                    G.stats.principleHits[p.id].hit++;
+                } else if (isSelected && !isCorrect) {
+                    card.classList.add('incorrect');
+                    card.querySelector('.principle-check').textContent = '✗';
+                } else if (isCorrect && !isSelected) {
+                    card.classList.add('missed');
+                    card.querySelector('.principle-check').textContent = '!';
+                }
+            });
+
+            const pPoints = pCorrect * 50;
+            roundScore += pPoints;
+            G.stats.principlesCorrect += pCorrect;
+            breakdown.push({ label: 'Принципы', value: pPoints, max: 100, color: pCorrect === 2 ? 'green' : pCorrect === 1 ? 'orange' : 'red' });
+
+            // Score dilemma
+            const dilemmaCorrect = G.selectedDilemma === c.dilemma.correct;
+            const dPoints = dilemmaCorrect ? 60 : 0;
+            roundScore += dPoints;
+            if (dilemmaCorrect) G.stats.dilemmasCorrect++;
+            breakdown.push({ label: 'Дилемма', value: dPoints, max: 60, color: dilemmaCorrect ? 'green' : 'red' });
+
+            // Highlight dilemma
+            document.querySelectorAll('.dilemma-btn').forEach((btn, i) => {
+                btn.disabled = true;
+                if (i === c.dilemma.correct) btn.classList.add('correct');
+                else if (i === G.selectedDilemma && !dilemmaCorrect) btn.classList.add('incorrect');
+                btn.classList.remove('selected');
+            });
+
+            // Streak bonus
+            const perfect = pCorrect === 2 && dilemmaCorrect;
+            if (perfect) {
+                G.streak++;
+                if (G.streak > G.maxStreak) G.maxStreak = G.streak;
+            } else {
+                G.streak = 0;
+            }
+
+            const streakBonus = G.streak >= 2 ? 20 : 0;
+            roundScore += streakBonus;
+            if (streakBonus > 0) {
+                breakdown.push({ label: 'Серия ×' + G.streak, value: streakBonus, max: 20, color: 'green' });
+            }
+
+            G.score += roundScore;
+
+            // Update UI
+            document.getElementById('total-score').textContent = G.score;
+            document.getElementById('streak').textContent = G.streak;
+            document.getElementById('phase-badge').textContent = 'Результат';
+            updateProgress();
+
+            // Show result
+            showResult(roundScore, breakdown, c);
+        }
+
+        function showResult(points, breakdown, c) {
+            const panel = document.getElementById('result-panel');
+            panel.classList.remove('excellent', 'good', 'partial', 'poor');
+
+            let cls, title;
+            if (points >= 150) { cls = 'excellent'; title = 'Превосходно!'; }
+            else if (points >= 100) { cls = 'good'; title = 'Хорошо!'; }
+            else if (points >= 50) { cls = 'partial'; title = 'Неплохо'; }
+            else { cls = 'poor'; title = 'Нужно подучить'; }
+
+            panel.classList.add('show', cls);
+            document.getElementById('result-title').textContent = title;
+            document.getElementById('result-points').textContent = `+${points}`;
+
+            document.getElementById('points-breakdown').innerHTML = breakdown.map(b => `
+                <div class="breakdown-item">
+                    <div class="breakdown-label">${b.label}</div>
+                    <div class="breakdown-value ${b.color}">${b.value}/${b.max}</div>
+                </div>
+            `).join('');
+
+            const correctNames = c.correctPrinciples.map(id => principles.find(p => p.id === id).name);
+
+            document.getElementById('expert-feedback').innerHTML = `
+                <div class="feedback-title">Экспертный разбор</div>
+                <div class="feedback-section">
+                    <div class="feedback-label">Правильные принципы</div>
+                    <p class="feedback-text"><strong>${correctNames.join('</strong> и <strong>')}</strong></p>
+                    <p class="feedback-text">${c.feedback.principles}</p>
+                </div>
+                <div class="feedback-section">
+                    <div class="feedback-label">Дилемма</div>
+                    <p class="feedback-text">${c.dilemma.explanation}</p>
+                </div>
+                <div class="feedback-section">
+                    <div class="feedback-label antipattern-label">Антипаттерн</div>
+                    <p class="feedback-text">${c.feedback.antipattern}</p>
+                </div>
+            `;
+
+            document.getElementById('submit-btn').style.display = 'none';
+            document.getElementById('next-btn').style.display = 'inline-block';
+            document.getElementById('next-btn').textContent =
+                G.round < cases.length - 1 ? 'Следующий кейс →' : 'Завершить игру';
+        }
+
+        function nextRound() {
+            G.round++;
+            if (G.round >= cases.length) {
+                endGame();
+            } else {
+                loadRound();
+            }
+        }
+
+        function endGame() {
+            document.getElementById('game-screen').style.display = 'none';
+            document.getElementById('dashboard').style.display = 'none';
+            document.getElementById('progress-container').style.display = 'none';
+            document.getElementById('end-screen').style.display = 'block';
+
+            const maxScore = cases.length * 180;
+            document.getElementById('final-score').textContent = G.score;
+            document.getElementById('final-max').textContent = `/ ${maxScore}`;
+
+            const verdict = document.getElementById('verdict');
+            verdict.classList.remove('fail', 'pass', 'good', 'expert');
+
+            if (G.score >= 1400) {
+                verdict.textContent = 'ЭКСПЕРТ GUIDING PRINCIPLES';
+                verdict.classList.add('expert');
+            } else if (G.score >= 1000) {
+                verdict.textContent = 'КОНСУЛЬТАНТ';
+                verdict.classList.add('good');
+            } else if (G.score >= 600) {
+                verdict.textContent = 'ПРАКТИК';
+                verdict.classList.add('pass');
+            } else {
+                verdict.textContent = 'НОВИЧОК';
+                verdict.classList.add('fail');
+            }
+
+            document.getElementById('stat-principles').textContent = G.stats.principlesCorrect;
+            document.getElementById('stat-dilemmas').textContent = G.stats.dilemmasCorrect;
+            document.getElementById('stat-streak').textContent = G.maxStreak;
+
+            // Mastery chart
+            const masteryGrid = document.getElementById('mastery-grid');
+            masteryGrid.innerHTML = '<h3 style="font-family: Russo One; color: var(--accent); margin-bottom: 12px; text-align: center;">Знание принципов</h3>' +
+                principles.map(p => {
+                    const data = G.stats.principleHits[p.id];
+                    const pct = data.shown > 0 ? Math.round((data.hit / data.shown) * 100) : -1;
+                    const color = pct >= 80 ? 'var(--success)' : pct >= 50 ? 'var(--warning)' : pct >= 0 ? 'var(--danger)' : 'var(--text-muted)';
+                    const displayPct = pct >= 0 ? pct + '%' : '—';
+                    const width = pct >= 0 ? pct : 0;
+                    return `
+                        <div class="mastery-row">
+                            <span class="mastery-label">${p.name}</span>
+                            <div class="mastery-bar">
+                                <div class="mastery-fill" style="width: ${width}%; background: ${color};"></div>
+                            </div>
+                            <span class="mastery-pct" style="color: ${color};">${displayPct}</span>
+                        </div>
+                    `;
+                }).join('');
+        }
+
+        function restartGame() {
+            document.getElementById('end-screen').style.display = 'none';
+            startGame();
+        }
+
+        function updateProgress() {
+            const pct = ((G.round + (G.answered ? 1 : 0)) / cases.length) * 100;
+            document.getElementById('progress-fill').style.width = pct + '%';
+            document.getElementById('progress-percent').textContent = Math.round(pct) + '%';
+        }
+    </script>
+</body>
+</html>
