@@ -1,0 +1,1028 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StartupOps: IT-архитектор стартапа</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0c0c0f;
+  --bg2:#141418;
+  --bg3:#1c1c22;
+  --bg4:#24242c;
+  --surface:#2a2a34;
+  --border:rgba(255,255,255,0.06);
+  --border2:rgba(255,255,255,0.1);
+  --t1:#f0ece4;
+  --t2:#a8a4a0;
+  --t3:#6a6660;
+  --orange:#ff6b2c;
+  --orange-dim:rgba(255,107,44,0.12);
+  --green:#2dd4a0;
+  --green-dim:rgba(45,212,160,0.12);
+  --red:#ff4757;
+  --red-dim:rgba(255,71,87,0.12);
+  --blue:#5b8cff;
+  --blue-dim:rgba(91,140,255,0.12);
+  --yellow:#ffc32b;
+  --yellow-dim:rgba(255,195,43,0.12);
+  --purple:#a78bfa;
+  --purple-dim:rgba(167,139,250,0.12);
+  --pink:#f472b6;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--t1);font-family:'Space Grotesk',sans-serif;min-height:100vh;overflow-x:hidden;}
+::-webkit-scrollbar{width:5px;}
+::-webkit-scrollbar-thumb{background:var(--surface);border-radius:3px;}
+
+/* ===== SCREENS ===== */
+.screen{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:500;padding:20px;}
+.screen.hidden{display:none !important;}
+.intro-bg{background:var(--bg);}
+.intro-box{max-width:680px;width:100%;}
+.intro-box .logo{font-family:'Syne',sans-serif;font-size:clamp(2rem,5vw,3.2rem);font-weight:800;letter-spacing:-1px;margin-bottom:4px;}
+.intro-box .logo .accent{color:var(--orange);}
+.intro-box .tagline{font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--t3);letter-spacing:2px;text-transform:uppercase;margin-bottom:28px;}
+.intro-box .brief{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:24px;font-size:.92rem;line-height:1.75;color:var(--t2);}
+.intro-box .brief strong{color:var(--t1);}
+.intro-box .brief em{color:var(--orange);font-style:normal;}
+.intro-box .brief .warn{display:inline-block;margin-top:12px;padding:8px 14px;background:var(--red-dim);border:1px solid rgba(255,71,87,.2);border-radius:8px;font-size:.82rem;color:var(--red);}
+.diff-select{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;}
+.diff-btn{flex:1;min-width:140px;padding:14px;border-radius:10px;border:2px solid var(--border2);background:var(--bg2);cursor:pointer;transition:.2s;text-align:left;color:var(--t1);}
+.diff-btn:hover{border-color:var(--orange);background:var(--orange-dim);}
+.diff-btn.selected{border-color:var(--orange);background:var(--orange-dim);}
+.diff-btn .d-name{font-weight:700;font-size:.95rem;margin-bottom:2px;}
+.diff-btn .d-desc{font-size:.72rem;color:var(--t3);}
+
+/* ===== BUTTONS ===== */
+.btn{font-family:'JetBrains Mono',monospace;font-weight:600;font-size:.8rem;padding:13px 28px;border:none;border-radius:8px;cursor:pointer;transition:.2s;letter-spacing:.5px;text-transform:uppercase;}
+.btn:disabled{opacity:.3;cursor:not-allowed;}
+.btn-primary{background:var(--orange);color:#000;}
+.btn-primary:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 4px 20px rgba(255,107,44,.3);}
+.btn-ghost{background:transparent;color:var(--t2);border:1px solid var(--border2);}
+.btn-ghost:hover{background:var(--bg3);color:var(--t1);}
+
+/* ===== MAIN LAYOUT ===== */
+.game-wrap{display:none;flex-direction:column;min-height:100vh;}
+.game-wrap.active{display:flex;}
+
+/* TOP BAR */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;background:var(--bg2);border-bottom:1px solid var(--border);flex-wrap:wrap;gap:8px;}
+.topbar .brand{font-family:'Syne',sans-serif;font-weight:800;font-size:1.05rem;letter-spacing:-0.5px;}
+.topbar .brand .accent{color:var(--orange);}
+.stage-badge{font-family:'JetBrains Mono',monospace;font-size:.7rem;padding:5px 12px;border-radius:20px;background:var(--orange-dim);color:var(--orange);border:1px solid rgba(255,107,44,.2);letter-spacing:1px;text-transform:uppercase;}
+.topbar-right{display:flex;gap:16px;align-items:center;}
+.turn-counter{font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--t3);}
+
+/* RESOURCES BAR */
+.resources-bar{display:flex;gap:6px;padding:10px 20px;background:var(--bg);border-bottom:1px solid var(--border);overflow-x:auto;flex-wrap:wrap;}
+.res-card{flex:1;min-width:130px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;}
+.res-card .res-label{font-size:.6rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--t3);margin-bottom:4px;}
+.res-card .res-val{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:1.15rem;}
+.res-card .res-bar{height:4px;background:var(--bg4);border-radius:2px;margin-top:6px;overflow:hidden;}
+.res-card .res-bar .fill{height:100%;border-radius:2px;transition:width .5s ease;}
+.res-val.orange{color:var(--orange);}
+.res-val.green{color:var(--green);}
+.res-val.red{color:var(--red);}
+.res-val.blue{color:var(--blue);}
+.res-val.yellow{color:var(--yellow);}
+.res-val.purple{color:var(--purple);}
+.res-delta{font-size:.65rem;margin-left:4px;font-weight:400;}
+.res-delta.pos{color:var(--green);}
+.res-delta.neg{color:var(--red);}
+
+/* MAIN GRID */
+.main-grid{display:grid;grid-template-columns:300px 1fr 280px;flex:1;overflow:hidden;}
+@media(max-width:1100px){.main-grid{grid-template-columns:1fr;}}
+
+/* LEFT PANEL */
+.left-panel{display:flex;flex-direction:column;border-right:1px solid var(--border);overflow-y:auto;background:var(--bg2);}
+.section{padding:16px;border-bottom:1px solid var(--border);}
+.section-title{font-family:'JetBrains Mono',monospace;font-size:.65rem;text-transform:uppercase;letter-spacing:2px;color:var(--t3);margin-bottom:10px;}
+.story-text{font-size:.85rem;line-height:1.7;color:var(--t2);}
+.story-text strong{color:var(--t1);}
+
+.event-log{font-size:.75rem;line-height:1.7;color:var(--t3);max-height:180px;overflow-y:auto;}
+.event-log .log-entry{padding:3px 0;border-bottom:1px solid rgba(255,255,255,.02);}
+.event-log .log-entry .log-turn{color:var(--orange);font-family:'JetBrains Mono',monospace;font-size:.65rem;}
+
+/* CENTER - BOARD */
+.center-area{display:flex;flex-direction:column;overflow-y:auto;padding:16px;}
+.board-stage-title{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:10px;}
+.board-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:16px;max-width:680px;}
+.cell{position:relative;aspect-ratio:1;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:.55rem;text-align:center;border:2px solid transparent;transition:.25s;padding:4px;cursor:default;min-height:54px;}
+.cell .c-num{position:absolute;top:3px;left:5px;font-family:'JetBrains Mono',monospace;font-size:.55rem;opacity:.35;}
+.cell .c-icon{font-size:1.2rem;margin-bottom:2px;}
+.cell .c-label{font-size:.48rem;opacity:.7;line-height:1.2;}
+.cell-infra{background:rgba(91,140,255,.06);border-color:rgba(91,140,255,.15);}
+.cell-team{background:rgba(45,212,160,.06);border-color:rgba(45,212,160,.15);}
+.cell-crisis{background:rgba(255,71,87,.06);border-color:rgba(255,71,87,.15);}
+.cell-client{background:rgba(255,195,43,.06);border-color:rgba(255,195,43,.15);}
+.cell-strategy{background:rgba(167,139,250,.06);border-color:rgba(167,139,250,.15);}
+.cell-market{background:rgba(255,107,44,.06);border-color:rgba(255,107,44,.15);}
+.cell-start{background:rgba(45,212,160,.1);border-color:rgba(45,212,160,.3);}
+.cell-finish{background:rgba(255,195,43,.1);border-color:rgba(255,195,43,.3);}
+.cell-audit{background:rgba(244,114,182,.06);border-color:rgba(244,114,182,.15);}
+.cell.active{transform:scale(1.08);z-index:2;box-shadow:0 0 20px rgba(255,107,44,.25);border-color:var(--orange);}
+.cell .token{position:absolute;width:20px;height:20px;border-radius:50%;background:var(--orange);box-shadow:0 0 10px rgba(255,107,44,.5);display:flex;align-items:center;justify-content:center;font-size:.6rem;z-index:3;transition:.4s cubic-bezier(.34,1.56,.64,1);}
+.cell.visited{opacity:.55;}
+.cell.visited.active{opacity:1;}
+
+/* CONTROLS */
+.controls{display:flex;gap:12px;align-items:center;justify-content:center;padding:12px;flex-wrap:wrap;}
+.dice-box{font-family:'JetBrains Mono',monospace;font-size:2rem;font-weight:800;width:60px;height:60px;display:flex;align-items:center;justify-content:center;background:var(--bg3);border:2px solid var(--border2);border-radius:10px;color:var(--orange);}
+.dice-box.spin{animation:dspin .08s infinite;}
+@keyframes dspin{0%,100%{transform:rotate(0)}50%{transform:rotate(8deg) scale(1.05)}}
+
+/* RIGHT PANEL */
+.right-panel{display:flex;flex-direction:column;border-left:1px solid var(--border);overflow-y:auto;background:var(--bg2);}
+.tech-stack{display:flex;flex-wrap:wrap;gap:5px;}
+.tech-tag{font-family:'JetBrains Mono',monospace;font-size:.65rem;padding:3px 8px;border-radius:4px;background:var(--bg4);color:var(--t2);border:1px solid var(--border);}
+.tech-tag.active-tech{background:var(--blue-dim);color:var(--blue);border-color:rgba(91,140,255,.2);}
+.decisions-list{font-size:.78rem;color:var(--t3);line-height:1.7;}
+.decisions-list .dec{padding:4px 0;border-bottom:1px solid rgba(255,255,255,.02);}
+.decisions-list .dec em{color:var(--orange);font-style:normal;}
+
+/* LEGEND */
+.legend{display:grid;grid-template-columns:1fr 1fr;gap:4px;font-size:.72rem;}
+.legend-item{display:flex;align-items:center;gap:6px;padding:3px 0;}
+.legend-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0;}
+
+/* ===== MODAL ===== */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.88);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;z-index:100;padding:16px;}
+.modal-overlay.show{display:flex;}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:14px;max-width:620px;width:100%;max-height:90vh;overflow-y:auto;animation:mIn .25s ease;}
+@keyframes mIn{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal-head{padding:20px 24px 0;display:flex;align-items:flex-start;gap:12px;}
+.modal-badge{font-family:'JetBrains Mono',monospace;font-size:.6rem;text-transform:uppercase;letter-spacing:2px;padding:4px 10px;border-radius:4px;flex-shrink:0;}
+.badge-infra{background:var(--blue-dim);color:var(--blue);}
+.badge-team{background:var(--green-dim);color:var(--green);}
+.badge-crisis{background:var(--red-dim);color:var(--red);}
+.badge-client{background:var(--yellow-dim);color:var(--yellow);}
+.badge-strategy{background:var(--purple-dim);color:var(--purple);}
+.badge-market{background:var(--orange-dim);color:var(--orange);}
+.badge-audit{background:rgba(244,114,182,.12);color:var(--pink);}
+.modal-body{padding:16px 24px 24px;}
+.modal-title{font-family:'Syne',sans-serif;font-weight:700;font-size:1.05rem;margin-bottom:4px;}
+.modal-context{font-size:.82rem;color:var(--t3);line-height:1.6;margin-bottom:16px;}
+.case-box{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:16px;font-size:.88rem;line-height:1.65;color:var(--t2);}
+.case-box strong{color:var(--t1);}
+.case-stakes{font-size:.75rem;color:var(--t3);margin-bottom:16px;padding:8px 12px;background:var(--bg);border-radius:6px;border-left:3px solid var(--orange);}
+.case-stakes strong{color:var(--orange);}
+
+.options-grid{display:flex;flex-direction:column;gap:8px;margin-bottom:16px;}
+.opt-btn{display:flex;align-items:flex-start;gap:12px;padding:14px;background:var(--bg);border:1px solid var(--border);border-radius:10px;cursor:pointer;transition:.2s;text-align:left;color:var(--t1);font-family:'Space Grotesk',sans-serif;font-size:.85rem;line-height:1.5;}
+.opt-btn:hover{border-color:var(--orange);background:var(--orange-dim);}
+.opt-btn .opt-letter{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.8rem;color:var(--orange);flex-shrink:0;width:24px;height:24px;display:flex;align-items:center;justify-content:center;background:var(--orange-dim);border-radius:4px;}
+.opt-btn.chosen-best{border-color:var(--green);background:var(--green-dim);}
+.opt-btn.chosen-ok{border-color:var(--yellow);background:var(--yellow-dim);}
+.opt-btn.chosen-bad{border-color:var(--red);background:var(--red-dim);}
+.opt-btn.not-chosen{opacity:.4;}
+
+.feedback-box{padding:14px;border-radius:10px;font-size:.84rem;line-height:1.6;margin-bottom:12px;display:none;}
+.feedback-box.show{display:block;}
+.feedback-box.fb-best{background:var(--green-dim);border:1px solid rgba(45,212,160,.2);color:var(--green);}
+.feedback-box.fb-ok{background:var(--yellow-dim);border:1px solid rgba(255,195,43,.2);color:var(--yellow);}
+.feedback-box.fb-bad{background:var(--red-dim);border:1px solid rgba(255,71,87,.2);color:var(--red);}
+.feedback-box .fb-title{font-weight:700;margin-bottom:4px;}
+.feedback-box .fb-effects{margin-top:8px;font-family:'JetBrains Mono',monospace;font-size:.72rem;}
+
+.itil-insight{margin-top:8px;padding:10px 14px;background:rgba(167,139,250,.06);border:1px solid rgba(167,139,250,.12);border-radius:8px;font-size:.78rem;color:var(--purple);line-height:1.5;}
+.itil-insight strong{color:var(--purple);}
+
+/* FINISH */
+.finish-overlay{position:fixed;inset:0;background:rgba(0,0,0,.92);display:none;align-items:center;justify-content:center;z-index:200;padding:20px;}
+.finish-overlay.show{display:flex;}
+.finish-card{background:var(--bg2);border:1px solid var(--border2);border-radius:16px;padding:32px;max-width:560px;width:100%;text-align:center;}
+.finish-card .f-title{font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:800;margin-bottom:8px;}
+.finish-card .f-score{font-family:'JetBrains Mono',monospace;font-size:3rem;font-weight:800;color:var(--orange);margin:12px 0;}
+.finish-card .f-rank{font-size:1rem;color:var(--green);margin-bottom:20px;}
+.f-stats{text-align:left;margin:16px 0;}
+.f-stat{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:.85rem;}
+.f-stat .f-v{font-family:'JetBrains Mono',monospace;color:var(--orange);font-weight:600;}
+.f-grade{margin:20px 0;padding:16px;border-radius:10px;font-size:.88rem;line-height:1.6;}
+.f-grade.grade-s{background:var(--green-dim);border:1px solid rgba(45,212,160,.2);color:var(--green);}
+.f-grade.grade-a{background:var(--blue-dim);border:1px solid rgba(91,140,255,.2);color:var(--blue);}
+.f-grade.grade-b{background:var(--yellow-dim);border:1px solid rgba(255,195,43,.2);color:var(--yellow);}
+.f-grade.grade-c{background:var(--red-dim);border:1px solid rgba(255,71,87,.2);color:var(--red);}
+</style>
+</head>
+<body>
+
+<!-- ==================== INTRO ==================== -->
+<div class="screen intro-bg" id="introScreen">
+<div class="intro-box">
+  <div class="logo">Startup<span class="accent">Ops</span></div>
+  <div class="tagline">// IT-архитектор растущего стартапа</div>
+  <div class="brief">
+    <strong>Вы — CTO стартапа «PulseApp»</strong>, платформы для мониторинга здоровья. Инвесторы дали денег, фаундер полон энтузиазма, а у вас... <em>один ноутбук и куча амбиций</em>.<br><br>
+    Ваша задача — провести стартап через <strong>5 стадий роста</strong>: от гаража до IPO. На каждом этапе — ключевые решения по IT-инфраструктуре, команде, процессам и клиентам.<br><br>
+    Здесь нет идеальных ответов. Каждое решение — <em>компромисс</em>. Вы управляете бюджетом, командой, техническим долгом, SLA и лояльностью клиентов. Один неверный шаг — и стартап может не пережить раунд.<br><br>
+    <span class="warn">⚠ Внимание: кейсы каверзные. Очевидный ответ — не всегда лучший.</span>
+  </div>
+  <div style="margin-bottom:16px;">
+    <div style="font-size:.75rem;color:var(--t3);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px;">Сложность:</div>
+    <div class="diff-select">
+      <div class="diff-btn selected" onclick="selectDiff(this,0)"><div class="d-name">🔥 Жёстко</div><div class="d-desc">Мало бюджета, суровые последствия</div></div>
+      <div class="diff-btn" onclick="selectDiff(this,1)"><div class="d-name">💀 Хардкор</div><div class="d-desc">Кризис за кризисом, выживите?</div></div>
+    </div>
+  </div>
+  <button class="btn btn-primary" onclick="startGame()" style="width:100%;padding:16px;">🚀 Запустить стартап</button>
+</div>
+</div>
+
+<!-- ==================== FINISH ==================== -->
+<div class="finish-overlay" id="finishOverlay">
+<div class="finish-card">
+  <div class="f-title" id="fTitle"></div>
+  <div class="f-score" id="fScore"></div>
+  <div class="f-rank" id="fRank"></div>
+  <div class="f-stats" id="fStats"></div>
+  <div class="f-grade" id="fGrade"></div>
+  <button class="btn btn-primary" onclick="location.reload()" style="width:100%;margin-top:12px;">🔄 Играть снова</button>
+</div>
+</div>
+
+<!-- ==================== MODAL ==================== -->
+<div class="modal-overlay" id="modalOverlay">
+<div class="modal" id="modal">
+  <div class="modal-head">
+    <span class="modal-badge" id="mBadge"></span>
+    <div><div class="modal-title" id="mTitle"></div><div class="modal-context" id="mCtx"></div></div>
+  </div>
+  <div class="modal-body">
+    <div class="case-box" id="mCase"></div>
+    <div class="case-stakes" id="mStakes"></div>
+    <div class="options-grid" id="mOptions"></div>
+    <div class="feedback-box" id="mFeedback"></div>
+    <div class="itil-insight" id="mItil" style="display:none;"></div>
+    <div id="mActions"></div>
+  </div>
+</div>
+</div>
+
+<!-- ==================== GAME ==================== -->
+<div class="game-wrap" id="gameWrap">
+  <div class="topbar">
+    <div class="brand">Startup<span class="accent">Ops</span></div>
+    <div class="stage-badge" id="stageBadge">Стадия 1: Гараж</div>
+    <div class="topbar-right">
+      <div class="turn-counter" id="turnCounter">Квартал 0</div>
+    </div>
+  </div>
+  <div class="resources-bar" id="resBar"></div>
+  <div class="main-grid">
+    <!-- LEFT -->
+    <div class="left-panel">
+      <div class="section">
+        <div class="section-title">📍 Ситуация</div>
+        <div class="story-text" id="storyText">Добро пожаловать в PulseApp...</div>
+      </div>
+      <div class="section">
+        <div class="section-title">📋 Журнал событий</div>
+        <div class="event-log" id="eventLog"></div>
+      </div>
+      <div class="section">
+        <div class="section-title">🏷️ Легенда</div>
+        <div class="legend">
+          <div class="legend-item"><div class="legend-dot" style="background:var(--blue);"></div>Инфраструктура</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--green);"></div>Команда</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--red);"></div>Кризис</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--yellow);"></div>Клиенты</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--purple);"></div>Стратегия</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--orange);"></div>Рынок</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--pink);"></div>Аудит</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CENTER -->
+    <div class="center-area">
+      <div class="board-stage-title" id="boardTitle">🏠 Стадия 1: Гараж</div>
+      <div class="board-grid" id="boardGrid"></div>
+      <div class="controls">
+        <div class="dice-box" id="dice">?</div>
+        <button class="btn btn-primary" id="rollBtn" onclick="rollDice()" disabled>🎲 Следующий квартал</button>
+      </div>
+    </div>
+
+    <!-- RIGHT -->
+    <div class="right-panel">
+      <div class="section">
+        <div class="section-title">🛠️ Тех-стек</div>
+        <div class="tech-stack" id="techStack"><span style="font-size:.75rem;color:var(--t3);">Пока пуст</span></div>
+      </div>
+      <div class="section">
+        <div class="section-title">📝 Принятые решения</div>
+        <div class="decisions-list" id="decisionsList"><span style="font-size:.75rem;color:var(--t3);">—</span></div>
+      </div>
+      <div class="section">
+        <div class="section-title">💡 ITIL-артефакты</div>
+        <div class="tech-stack" id="itilArtifacts"><span style="font-size:.75rem;color:var(--t3);">—</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ========================================
+// STATE
+// ========================================
+let difficulty = 0; // 0=hard, 1=hardcore
+const S = {
+  stage: 0, pos: 0, turn: 0,
+  budget: 100, team: 70, techDebt: 10, sla: 80, clients: 60, score: 0,
+  bestChoices: 0, okChoices: 0, badChoices: 0,
+  techStack: [], decisions: [], itilArtifacts: [],
+  visitedCells: new Set(), usedCases: new Set()
+};
+
+// ========================================
+// STAGES
+// ========================================
+const STAGES = [
+  { name:'Гараж', icon:'🏠', desc:'5 человек, один офис, большие мечты', cells:8 },
+  { name:'Seed', icon:'🌱', desc:'Первые инвестиции, первые клиенты', cells:9 },
+  { name:'Series A', icon:'🚀', desc:'Рост x10, всё трещит по швам', cells:10 },
+  { name:'Series B', icon:'📈', desc:'Корпоративные клиенты, SLA, аудиты', cells:10 },
+  { name:'IPO', icon:'👑', desc:'Большая игра. Ошибки стоят миллионы', cells:8 }
+];
+
+const CELL_TYPES = ['infra','team','crisis','client','strategy','market','audit'];
+function genStageBoard(stageIdx) {
+  const st = STAGES[stageIdx];
+  const board = [{ type:'start', icon:'▶️', label:'Старт' }];
+  const count = st.cells - 2;
+  // Weight crisis and audit higher in later stages
+  const weights = stageIdx < 2
+    ? { infra:3, team:3, client:2, strategy:2, market:2, crisis:1, audit:0 }
+    : { infra:2, team:2, client:3, strategy:2, market:2, crisis:3, audit:2 };
+  const pool = [];
+  for (const [t,w] of Object.entries(weights)) for (let i=0;i<w;i++) pool.push(t);
+  for (let i=0;i<count;i++) {
+    const t = pool[Math.floor(Math.random()*pool.length)];
+    const icons = {infra:'🖥️',team:'👥',crisis:'🔥',client:'🤝',strategy:'🧠',market:'📊',audit:'🔍'};
+    const labels = {infra:'Инфра',team:'Команда',crisis:'Кризис',client:'Клиенты',strategy:'Стратегия',market:'Рынок',audit:'Аудит'};
+    board.push({ type:t, icon:icons[t], label:labels[t] });
+  }
+  board.push({ type:'finish', icon:'🏁', label:'Далее' });
+  return board;
+}
+
+let currentBoard = [];
+
+// ========================================
+// CASES DATABASE — каверзные!
+// ========================================
+const CASES = {
+infra: [
+  {
+    title:'Выбор хостинга',
+    ctx:'Стадия ранняя, бюджет ограничен.',
+    case:'Нужно развернуть production-окружение. У вас 3 варианта. <strong>Фаундер настаивает на «серьёзном» облаке</strong>, потому что «так делают в Google».',
+    stakes:'На кону: бюджет, масштабируемость, время запуска.',
+    options:[
+      { text:'AWS/GCP с Kubernetes — «по-взрослому»', quality:'bad', effects:{budget:-25,techDebt:+5,sla:+5}, feedback:'Kubernetes для 5 человек и 100 пользователей — это оверинжиниринг. Вы потратите месяцы и деньги на настройку того, что пока не нужно.', itil:'Принцип «Придерживайтесь простоты»: избегайте излишней сложности. Мыслите от результата — вам нужен работающий продукт, а не идеальная инфра.' },
+      { text:'Простой VPS + Docker Compose', quality:'best', effects:{budget:-5,techDebt:+0,sla:+5}, feedback:'Отличный выбор! Минимум затрат, быстрый старт, легко мигрировать позже. Принцип простоты в действии.', itil:'Принцип «Начинайте с того, где вы находитесь»: ваш масштаб пока не требует сложной инфры. Оптимизируйте позже.' },
+      { text:'Heroku / Railway — PaaS без настройки', quality:'ok', effects:{budget:-10,techDebt:+0,sla:+3}, feedback:'Неплохо — быстрый старт. Но вендор-лок и растущие затраты при масштабировании. Компромисс.', itil:'Принцип «Продвигайтесь итеративно»: PaaS даёт быстрый старт, но контролируйте зависимость от вендора.' },
+    ],
+    artifact:'Hosting Strategy', techTag:'Docker'
+  },
+  {
+    title:'Мониторинг: нужен ли сейчас?',
+    ctx:'Продукт только запущен, 50 пользователей.',
+    case:'Разработчик предлагает потратить спринт на настройку полного стека мониторинга: Prometheus + Grafana + AlertManager + ELK. <strong>«Потом будет поздно»</strong>, говорит он.',
+    stakes:'На кону: скорость разработки vs наблюдаемость.',
+    options:[
+      { text:'Полный стек мониторинга сейчас', quality:'bad', effects:{budget:-15,techDebt:-5,sla:+5,team:-5}, feedback:'Спринт на мониторинг при 50 пользователях — роскошь. Команда демотивирована «инфра-задачами» вместо фич.', itil:'Принцип «Фокусируйтесь на ценности»: мониторинг важен, но ценность для 50 пользователей создаётся фичами.' },
+      { text:'Минимальный мониторинг: uptime-пинг + логи в stdout', quality:'best', effects:{budget:-2,techDebt:+3,sla:+2}, feedback:'Достаточно для текущего масштаба. Вы получите базовую видимость без потери скорости разработки.', itil:'Принцип «Продвигайтесь итеративно»: начните с минимума, расширяйте по мере роста.' },
+      { text:'Облачный SaaS-мониторинг (Datadog / New Relic)', quality:'ok', effects:{budget:-10,techDebt:+0,sla:+5}, feedback:'Работает, но дорого для стартапа. При росте счёт вырастет в 10 раз.', itil:'Принцип «Оптимизируйте»: SaaS удобен, но следите за cost-efficiency.' },
+    ],
+    artifact:null, techTag:'Monitoring'
+  },
+  {
+    title:'Монолит или микросервисы?',
+    ctx:'Продукт растёт, команда 15 человек.',
+    case:'Архитектор предлагает <strong>разбить монолит на 8 микросервисов</strong>. Аргумент: «Netflix так делает, и мы должны быть готовы к масштабу». Текущая нагрузка — 2000 RPM.',
+    stakes:'На кону: скорость разработки, сложность, масштабируемость.',
+    options:[
+      { text:'Полный переход на микросервисы', quality:'bad', effects:{budget:-20,techDebt:+15,team:-10,sla:-10}, feedback:'Катастрофа. 15 человек не могут поддерживать 8 сервисов. Distributed monolith хуже обычного монолита. Вы не Netflix.', itil:'Принцип «Мыслите целостно»: микросервисы — это не только код, но и DevOps, мониторинг, CI/CD, на каждый сервис. Оцените все 4 измерения.' },
+      { text:'Оставить монолит, улучшить модульность внутри', quality:'best', effects:{budget:-3,techDebt:-5,sla:+3}, feedback:'Мудрое решение. Модульный монолит — золотая середина для вашего масштаба. Микросервисы подождут.', itil:'«Начинайте с того, где вы находитесь» + «Простота»: не чините то, что не сломано. Оптимизируйте текущую архитектуру.' },
+      { text:'Выделить 2 самых нагруженных модуля в отдельные сервисы', quality:'ok', effects:{budget:-8,techDebt:+3,sla:+5}, feedback:'Разумный компромисс. Вы получите опыт с микросервисами без тотального хаоса.', itil:'«Продвигайтесь итеративно»: начните с малого, учитесь на каждом шаге.' },
+    ],
+    artifact:'Architecture Decision Record', techTag:'Microservices'
+  },
+  {
+    title:'CI/CD пайплайн',
+    ctx:'Деплой происходит вручную раз в 2 недели.',
+    case:'Релизы — боль. Последний деплой занял 4 часа и сломал прод. <strong>Разработчики деплоят через SSH на сервер</strong>. Тестов мало.',
+    stakes:'На кону: скорость доставки, надёжность, мораль команды.',
+    options:[
+      { text:'Полный CI/CD: тесты, staging, canary-деплой, автооткат', quality:'ok', effects:{budget:-12,techDebt:-10,sla:+8,team:+5}, feedback:'Хороший результат, но дорого и долго для текущего этапа. Canary-деплой при 3 серверах — излишество.', itil:'«Оптимизируйте и автоматизируйте» — но помните: СНАЧАЛА оптимизируйте процесс, потом автоматизируйте.' },
+      { text:'Базовый CI: автотесты + деплой одной кнопкой через GitHub Actions', quality:'best', effects:{budget:-3,techDebt:-8,sla:+5,team:+8}, feedback:'Идеально для текущего масштаба! Быстрый результат, команда счастлива, процесс улучшен.', itil:'«Оптимизируйте перед автоматизацией»: сначала стандартизировали процесс, потом автоматизировали ключевое.' },
+      { text:'Написать документацию по ручному деплою и нанять DevOps', quality:'bad', effects:{budget:-15,techDebt:+5,team:-3}, feedback:'Документация ручного хаоса — всё ещё хаос. DevOps-инженер будет скучать без автоматизации.', itil:'Нарушение принципа «Оптимизируйте и автоматизируйте»: вы зафиксировали плохой процесс вместо его улучшения.' },
+    ],
+    artifact:'CI/CD Pipeline', techTag:'CI/CD'
+  },
+  {
+    title:'Безопасность данных',
+    ctx:'У вас медицинские данные пользователей.',
+    case:'Пентестер нашёл <strong>SQL-инъекцию и незашифрованные пароли</strong> в базе. Фаундер: «Мы маленькие, нас никто не атакует. Давайте лучше фичи пилить».',
+    stakes:'На кону: безопасность, репутация, юридические риски.',
+    options:[
+      { text:'Согласиться с фаундером — фичи важнее', quality:'bad', effects:{techDebt:+15,clients:-5,sla:-5}, feedback:'КРИТИЧЕСКАЯ ОШИБКА. Утечка медицинских данных = конец стартапа. Не вопрос приоритетов, а вопрос выживания.', itil:'Нарушение принципа «Мыслите целостно»: безопасность — не отдельная задача, а часть ценности услуги для клиента.' },
+      { text:'Немедленно исправить критические уязвимости, план на остальное', quality:'best', effects:{budget:-5,techDebt:-8,sla:+3,clients:+3}, feedback:'Правильно. Критическое сейчас, план на остальное. Баланс между скоростью и безопасностью.', itil:'«Начинайте с того, где вы» + «Итеративно»: оцените текущие риски, исправьте критичное, планируйте остальное.' },
+      { text:'Полный аудит безопасности + нанять CISO', quality:'ok', effects:{budget:-20,techDebt:-10,team:-3}, feedback:'Избыточно для стартапа. CISO будет просить бюджет, которого нет. Но уязвимости закроете.', itil:'Нарушение «Простоты»: для стартапа из 15 человек CISO — перебор. Масштабируйте безопасность постепенно.' },
+    ],
+    artifact:'Security Policy', techTag:'InfoSec'
+  }
+],
+team: [
+  {
+    title:'Первый найм',
+    ctx:'Вы один, нужны люди.',
+    case:'У вас бюджет на <strong>2 найма</strong>. Кандидаты: сениор-фуллстек (дорогой, опытный), два мидла (дешевле, мотивированы), или один мидл + фрилансер на аутсорсе.',
+    stakes:'На кону: скорость разработки, культура, бюджет.',
+    options:[
+      { text:'Один сениор-фуллстек', quality:'ok', effects:{budget:-15,team:+5,techDebt:-5}, feedback:'Сениор — надёжно, но одна точка отказа. Если уйдёт — всё с ним.', itil:'Принцип «Мыслите целостно»: один человек = bus factor 1. Учтите все измерения, включая людей.' },
+      { text:'Два мидла', quality:'best', effects:{budget:-10,team:+10,techDebt:+3}, feedback:'Оптимально. Два мотивированных разработчика создают команду, а не зависимость от одного человека.', itil:'«Сотрудничество и прозрачность»: команда > индивидуал. Двое уже могут делать code review.' },
+      { text:'Мидл + фрилансер', quality:'bad', effects:{budget:-8,team:+2,techDebt:+10}, feedback:'Фрилансер напишет код и уйдёт. Знания утекут. Техдолг вырастет — его код никто не понимает.', itil:'Нарушение «Мыслите целостно»: аутсорс без управления знаниями = бомба замедленного действия.' },
+    ],
+    artifact:null, techTag:null
+  },
+  {
+    title:'Звёздный разработчик',
+    ctx:'У вас уже команда из 10 человек.',
+    case:'<strong>Лучший разработчик</strong> (пишет 40% кода) требует повышение зарплаты в 2 раза. Если откажете — уйдёт к конкуренту. Другие разработчики получают значительно меньше.',
+    stakes:'На кону: мораль команды, знания, бюджет, справедливость.',
+    options:[
+      { text:'Повысить зарплату в 2 раза', quality:'bad', effects:{budget:-15,team:-10}, feedback:'Узнав об этом, остальные возмутятся. «Шантажом можно получить что хочешь» — токсичный сигнал. Мораль команды рухнет.', itil:'Нарушение «Сотрудничества и прозрачности»: непрозрачные решения по зарплатам разрушают доверие в команде.' },
+      { text:'Отпустить и распределить его задачи', quality:'ok', effects:{team:-5,techDebt:+8,sla:-5}, feedback:'Болезненно, но справедливо. Bus factor — ваша вина. Теперь вы это знаете и можете распределить знания.', itil:'«Начинайте с того, где вы»: признайте проблему зависимости от одного человека. Начните парное программирование.' },
+      { text:'Повысить разумно + план развития для всей команды', quality:'best', effects:{budget:-8,team:+5,techDebt:+3}, feedback:'Мудро. Вы признаёте ценность, но не создаёте прецедент шантажа. Прозрачная система роста для всех.', itil:'«Фокус на ценности» + «Сотрудничество»: ценность создаётся командой, а не героем. Системное решение лучше реактивного.' },
+    ],
+    artifact:'Team Growth Framework', techTag:null
+  },
+  {
+    title:'Burnout в команде',
+    ctx:'Третий месяц переработок перед релизом.',
+    case:'Два разработчика написали <strong>заявления на увольнение</strong>. Тимлид на грани. Фаундер говорит: «Ещё 2 недели — и релиз. Потом отдохнём». Дедлайн — контракт с крупным клиентом.',
+    stakes:'На кону: люди, дедлайн, репутация.',
+    options:[
+      { text:'Дожать: «Ещё 2 недели, потом отпуска всем»', quality:'bad', effects:{team:-15,sla:+3,clients:+5,techDebt:+10}, feedback:'Вы «дожали», но потеряли людей. Новые релизы откатятся на месяцы. Качество кода — мусор. Это был пиррова победа.', itil:'Нарушение ВСЕХ принципов. Особенно «Мыслите целостно»: релиз — не цель, а часть потока ценности. Выгоревшая команда не создаёт ценность.' },
+      { text:'Сократить scope релиза, дать отдых, отправить MVP', quality:'best', effects:{team:+8,sla:-3,clients:+2,techDebt:-3}, feedback:'Клиент получит 80% от обещанного, но команда выживет. MVP подход + итеративные улучшения после.', itil:'«Продвигайтесь итеративно с обратной связью»: MVP сейчас, доработка потом. «Фокус на ценности» — ценность ≠ всё и сразу.' },
+      { text:'Нанять аутсорс-команду для помощи', quality:'ok', effects:{budget:-20,team:+2,techDebt:+8}, feedback:'Временная помощь, но аутсорсеры без контекста добавят техдолга. Проблему burnout это не решает.', itil:'Не решает корневую причину. «Начинайте с того, где вы» — проблема в процессе, а не в количестве рук.' },
+    ],
+    artifact:'Sustainable Pace Policy', techTag:null
+  }
+],
+crisis: [
+  {
+    title:'Production down!',
+    ctx:'Пятница, 18:00. Главный сервис лежит.',
+    case:'<strong>Прод упал</strong>. 5000 пользователей без доступа. Мониторинг показывает: база данных переполнена. Последний бэкап — 3 дня назад. <strong>CEO звонит инвесторам через час.</strong>',
+    stakes:'На кону: данные, SLA, доверие инвесторов, нервы.',
+    options:[
+      { text:'Всех поднять — чинить одновременно базу, бэкапы, приложение', quality:'bad', effects:{team:-10,sla:-5,techDebt:+5}, feedback:'Хаос. 7 человек в одном SSH-терминале = конфликты, перезатирание изменений. Без координации это паника, а не инцидент-менеджмент.', itil:'Нарушение практики «Управление инцидентами»: нужен один incident commander, чёткие роли, приоритизация.' },
+      { text:'Один incident commander: приоритет — восстановить сервис, потом разбираться', quality:'best', effects:{sla:-2,team:-2,techDebt:+3}, feedback:'Правильно. Сначала восстановление, потом RCA. Incident commander координирует, остальные выполняют.', itil:'Практика «Управление инцидентами» + «Поставка и поддержка»: приоритет #1 — восстановить нормальную работу сервиса.' },
+      { text:'Откатить последний деплой — может, это он сломал', quality:'ok', effects:{sla:-3,techDebt:+2}, feedback:'Быстрая гипотеза, но без диагностики это лотерея. В этот раз проблема в базе, а не в коде. Вы потеряли время.', itil:'«Начинайте с того, где вы»: не делайте предположений. Сначала диагностика, потом действия.' },
+    ],
+    artifact:'Incident Response Playbook', techTag:'Incident Mgmt'
+  },
+  {
+    title:'Утечка данных',
+    ctx:'СМИ написали, что данные пользователей утекли.',
+    case:'В Telegram-канале появился дамп <strong>email-адресов и хешированных паролей</strong> ваших пользователей. Пресса подхватила. Фаундер хочет <strong>«тихо починить и не привлекать внимание»</strong>.',
+    stakes:'На кону: репутация, юридические последствия, доверие.',
+    options:[
+      { text:'Тихо исправить уязвимость, не информировать пользователей', quality:'bad', effects:{clients:-20,techDebt:+5,sla:-5}, feedback:'КАТАСТРОФА. Когда правда выйдет (а она выйдет), последствия будут в 10 раз хуже. Нарушение законов о персональных данных.', itil:'Грубейшее нарушение «Сотрудничества и прозрачности». Прозрачность — не опция, а обязанность.' },
+      { text:'Немедленно уведомить всех: пользователей, регулятора, СМИ. Сбросить пароли.', quality:'best', effects:{clients:-5,budget:-5,sla:+5,team:+5}, feedback:'Больно, но правильно. Прозрачность и быстрая реакция = доверие. Многие компании выходили из таких кризисов сильнее.', itil:'«Сотрудничество и прозрачность» + «Взаимодействие (Engage)»: честная коммуникация со стейкхолдерами — основа доверия.' },
+      { text:'Уведомить только затронутых пользователей', quality:'ok', effects:{clients:-10,budget:-3}, feedback:'Полумера. Если масштаб утечки окажется больше, вы опять будете догонять ситуацию.', itil:'«Мыслите целостно»: инцидент безопасности затрагивает ВСЮ экосистему, не только конкретных пользователей.' },
+    ],
+    artifact:'Incident Communication Plan', techTag:'Security'
+  },
+  {
+    title:'Каскадный отказ',
+    ctx:'Новая фича вызвала цепную реакцию.',
+    case:'Деплой нового модуля оплаты <strong>вызвал каскадный отказ</strong>: упал платёжный сервис → не работает авторизация → лежит весь продукт. У вас нет feature flags. Откат занимает 30 минут.',
+    stakes:'На кону: деньги клиентов, SLA, техническая архитектура.',
+    options:[
+      { text:'Откатить весь релиз немедленно', quality:'best', effects:{sla:-3,techDebt:+2,clients:-2}, feedback:'Правильно. Откат — боль, но 30 минут даунтайма лучше, чем часы. После — RCA и внедрение feature flags.', itil:'«Управление инцидентами»: восстановление сервиса — приоритет. «Управление изменениями»: после инцидента — change review.' },
+      { text:'Хотфикс прямо на проде — быстрее отката', quality:'bad', effects:{sla:-8,techDebt:+10,team:-5}, feedback:'Хотфикс на проде в панике = ещё больше проблем. Вы починили оплату, но сломали уведомления. Каскад продолжился.', itil:'Нарушение «Оптимизируйте перед автоматизацией»: хотфикс на проде — антипаттерн. Нет процесса = нет контроля.' },
+      { text:'Отключить только модуль оплаты, остальное оставить', quality:'ok', effects:{sla:-5,clients:-5,techDebt:+3}, feedback:'Логично, но без feature flags вы не можете отключить один модуль. Пришлось писать срочный костыль.', itil:'«Начинайте с того, где вы»: если нет feature flags, это не вариант. Не предполагайте возможности, которых нет.' },
+    ],
+    artifact:'Feature Flags Policy', techTag:'Feature Flags'
+  },
+  {
+    title:'DDoS-атака',
+    ctx:'Конкурент (предположительно) организовал атаку.',
+    case:'<strong>Мощная DDoS-атака</strong> уже 2 часа. Сервис недоступен. У вас нет CDN и WAF. Облачный провайдер предлагает «DDoS Protection» за $5000/мес. Фаундер: <strong>«Подождём, может, прекратится»</strong>.',
+    stakes:'На кону: доступность, бюджет, клиенты уходят прямо сейчас.',
+    options:[
+      { text:'Подождать — может, атака прекратится', quality:'bad', effects:{sla:-15,clients:-10}, feedback:'4 часа даунтайма. 30% пользователей ушли к конкуренту. «Подождать» — не стратегия, а капитуляция.', itil:'Нарушение «Фокуса на ценности»: пока вы ждёте, клиенты теряют ценность. Каждая минута простоя — потерянное доверие.' },
+      { text:'Подключить Cloudflare (бесплатный тариф) + базовые правила', quality:'best', effects:{budget:-2,sla:-3,techDebt:+2}, feedback:'Быстрое и экономичное решение. Cloudflare Free снимает базовый DDoS. Не идеально, но работает.', itil:'«Простота и практичность» + «Итеративно»: простое решение сейчас, улучшение позже.' },
+      { text:'Купить DDoS Protection за $5000/мес', quality:'ok', effects:{budget:-20,sla:-2}, feedback:'Работает, но дорого. Для стартапа $60K/год — серьёзная статья. Есть более экономичные варианты.', itil:'«Фокус на ценности»: решение эффективно, но пропорционально ли стоимость полученной ценности?' },
+    ],
+    artifact:'DDoS Mitigation Plan', techTag:'CDN/WAF'
+  }
+],
+client: [
+  {
+    title:'Enterprise-клиент с требованиями',
+    ctx:'Крупная корпорация хочет стать клиентом.',
+    case:'Корпорация «МегаХелс» готова подписать контракт на <strong>$500K/год</strong>, но требует: 99.9% SLA, SOC2 аудит, выделенный инстанс, 24/7 поддержку. <strong>У вас ничего этого нет.</strong>',
+    stakes:'На кону: огромный контракт, ресурсы, честность.',
+    options:[
+      { text:'Подписать контракт, потом разбираться', quality:'bad', effects:{budget:+20,sla:-15,techDebt:+15,team:-10,clients:-5}, feedback:'Вы подписали контракт, который не можете выполнить. Через 3 месяца — штрафы за нарушение SLA, команда выгорает, остальные клиенты страдают.', itil:'Нарушение «Мыслите целостно»: один клиент ≠ весь бизнес. Обещания без возможности их выполнить разрушают ценность.' },
+      { text:'Честно сказать, что не готовы, предложить roadmap на 6 месяцев', quality:'best', effects:{budget:+5,clients:+5,team:+3}, feedback:'Уважение. «МегаХелс» оценит честность и подпишет LOI с условием достижения требований. Вы получаете время и мотивацию.', itil:'«Фокус на ценности» + «Сотрудничество»: честность — основа взаимоотношений. «Взаимодействие (Engage)»: поймите ожидания и управляйте ими.' },
+      { text:'Подписать с оговорками: поэтапное достижение SLA за 3 месяца', quality:'ok', effects:{budget:+10,sla:-5,techDebt:+8,team:-5}, feedback:'Рискованно, но честно. Если выполните — отлично. Но давление на команду будет серьёзным.', itil:'«Итеративный подход»: поэтапные цели — верная тактика. Но убедитесь, что они реалистичны.' },
+    ],
+    artifact:'SLA Framework', techTag:'SLA 99.9%'
+  },
+  {
+    title:'Клиент просит «маленькую доработку»',
+    ctx:'Крупный клиент платит 30% вашего дохода.',
+    case:'Клиент просит «<strong>небольшую кнопочку</strong>». В реальности это изменение архитектуры на 2 месяца. Если откажете — уйдёт. Если согласитесь — другие фичи встанут.',
+    stakes:'На кону: один клиент vs развитие продукта.',
+    options:[
+      { text:'Сделать всё, что просит — он платит 30%', quality:'bad', effects:{budget:+5,techDebt:+12,team:-8,clients:-3}, feedback:'Вы стали аутсорс-командой одного клиента. Продукт перестал развиваться. Другие клиенты уходят, потому что их запросы игнорируются.', itil:'Нарушение «Фокуса на ценности»: ценность = для ВСЕХ стейкхолдеров, не для одного. Зависимость от одного клиента — риск.' },
+      { text:'Проанализировать запрос: что ценно для всех клиентов?', quality:'best', effects:{budget:+2,techDebt:+2,clients:+5}, feedback:'Элегантно. Вы нашли общее ядро запроса и сделали фичу, полезную всем. Клиент доволен, продукт вырос.', itil:'«Фокус на ценности»: найдите, что ценно не для одного, а для всех. «Взаимодействие»: поймите истинную потребность за запросом.' },
+      { text:'Предложить клиенту оплатить кастомную доработку отдельно', quality:'ok', effects:{budget:+8,techDebt:+8,team:-3}, feedback:'Бизнес-подход, но кастомный код = техдолг. Вы теперь поддерживаете две версии продукта.', itil:'«Простота»: каждая кастомизация увеличивает сложность. «Мыслите целостно» — учтите долгосрочные последствия.' },
+    ],
+    artifact:null, techTag:null
+  }
+],
+strategy: [
+  {
+    title:'Технический долг vs фичи',
+    ctx:'Техдолг копится уже полгода.',
+    case:'Бэкенд на скотче и молитвах. Тесты покрывают 15% кода. <strong>Каждый новый релиз ломает что-то старое.</strong> Фаундер: «Клиентам нужны фичи, а не рефакторинг. Рефакторинг не продаёшь инвесторам».',
+    stakes:'На кону: скорость разработки, стабильность, будущее продукта.',
+    options:[
+      { text:'Фаундер прав — фичи в приоритете, техдолг подождёт', quality:'bad', effects:{techDebt:+15,clients:+3,sla:-8,team:-5}, feedback:'Через 3 месяца скорость разработки упала в 3 раза. Каждая фича ломает две старых. Техдолг — это налог на скорость, и вы обанкротились.', itil:'Нарушение «Постоянного улучшения»: игнорирование техдолга = замедление всей системы создания ценности.' },
+      { text:'20% спринта на техдолг + правило «бойскаута» (оставь код чище)', quality:'best', effects:{techDebt:-8,clients:+1,sla:+5,team:+8}, feedback:'Золотое правило. Постоянное улучшение небольшими шагами. Через 2 месяца скорость выросла, баги уменьшились, команда счастлива.', itil:'«Постоянное улучшение» + «Итеративный подход»: не ждите, пока техдолг станет критичным. Маленькие улучшения каждый день.' },
+      { text:'Заморозить фичи на месяц — полный рефакторинг', quality:'ok', effects:{techDebt:-12,clients:-8,team:+3}, feedback:'Техдолг снизился, но клиенты месяц без обновлений = конкурент забрал 10% базы. Баланс нарушен.', itil:'Нарушение «Фокуса на ценности»: полная остановка поставки ценности — крайняя мера. «Итеративно» — лучше понемногу.' },
+    ],
+    artifact:'Tech Debt Policy', techTag:'Boy Scout Rule'
+  },
+  {
+    title:'Build vs Buy',
+    ctx:'Нужна система уведомлений.',
+    case:'Команда хочет <strong>написать свою систему push/email/sms уведомлений</strong>. «Мы сделаем лучше и дешевле». Альтернатива — SaaS-сервисы (SendGrid, Twilio) или open-source (Novu).',
+    stakes:'На кону: время, бюджет, фокус команды.',
+    options:[
+      { text:'Писать своё — полный контроль', quality:'bad', effects:{budget:-5,techDebt:+12,team:-8,sla:-3}, feedback:'3 месяца на «простую систему уведомлений». В итоге — багнутый велосипед, который хуже бесплатных аналогов. Команда могла делать продукт.', itil:'Нарушение «Простоты» и «Фокуса на ценности»: уведомления — не ваш core business. Не изобретайте колесо.' },
+      { text:'SaaS (SendGrid + Twilio)', quality:'ok', effects:{budget:-8,techDebt:+0,sla:+3}, feedback:'Работает, но расходы будут расти с базой пользователей. При 100K пользователей счёт станет ощутимым.', itil:'«Получение/создание (Obtain/Build)»: иногда «получить» эффективнее, чем «создать». Но контролируйте зависимости.' },
+      { text:'Open-source (Novu) + минимальная обвязка', quality:'best', effects:{budget:-2,techDebt:+2,sla:+3,team:+3}, feedback:'Оптимально. Контроль, экономия, сообщество. Команда фокусируется на продукте, а не на инфраструктуре уведомлений.', itil:'«Простота» + «Оптимизация»: используйте готовое, адаптируйте под себя, фокусируйтесь на ценности.' },
+    ],
+    artifact:'Build vs Buy Matrix', techTag:'Novu'
+  },
+  {
+    title:'Процессы управления изменениями',
+    ctx:'Стартап вырос до 40 человек.',
+    case:'За последний месяц <strong>3 инцидента из-за незакоординированных изменений</strong>. Один разработчик изменил API, не предупредив фронтенд. Другой мигрировал базу в рабочее время. CTO (вы) думаете о Change Management.',
+    stakes:'На кону: стабильность vs скорость, бюрократия vs хаос.',
+    options:[
+      { text:'ITIL-style CAB: все изменения через комитет одобрения', quality:'bad', effects:{team:-10,techDebt:-3,sla:+3}, feedback:'Стартап со скоростью госкорпорации. Разработчики бунтуют, time-to-market вырос в 5 раз. Вы убили agile-культуру.', itil:'«Простота»: полный CAB для стартапа — оверкилл. Change Enablement в ITIL 4 — не бюрократия, а СОДЕЙСТВИЕ изменениям.' },
+      { text:'Лёгкий процесс: PR review + автотесты + deploy window', quality:'best', effects:{techDebt:-5,sla:+5,team:+5}, feedback:'Идеально. Минимальная бюрократия, максимум защиты. PR review = peer control, автотесты = автоматическая проверка, deploy window = предсказуемость.', itil:'Change Enablement (не Control!): содействие изменениям. «Оптимизируйте и автоматизируйте» — автотесты вместо ручных проверок.' },
+      { text:'Никаких процессов — мы стартап, двигаемся быстро', quality:'ok', effects:{techDebt:+5,sla:-5,team:+3}, feedback:'«Move fast and break things» — пока не сломаете продакшен клиента. Свобода без ответственности = хаос.', itil:'Баланс «Простоты» и «Целостности»: отсутствие процессов — тоже крайность. Нужен минимально достаточный контроль.' },
+    ],
+    artifact:'Change Enablement Process', techTag:'Change Mgmt'
+  }
+],
+market: [
+  {
+    title:'Конкурент скопировал продукт',
+    ctx:'Крупная компания запустила аналог.',
+    case:'<strong>HealthCorp (бюджет x100 ваш)</strong> запустил продукт-клон с бесплатным тарифом. Ваши пользователи начинают мигрировать. Команда в панике.',
+    stakes:'На кону: выживание, стратегия, мораль.',
+    options:[
+      { text:'Ценовая война — сделать бесплатный тариф', quality:'bad', effects:{budget:-20,clients:-3,team:-5}, feedback:'Вы не можете конкурировать бюджетом с корпорацией. Бесплатный тариф сожжёт ваши деньги за 6 месяцев.', itil:'Нарушение «Фокуса на ценности»: конкуренция ценой — это гонка ко дну. Ценность ≠ цена.' },
+      { text:'Фокус на нише: уникальные фичи, которые корпорация не скопирует', quality:'best', effects:{budget:-5,clients:+5,team:+8}, feedback:'Стартап побеждает фокусом, а не масштабом. Вы удвоили усилия на UX для вашей ниши. Лояльные пользователи остались.', itil:'«Фокус на ценности»: поймите, какая УНИКАЛЬНАЯ ценность у вас. «Начинайте с того, где вы» — ваше преимущество: скорость и фокус.' },
+      { text:'Искать покупателя / merger', quality:'ok', effects:{budget:+10,team:-8}, feedback:'Возможно, разумно. Но это капитуляция. Команда демотивирована, лучшие уйдут.', itil:'Стратегическое решение на уровне «Управления (Governance)»: оценка, направление, мониторинг.' },
+    ],
+    artifact:null, techTag:null
+  },
+  {
+    title:'Регуляторные требования',
+    ctx:'Новый закон о персональных данных.',
+    case:'Вступает в силу <strong>новый закон о хранении медицинских данных</strong>: локализация в РФ, аудит, сертификация. Дедлайн — 4 месяца. Штрафы до 10 млн руб. Переезд инфры займёт ~3 месяца.',
+    stakes:'На кону: юридическое существование, бюджет, архитектура.',
+    options:[
+      { text:'Начать переезд немедленно, отложив все фичи', quality:'ok', effects:{budget:-15,techDebt:+5,clients:-5,sla:-3}, feedback:'Успеете, но 4 месяца без фич = недовольные клиенты. Вы были реактивны — могли следить за законодательством заранее.', itil:'«Планирование (Plan)»: мониторинг внешней среды — часть планирования. Не должно быть сюрпризом.' },
+      { text:'Гибридный подход: критичные данные мигрировать, остальное — потом', quality:'best', effects:{budget:-8,techDebt:+3,clients:-2,sla:-2}, feedback:'Умный приоритет. Вы закрыли юридический минимум и продолжили развитие. Итеративная миграция.', itil:'«Итеративный подход» + «Начинайте с того, где вы»: оцените, ЧТО нужно мигрировать немедленно, а что может подождать.' },
+      { text:'Нанять юриста, найти лазейку в законе', quality:'bad', effects:{budget:-10,techDebt:+0,clients:+0}, feedback:'Лазейки нет. Вы потеряли 2 месяца и $20K на юристов. Теперь у вас 2 месяца на 3-месячную работу.', itil:'«Мыслите целостно»: юридический риск — часть системы. Нельзя игнорировать внешние факторы (PESTLE).' },
+    ],
+    artifact:'Compliance Roadmap', techTag:'Data Localization'
+  }
+],
+audit: [
+  {
+    title:'SOC2 аудит',
+    ctx:'Enterprise-клиент требует SOC2.',
+    case:'Для подписания контракта на $1M нужен <strong>SOC2 Type II сертификат</strong>. Аудит занимает 6-12 месяцев. У вас нет: формализованных процессов, политики безопасности, логирования доступа. <strong>Контракт ждут 3 месяца.</strong>',
+    stakes:'На кону: миллионный контракт, зрелость процессов.',
+    options:[
+      { text:'Пообещать SOC2 через 3 месяца (нереалистично)', quality:'bad', effects:{clients:-8,techDebt:+5,team:-5}, feedback:'Невыполненное обещание = потерянный контракт + подмоченная репутация. SOC2 Type II физически невозможно за 3 месяца.', itil:'«Начинайте с того, где вы»: честно оцените текущее состояние. Ложные обещания разрушают ценность.' },
+      { text:'Предложить SOC2 Type I за 3 мес + Type II roadmap', quality:'best', effects:{budget:-10,techDebt:-5,clients:+5,sla:+3}, feedback:'Реалистично и профессионально. Type I = текущие контроли на момент, Type II = контроли работают 6+ мес. Клиент оценит зрелость подхода.', itil:'«Итеративный подход» + «Взаимодействие (Engage)»: управляйте ожиданиями, предлагайте поэтапный план.' },
+      { text:'Отказаться от контракта — не готовы', quality:'ok', effects:{clients:-3,team:-3}, feedback:'Честно, но упущенная возможность. SOC2 пригодится и для других клиентов.', itil:'«Фокус на ценности»: SOC2 — инвестиция, а не трата. Ценность = долгосрочная, не только текущий контракт.' },
+    ],
+    artifact:'SOC2 Compliance Plan', techTag:'SOC2'
+  },
+  {
+    title:'Post-mortem после инцидента',
+    ctx:'Крупный инцидент, клиенты пострадали.',
+    case:'После 6-часового даунтайма <strong>фаундер хочет найти виноватого</strong>: «Кто это сделал? Он будет наказан!». Команда в страхе. Реальная причина — отсутствие процесса проверки деплоев.',
+    stakes:'На кону: культура, доверие, предотвращение будущих инцидентов.',
+    options:[
+      { text:'Назначить виноватого и объявить выговор', quality:'bad', effects:{team:-15,techDebt:+5}, feedback:'Культура страха. Разработчики начнут скрывать ошибки, не деплоить, не экспериментировать. Инциденты не уменьшатся — их просто будут прятать.', itil:'Нарушение ВСЕХ принципов. Особенно «Сотрудничество и прозрачность»: карательная культура убивает прозрачность.' },
+      { text:'Blameless post-mortem: системная причина, не виновник', quality:'best', effects:{team:+10,techDebt:-5,sla:+5}, feedback:'Лучшая практика индустрии. Вы нашли 5 системных проблем и внедрили 5 улучшений. Команда чувствует безопасность для честности.', itil:'«Постоянное улучшение» + «Сотрудничество»: blameless culture + «Управление проблемами»: ищите корневую причину, не виноватого.' },
+      { text:'Тихо исправить проблему без разбора полётов', quality:'ok', effects:{techDebt:+3}, feedback:'Проблему починили, но не извлекли уроки. Похожий инцидент повторится через 2 месяца.', itil:'Нарушение «Постоянного улучшения»: без анализа нет обучения. «Где мы сейчас?» → «Куда хотим?» → «Как добраться?»' },
+    ],
+    artifact:'Blameless Post-mortem Template', techTag:'SRE Culture'
+  }
+]
+};
+
+// ========================================
+// DIFFICULTY SETTINGS
+// ========================================
+const DIFF = [
+  { budgetMod:1, penaltyMod:1, startBudget:100 },
+  { budgetMod:0.7, penaltyMod:1.5, startBudget:70 }
+];
+
+function selectDiff(el, d) {
+  document.querySelectorAll('.diff-btn').forEach(b=>b.classList.remove('selected'));
+  el.classList.add('selected');
+  difficulty = d;
+}
+
+// ========================================
+// RENDERING
+// ========================================
+function renderResources() {
+  const bar = document.getElementById('resBar');
+  const res = [
+    { key:'budget', label:'Бюджет', val:S.budget, max:200, color:'orange', unit:'K$' },
+    { key:'team', label:'Команда', val:S.team, max:100, color:'green', unit:'%' },
+    { key:'techDebt', label:'Техдолг', val:S.techDebt, max:100, color:'red', unit:'%', invert:true },
+    { key:'sla', label:'SLA', val:S.sla, max:100, color:'blue', unit:'%' },
+    { key:'clients', label:'Клиенты', val:S.clients, max:100, color:'yellow', unit:'%' },
+    { key:'score', label:'Очки', val:S.score, max:999, color:'purple', unit:'' },
+  ];
+  bar.innerHTML = res.map(r => {
+    const pct = Math.max(0,Math.min(100, (r.val / r.max)*100));
+    const fillColor = r.invert
+      ? (r.val > 60 ? 'var(--red)' : r.val > 30 ? 'var(--yellow)' : 'var(--green)')
+      : `var(--${r.color})`;
+    return `<div class="res-card">
+      <div class="res-label">${r.label}</div>
+      <div class="res-val ${r.color}">${r.val}${r.unit}</div>
+      <div class="res-bar"><div class="fill" style="width:${pct}%;background:${fillColor};"></div></div>
+    </div>`;
+  }).join('');
+}
+
+function renderBoard() {
+  const st = STAGES[S.stage];
+  document.getElementById('boardTitle').textContent = `${st.icon} Стадия ${S.stage+1}: ${st.name}`;
+  document.getElementById('stageBadge').textContent = `Стадия ${S.stage+1}: ${st.name} — ${st.desc}`;
+  const grid = document.getElementById('boardGrid');
+  grid.innerHTML = '';
+  currentBoard.forEach((cell, i) => {
+    const div = document.createElement('div');
+    div.className = `cell cell-${cell.type}`;
+    div.id = `bcell-${i}`;
+    if (S.visitedCells.has(`${S.stage}-${i}`) && i !== S.pos) div.classList.add('visited');
+    if (i === S.pos) {
+      div.classList.add('active');
+      div.innerHTML = `<span class="c-num">${i}</span><div class="token">🧑‍💻</div><span class="c-icon">${cell.icon}</span>`;
+    } else {
+      div.innerHTML = `<span class="c-num">${i}</span><span class="c-icon">${cell.icon}</span><span class="c-label">${cell.label}</span>`;
+    }
+    grid.appendChild(div);
+  });
+}
+
+function renderTechStack() {
+  const el = document.getElementById('techStack');
+  if (!S.techStack.length) { el.innerHTML='<span style="font-size:.75rem;color:var(--t3);">Пока пуст</span>'; return; }
+  el.innerHTML = S.techStack.map(t=>`<span class="tech-tag active-tech">${t}</span>`).join('');
+}
+
+function renderDecisions() {
+  const el = document.getElementById('decisionsList');
+  if (!S.decisions.length) { el.innerHTML='<span style="font-size:.75rem;color:var(--t3);">—</span>'; return; }
+  el.innerHTML = S.decisions.slice(-12).reverse().map(d=>`<div class="dec"><em>Q${d.turn}</em> ${d.text}</div>`).join('');
+}
+
+function renderItilArtifacts() {
+  const el = document.getElementById('itilArtifacts');
+  if (!S.itilArtifacts.length) { el.innerHTML='<span style="font-size:.75rem;color:var(--t3);">—</span>'; return; }
+  el.innerHTML = S.itilArtifacts.map(a=>`<span class="tech-tag" style="background:var(--purple-dim);color:var(--purple);border-color:rgba(167,139,250,.2);">${a}</span>`).join('');
+}
+
+function addLog(text) {
+  const el = document.getElementById('eventLog');
+  el.innerHTML = `<div class="log-entry"><span class="log-turn">Q${S.turn}</span> ${text}</div>` + el.innerHTML;
+}
+
+// ========================================
+// GAME LOGIC
+// ========================================
+function startGame() {
+  const d = DIFF[difficulty];
+  S.budget = d.startBudget;
+  if (difficulty === 1) { S.team = 55; S.sla = 65; S.clients = 45; S.techDebt = 20; }
+  
+  document.getElementById('introScreen').classList.add('hidden');
+  document.getElementById('gameWrap').classList.add('active');
+  currentBoard = genStageBoard(0);
+  renderResources();
+  renderBoard();
+  renderTechStack();
+  document.getElementById('rollBtn').disabled = false;
+  document.getElementById('storyText').innerHTML = '<strong>Квартал 1.</strong> PulseApp запущен. Офис — гараж фаундера. Вай-фай через телефон. Но мечты — огромные. Впереди — решения, которые определят судьбу стартапа.';
+  addLog('🚀 PulseApp основан!');
+}
+
+function rollDice() {
+  const btn = document.getElementById('rollBtn');
+  btn.disabled = true;
+  const dice = document.getElementById('dice');
+  dice.classList.add('spin');
+  
+  let n=0;
+  const iv = setInterval(()=>{
+    dice.textContent = Math.floor(Math.random()*4)+1;
+    if(++n >= 10){
+      clearInterval(iv);
+      const result = Math.floor(Math.random()*3)+1; // 1-3 for shorter boards
+      dice.textContent = result;
+      dice.classList.remove('spin');
+      S.turn++;
+      document.getElementById('turnCounter').textContent = `Квартал ${S.turn}`;
+      movePlayer(result);
+    }
+  },70);
+}
+
+function movePlayer(steps) {
+  const target = Math.min(S.pos + steps, currentBoard.length - 1);
+  let cur = S.pos;
+  const iv = setInterval(()=>{
+    cur++;
+    if(cur > target){ clearInterval(iv); S.pos = target; S.visitedCells.add(`${S.stage}-${S.pos}`); renderBoard(); setTimeout(handleCell,300); return; }
+    S.pos = cur;
+    renderBoard();
+  },200);
+}
+
+function handleCell() {
+  const cell = currentBoard[S.pos];
+  
+  if (cell.type === 'start') {
+    document.getElementById('rollBtn').disabled = false;
+    return;
+  }
+  
+  if (cell.type === 'finish') {
+    if (S.stage < STAGES.length - 1) {
+      advanceStage();
+    } else {
+      finishGame();
+    }
+    return;
+  }
+  
+  showCase(cell.type);
+}
+
+function advanceStage() {
+  // bonus for completing stage
+  S.score += 20;
+  S.budget += 15;
+  addLog(`🎉 Стадия «${STAGES[S.stage].name}» пройдена! +20 очков, +15K$ бюджет`);
+  
+  S.stage++;
+  S.pos = 0;
+  S.visitedCells.clear();
+  currentBoard = genStageBoard(S.stage);
+  
+  const st = STAGES[S.stage];
+  document.getElementById('storyText').innerHTML = `<strong>🚀 Стадия ${S.stage+1}: ${st.name}!</strong><br>${st.desc}. Новые вызовы, новые масштабы. Ваши решения определяют будущее PulseApp.`;
+  
+  renderResources();
+  renderBoard();
+  document.getElementById('rollBtn').disabled = false;
+  
+  // Check game over conditions
+  checkGameOver();
+}
+
+function checkGameOver() {
+  if (S.budget <= 0 || S.team <= 0 || S.sla <= 10 || S.clients <= 5) {
+    finishGame(true);
+  }
+}
+
+function getCase(type) {
+  const pool = CASES[type];
+  if (!pool || !pool.length) return getCase('infra');
+  const available = pool.filter((_,i) => !S.usedCases.has(`${type}-${i}`));
+  if (!available.length) {
+    pool.forEach((_,i) => S.usedCases.delete(`${type}-${i}`));
+    return getCase(type);
+  }
+  const c = available[Math.floor(Math.random()*available.length)];
+  S.usedCases.add(`${type}-${pool.indexOf(c)}`);
+  return c;
+}
+
+function showCase(type) {
+  const c = getCase(type);
+  const overlay = document.getElementById('modalOverlay');
+  const badgeClasses = {infra:'badge-infra',team:'badge-team',crisis:'badge-crisis',client:'badge-client',strategy:'badge-strategy',market:'badge-market',audit:'badge-audit'};
+  const badgeLabels = {infra:'Инфраструктура',team:'Команда',crisis:'Кризис',client:'Клиенты',strategy:'Стратегия',market:'Рынок',audit:'Аудит'};
+  
+  document.getElementById('mBadge').className = `modal-badge ${badgeClasses[type]||'badge-infra'}`;
+  document.getElementById('mBadge').textContent = badgeLabels[type]||type;
+  document.getElementById('mTitle').textContent = c.title;
+  document.getElementById('mCtx').textContent = c.ctx;
+  document.getElementById('mCase').innerHTML = c.case;
+  document.getElementById('mStakes').innerHTML = `<strong>Ставки:</strong> ${c.stakes}`;
+  
+  const fb = document.getElementById('mFeedback');
+  fb.className = 'feedback-box'; fb.style.display = 'none';
+  document.getElementById('mItil').style.display = 'none';
+  
+  // Shuffle options
+  const indices = c.options.map((_,i)=>i);
+  const shuffled = shuffle(indices);
+  const letters = ['A','B','C','D'];
+  
+  const grid = document.getElementById('mOptions');
+  grid.innerHTML = '';
+  shuffled.forEach((origIdx, di) => {
+    const opt = c.options[origIdx];
+    const btn = document.createElement('button');
+    btn.className = 'opt-btn';
+    btn.innerHTML = `<span class="opt-letter">${letters[di]}</span><span>${opt.text}</span>`;
+    btn.onclick = () => handleChoice(shuffled, di, origIdx, c, type);
+    grid.appendChild(btn);
+  });
+  
+  document.getElementById('mActions').innerHTML = '';
+  overlay.classList.add('show');
+}
+
+function handleChoice(shuffled, displayIdx, origIdx, caseData, type) {
+  const opt = caseData.options[origIdx];
+  const d = DIFF[difficulty];
+  const buttons = document.querySelectorAll('#mOptions .opt-btn');
+  
+  // Highlight all
+  buttons.forEach((btn, di) => {
+    btn.onclick = null;
+    btn.style.cursor = 'default';
+    const oi = shuffled[di];
+    const q = caseData.options[oi].quality;
+    if (di === displayIdx) {
+      btn.classList.add(q === 'best' ? 'chosen-best' : q === 'ok' ? 'chosen-ok' : 'chosen-bad');
+    } else {
+      btn.classList.add('not-chosen');
+    }
+  });
+  
+  // Apply effects
+  const effects = { ...opt.effects };
+  if (opt.quality === 'bad') {
+    for (const k of Object.keys(effects)) {
+      if (effects[k] < 0) effects[k] = Math.round(effects[k] * d.penaltyMod);
+    }
+  }
+  
+  let effectsText = [];
+  for (const [k,v] of Object.entries(effects)) {
+    if (v === 0) continue;
+    const name = {budget:'Бюджет',team:'Команда',techDebt:'Техдолг',sla:'SLA',clients:'Клиенты'}[k]||k;
+    S[k] = Math.max(0, Math.min(k==='budget'?300:100, S[k] + v));
+    effectsText.push(`${name}: ${v>0?'+':''}${v}`);
+  }
+  
+  // Score
+  let pts = opt.quality === 'best' ? 15 : opt.quality === 'ok' ? 5 : -5;
+  S.score += pts;
+  if (opt.quality === 'best') S.bestChoices++;
+  else if (opt.quality === 'ok') S.okChoices++;
+  else S.badChoices++;
+  
+  effectsText.push(`Очки: ${pts>0?'+':''}${pts}`);
+  
+  // Feedback
+  const fb = document.getElementById('mFeedback');
+  const fbClass = opt.quality === 'best' ? 'fb-best' : opt.quality === 'ok' ? 'fb-ok' : 'fb-bad';
+  const fbTitle = opt.quality === 'best' ? '✅ Отличное решение!' : opt.quality === 'ok' ? '⚠️ Неплохо, но есть нюансы' : '❌ Плохой выбор';
+  fb.className = `feedback-box ${fbClass} show`;
+  fb.innerHTML = `<div class="fb-title">${fbTitle}</div>${opt.feedback}<div class="fb-effects">${effectsText.join(' • ')}</div>`;
+  
+  // ITIL insight
+  if (opt.itil) {
+    const itil = document.getElementById('mItil');
+    itil.style.display = 'block';
+    itil.innerHTML = `<strong>🔖 ITIL 4 Insight:</strong> ${opt.itil}`;
+  }
+  
+  // Artifacts & tech
+  if (caseData.artifact && opt.quality !== 'bad') {
+    if (!S.itilArtifacts.includes(caseData.artifact)) {
+      S.itilArtifacts.push(caseData.artifact);
+      renderItilArtifacts();
+    }
+  }
+  if (caseData.techTag && opt.quality !== 'bad') {
+    if (!S.techStack.includes(caseData.techTag)) {
+      S.techStack.push(caseData.techTag);
+      renderTechStack();
+    }
+  }
+  
+  S.decisions.push({ turn:S.turn, text:caseData.title });
+  
+  // Story update
+  const storySnippets = {
+    best: `<strong>Q${S.turn}:</strong> Мудрое решение по «${caseData.title}». PulseApp укрепляет позиции.`,
+    ok: `<strong>Q${S.turn}:</strong> Решение «${caseData.title}» — компромисс. Могло быть лучше.`,
+    bad: `<strong>Q${S.turn}:</strong> Решение «${caseData.title}» ударило по стартапу. Последствия будут...`
+  };
+  document.getElementById('storyText').innerHTML = storySnippets[opt.quality];
+  
+  renderResources();
+  renderDecisions();
+  addLog(`${opt.quality==='best'?'✅':opt.quality==='ok'?'⚠️':'❌'} ${caseData.title}`);
+  
+  document.getElementById('mActions').innerHTML = `<button class="btn btn-primary" onclick="closeModal()" style="width:100%;margin-top:8px;">Продолжить →</button>`;
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('show');
+  checkGameOver();
+  if (!document.getElementById('finishOverlay').classList.contains('show')) {
+    document.getElementById('rollBtn').disabled = false;
+  }
+}
+
+function finishGame(failed=false) {
+  const total = S.bestChoices + S.okChoices + S.badChoices;
+  const bestPct = total > 0 ? Math.round((S.bestChoices/total)*100) : 0;
+  
+  let grade, gradeClass, gradeText, title;
+  if (failed) {
+    title = '💀 Стартап не выжил';
+    grade = 'F'; gradeClass = 'grade-c';
+    if (S.budget <= 0) gradeText = 'Деньги закончились. Инвесторы не дали следующий раунд. PulseApp закрыт.';
+    else if (S.team <= 0) gradeText = 'Команда разбежалась. Некому писать код. PulseApp заморожен.';
+    else if (S.sla <= 10) gradeText = 'SLA рухнул. Клиенты ушли. Репутация уничтожена.';
+    else gradeText = 'Клиентская база обнулилась. Продукт никому не нужен.';
+  } else if (S.score >= 150 && bestPct >= 60) {
+    title = '👑 IPO успешно!'; grade = 'S'; gradeClass = 'grade-s';
+    gradeText = `Блестяще! PulseApp вышел на IPO с оценкой $2B. Ваш тех-стек, команда и процессы — образец для индустрии. ITIL-практики внедрены органично и работают как часы.`;
+  } else if (S.score >= 100) {
+    title = '🚀 Успешный стартап'; grade = 'A'; gradeClass = 'grade-a';
+    gradeText = `PulseApp вышел на IPO, но с шероховатостями. Некоторые решения оставили след в виде техдолга и процессных проблем. В целом — достойный результат.`;
+  } else if (S.score >= 50) {
+    title = '📈 Средний результат'; grade = 'B'; gradeClass = 'grade-b';
+    gradeText = `PulseApp вышел на биржу, но IPO было скромным. Инвесторы не в восторге. Много нерешённых проблем, но компания жива.`;
+  } else {
+    title = '⚠️ Еле выжили'; grade = 'C'; gradeClass = 'grade-c';
+    gradeText = `PulseApp формально дошёл до IPO, но ценой огромных потерь. Техдолг, выгоревшая команда, недовольные клиенты. Будущее туманно.`;
+  }
+  
+  document.getElementById('fTitle').textContent = title;
+  document.getElementById('fScore').textContent = S.score;
+  document.getElementById('fRank').textContent = `Грейд: ${grade}`;
+  document.getElementById('fStats').innerHTML = `
+    <div class="f-stat"><span>Пройдено стадий</span><span class="f-v">${S.stage+1} / ${STAGES.length}</span></div>
+    <div class="f-stat"><span>Кварталов</span><span class="f-v">${S.turn}</span></div>
+    <div class="f-stat"><span>Оптимальных решений</span><span class="f-v">${S.bestChoices} из ${total}</span></div>
+    <div class="f-stat"><span>Компромиссов</span><span class="f-v">${S.okChoices}</span></div>
+    <div class="f-stat"><span>Ошибок</span><span class="f-v">${S.badChoices}</span></div>
+    <div class="f-stat"><span>Точность (% оптимальных)</span><span class="f-v">${bestPct}%</span></div>
+    <div class="f-stat"><span>Итоговый бюджет</span><span class="f-v">${S.budget}K$</span></div>
+    <div class="f-stat"><span>Техдолг</span><span class="f-v">${S.techDebt}%</span></div>
+    <div class="f-stat"><span>Тех-стек</span><span class="f-v">${S.techStack.length} технологий</span></div>
+    <div class="f-stat"><span>ITIL-артефактов</span><span class="f-v">${S.itilArtifacts.length}</span></div>
+  `;
+  document.getElementById('fGrade').className = `f-grade ${gradeClass}`;
+  document.getElementById('fGrade').textContent = gradeText;
+  
+  document.getElementById('finishOverlay').classList.add('show');
+}
+
+function shuffle(arr) {
+  const a=[...arr]; for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a;
+}
+</script>
+</body>
+</html>
