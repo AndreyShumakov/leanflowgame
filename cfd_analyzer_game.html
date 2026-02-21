@@ -4,198 +4,251 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FlowLab: CFD-Аналитик</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Russo+One&family=Exo+2:wght@300;400;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg:#f6f4f0; --bg2:#edeae4; --bg3:#e3dfd8;
-  --card:#fff; --card-border:#e0dcd5;
-  --ink:#1a1714; --ink2:#4a453d; --ink3:#8a8478;
-  --accent:#d35322; --accent-bg:rgba(211,83,34,.07);
-  --accent2:#1e6b4f; --accent2-bg:rgba(30,107,79,.07);
-  --blue:#2c5ea0; --blue-bg:rgba(44,94,160,.07);
-  --warn:#c4382a; --warn-bg:rgba(196,56,42,.07);
-  --purple:#6b4fa0; --purple-bg:rgba(107,79,160,.07);
-  --gold:#a08030;
-  --todo:#b0b0b0; --wip:#7bb8d8; --done:#3a9e7e;
-  --radius:10px;
-  --shadow:0 1px 3px rgba(0,0,0,.05),0 4px 12px rgba(0,0,0,.04);
-  --shadow2:0 2px 8px rgba(0,0,0,.06),0 8px 24px rgba(0,0,0,.06);
+  --bg-dark: #0d1117;
+  --bg-card: #161b22;
+  --bg-column: #21262d;
+  --text-primary: #c9d1d9;
+  --text-secondary: #8b949e;
+  --accent-green: #238636;
+  --accent-blue: #1f6feb;
+  --accent-purple: #8957e5;
+  --accent-orange: #d29922;
+  --accent-red: #da3633;
+  --accent-cyan: #39c5cf;
+  --todo-color: #8b949e;
+  --wip-color: #39c5cf;
+  --done-color: #238636;
+  --radius: 12px;
 }
 *{margin:0;padding:0;box-sizing:border-box;}
-body{background:var(--bg);color:var(--ink);font-family:'DM Sans',sans-serif;min-height:100vh;line-height:1.6;}
-::-webkit-scrollbar{width:6px;} ::-webkit-scrollbar-thumb{background:var(--bg3);border-radius:3px;}
+body{font-family:'Exo 2',sans-serif;background:var(--bg-dark);color:var(--text-primary);min-height:100vh;line-height:1.6;}
+::-webkit-scrollbar{width:6px;height:6px;} ::-webkit-scrollbar-track{background:rgba(255,255,255,.05);} ::-webkit-scrollbar-thumb{background:rgba(255,255,255,.2);border-radius:3px;}
 
-.screen{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:500;background:var(--bg);padding:20px;overflow-y:auto;}
+/* ====== SCREENS ====== */
+.screen{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:500;background:var(--bg-dark);padding:20px;overflow-y:auto;}
 .screen.hidden{display:none!important;}
 
-.intro-card{max-width:600px;width:100%;}
-.intro-card .logo{font-family:'Instrument Serif',serif;font-size:clamp(2.2rem,5vw,3rem);color:var(--ink);margin-bottom:2px;line-height:1.15;}
-.intro-card .logo em{color:var(--accent);font-style:italic;}
-.intro-card .sub{font-family:'IBM Plex Mono',monospace;font-size:.7rem;text-transform:uppercase;letter-spacing:2.5px;color:var(--ink3);margin-bottom:28px;}
-.intro-brief{background:var(--card);border:1px solid var(--card-border);border-radius:var(--radius);padding:24px;margin-bottom:20px;font-size:.9rem;color:var(--ink2);box-shadow:var(--shadow);}
-.intro-brief strong{color:var(--ink);}
-.intro-brief .hl{color:var(--accent);font-weight:600;}
+/* ====== INTRO ====== */
+.intro-card{max-width:680px;width:100%;}
+.intro-logo{display:flex;align-items:center;gap:12px;margin-bottom:4px;}
+.intro-logo .logo-icon{font-size:2em;}
+.intro-logo .logo-text{font-family:'Russo One',sans-serif;font-size:clamp(1.8rem,4vw,2.4rem);background:linear-gradient(135deg,var(--accent-green),var(--accent-cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.intro-sub{font-size:.8em;color:var(--text-secondary);margin-bottom:24px;text-transform:uppercase;letter-spacing:2px;}
+
+.intro-brief{background:var(--bg-card);border:1px solid rgba(255,255,255,.1);border-radius:var(--radius);padding:24px;margin-bottom:20px;font-size:.9rem;color:var(--text-secondary);box-shadow:0 8px 24px rgba(0,0,0,.4);}
+.intro-brief strong{color:var(--text-primary);}
+.intro-brief .hl{color:var(--accent-cyan);font-weight:600;}
 
 .intro-steps{margin:20px 0;display:flex;flex-direction:column;gap:8px;}
-.intro-step{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--card);border:1px solid var(--card-border);border-radius:8px;font-size:.85rem;}
-.intro-step .s-num{font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:.7rem;color:var(--accent);background:var(--accent-bg);padding:3px 8px;border-radius:4px;flex-shrink:0;}
-.intro-step .s-label{color:var(--ink);}
-.intro-step .s-desc{color:var(--ink3);font-size:.78rem;}
+.intro-step{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--bg-card);border:1px solid rgba(255,255,255,.08);border-radius:8px;font-size:.85rem;transition:.2s;}
+.intro-step:hover{border-color:var(--accent-cyan);background:rgba(57,197,207,.05);}
+.intro-step .s-num{font-family:'Russo One',sans-serif;font-size:.7rem;color:var(--accent-cyan);background:rgba(57,197,207,.15);padding:4px 10px;border-radius:4px;flex-shrink:0;}
+.intro-step .s-label{color:var(--text-primary);font-weight:600;}
+.intro-step .s-desc{color:var(--text-secondary);font-size:.78rem;}
 
-.btn{font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:.75rem;padding:12px 24px;border:none;border-radius:6px;cursor:pointer;transition:.2s;letter-spacing:.5px;text-transform:uppercase;}
-.btn:disabled{opacity:.3;cursor:not-allowed;}
-.btn-primary{background:var(--ink);color:var(--bg);} .btn-primary:hover:not(:disabled){background:#333;transform:translateY(-1px);box-shadow:var(--shadow2);}
-.btn-accent{background:var(--accent);color:#fff;} .btn-accent:hover:not(:disabled){opacity:.9;transform:translateY(-1px);}
-.btn-ghost{background:transparent;color:var(--ink2);border:1px solid var(--card-border);} .btn-ghost:hover{background:var(--bg2);}
+/* ====== DATASET SELECTION ====== */
+.dataset-section{margin:24px 0;}
+.dataset-title{font-family:'Russo One',sans-serif;font-size:1em;color:var(--accent-cyan);margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.dataset-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;}
+.dataset-card{background:var(--bg-card);border:2px solid rgba(255,255,255,.08);border-radius:var(--radius);padding:16px;cursor:pointer;transition:.3s;position:relative;}
+.dataset-card:hover{border-color:var(--accent-cyan);box-shadow:0 0 20px rgba(57,197,207,.15);transform:translateY(-2px);}
+.dataset-card.selected{border-color:var(--accent-cyan);background:rgba(57,197,207,.08);box-shadow:0 0 25px rgba(57,197,207,.2);}
+.dataset-card .ds-icon{font-size:1.8em;margin-bottom:8px;}
+.dataset-card .ds-name{font-family:'Russo One',sans-serif;font-size:.85em;margin-bottom:4px;}
+.dataset-card .ds-desc{font-size:.75em;color:var(--text-secondary);line-height:1.5;}
+.dataset-card .ds-badge{position:absolute;top:10px;right:10px;font-size:.6em;padding:3px 8px;border-radius:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;}
+.badge-stable{background:rgba(35,134,54,.2);color:var(--accent-green);}
+.badge-warn{background:rgba(210,153,34,.2);color:var(--accent-orange);}
+.badge-danger{background:rgba(218,54,51,.2);color:var(--accent-red);}
+.badge-chaos{background:rgba(137,87,229,.2);color:var(--accent-purple);}
+.badge-custom{background:rgba(57,197,207,.2);color:var(--accent-cyan);}
 
+/* ====== BUTTONS ====== */
+.btn{font-family:'Exo 2',sans-serif;font-weight:600;font-size:.85em;padding:12px 24px;border:none;border-radius:8px;cursor:pointer;transition:.3s;display:inline-flex;align-items:center;gap:8px;}
+.btn:disabled{opacity:.35;cursor:not-allowed;}
+.btn:hover:not(:disabled){transform:translateY(-2px);}
+.btn-primary{background:linear-gradient(135deg,var(--accent-green),var(--accent-cyan));color:#fff;}
+.btn-primary:hover:not(:disabled){box-shadow:0 5px 20px rgba(57,197,207,.4);}
+.btn-accent{background:linear-gradient(135deg,var(--accent-orange),#ea580c);color:#fff;}
+.btn-ghost{background:rgba(255,255,255,.05);color:var(--text-secondary);border:1px solid rgba(255,255,255,.1);}
+.btn-ghost:hover:not(:disabled){background:rgba(255,255,255,.1);color:var(--text-primary);}
+
+/* ====== GAME WRAP ====== */
 .game-wrap{display:none;flex-direction:column;min-height:100vh;}
 .game-wrap.active{display:flex;}
 
-.topbar{display:flex;align-items:center;justify-content:space-between;padding:10px 20px;background:var(--card);border-bottom:1px solid var(--card-border);flex-wrap:wrap;gap:8px;}
-.topbar .brand{font-family:'Instrument Serif',serif;font-size:1.1rem;}
-.topbar .brand em{color:var(--accent);font-style:italic;}
-.phase-badge{font-family:'IBM Plex Mono',monospace;font-size:.65rem;padding:4px 10px;border-radius:20px;background:var(--accent-bg);color:var(--accent);letter-spacing:1px;text-transform:uppercase;border:1px solid rgba(211,83,34,.15);}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:10px 20px;background:var(--bg-card);border-bottom:1px solid rgba(255,255,255,.1);flex-wrap:wrap;gap:8px;}
+.topbar .brand{display:flex;align-items:center;gap:8px;}
+.topbar .brand .logo-icon{font-size:1.2em;}
+.topbar .brand .logo-text{font-family:'Russo One',sans-serif;font-size:1.1em;background:linear-gradient(135deg,var(--accent-green),var(--accent-cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.phase-badge{font-size:.7em;padding:5px 12px;border-radius:20px;background:rgba(57,197,207,.15);color:var(--accent-cyan);font-weight:600;text-transform:uppercase;letter-spacing:1px;border:1px solid rgba(57,197,207,.25);}
+
 .progress-bar{display:flex;align-items:center;gap:8px;}
 .progress-dots{display:flex;gap:4px;}
-.p-dot{width:10px;height:10px;border-radius:50%;background:var(--bg2);border:1.5px solid var(--card-border);transition:.3s;}
-.p-dot.done{background:var(--accent2);border-color:var(--accent2);}
-.p-dot.current{background:var(--accent);border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-bg);}
-.score-display{font-family:'IBM Plex Mono',monospace;font-size:.75rem;color:var(--ink3);}
+.p-dot{width:10px;height:10px;border-radius:50%;background:var(--bg-column);border:1.5px solid rgba(255,255,255,.15);transition:.3s;}
+.p-dot.done{background:var(--accent-green);border-color:var(--accent-green);}
+.p-dot.current{background:var(--accent-cyan);border-color:var(--accent-cyan);box-shadow:0 0 8px rgba(57,197,207,.5);}
+.score-display{font-size:.8em;color:var(--accent-cyan);font-weight:700;}
 
+/* ====== MAIN AREA ====== */
 .main-area{flex:1;display:flex;flex-direction:column;align-items:center;padding:20px;overflow-y:auto;}
-.content-card{max-width:900px;width:100%;background:var(--card);border:1px solid var(--card-border);border-radius:12px;box-shadow:var(--shadow);overflow:hidden;animation:fadeUp .35s ease;margin-bottom:20px;}
+.content-card{max-width:900px;width:100%;background:var(--bg-card);border:1px solid rgba(255,255,255,.08);border-radius:var(--radius);box-shadow:0 8px 32px rgba(0,0,0,.4);overflow:hidden;animation:fadeUp .35s ease;margin-bottom:20px;}
 @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 
 .cc-header{padding:20px 24px 0;display:flex;align-items:flex-start;gap:12px;}
-.cc-type{font-family:'IBM Plex Mono',monospace;font-size:.6rem;text-transform:uppercase;letter-spacing:2px;padding:4px 10px;border-radius:4px;flex-shrink:0;}
-.type-input{background:var(--accent-bg);color:var(--accent);}
-.type-theory{background:var(--blue-bg);color:var(--blue);}
-.type-quiz{background:var(--purple-bg);color:var(--purple);}
-.type-report{background:var(--accent2-bg);color:var(--accent2);}
+.cc-type{font-size:.65em;text-transform:uppercase;letter-spacing:2px;padding:5px 12px;border-radius:20px;font-weight:600;flex-shrink:0;}
+.type-input{background:rgba(57,197,207,.15);color:var(--accent-cyan);border:1px solid rgba(57,197,207,.25);}
+.type-theory{background:rgba(31,111,235,.15);color:var(--accent-blue);border:1px solid rgba(31,111,235,.25);}
+.type-quiz{background:rgba(137,87,229,.15);color:var(--accent-purple);border:1px solid rgba(137,87,229,.25);}
+.type-report{background:rgba(35,134,54,.15);color:var(--accent-green);border:1px solid rgba(35,134,54,.25);}
 
 .cc-body{padding:16px 24px 24px;}
-.cc-title{font-family:'Instrument Serif',serif;font-size:1.3rem;margin-bottom:4px;line-height:1.3;}
-.cc-desc{font-size:.85rem;color:var(--ink3);margin-bottom:16px;line-height:1.6;}
+.cc-title{font-family:'Russo One',sans-serif;font-size:1.2em;margin-bottom:4px;line-height:1.3;}
+.cc-desc{font-size:.85rem;color:var(--text-secondary);margin-bottom:16px;line-height:1.6;}
 
-/* DATA TABLE */
-.data-table-wrap{overflow-x:auto;margin-bottom:16px;border:1px solid var(--card-border);border-radius:8px;}
+/* ====== DATA TABLE ====== */
+.data-table-wrap{overflow-x:auto;margin-bottom:16px;border:1px solid rgba(255,255,255,.08);border-radius:8px;}
 .data-table{width:100%;border-collapse:collapse;font-size:.8rem;}
-.data-table th{font-family:'IBM Plex Mono',monospace;font-size:.65rem;text-transform:uppercase;letter-spacing:1px;padding:8px 6px;background:var(--bg2);color:var(--ink3);border-bottom:1px solid var(--card-border);text-align:center;position:sticky;top:0;}
+.data-table th{font-family:'Russo One',sans-serif;font-size:.65rem;text-transform:uppercase;letter-spacing:1px;padding:8px 6px;background:var(--bg-column);color:var(--text-secondary);border-bottom:1px solid rgba(255,255,255,.08);text-align:center;position:sticky;top:0;}
 .data-table th:first-child{text-align:left;padding-left:12px;}
-.data-table td{padding:4px 4px;border-bottom:1px solid rgba(0,0,0,.04);text-align:center;vertical-align:middle;}
-.data-table td:first-child{font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:.72rem;color:var(--accent);padding-left:12px;text-align:left;white-space:nowrap;}
-.data-table tr:hover{background:var(--accent-bg);}
-.data-table input{width:52px;padding:5px 4px;border:1px solid var(--card-border);border-radius:4px;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:.78rem;background:var(--bg);color:var(--ink);transition:.2s;}
-.data-table input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-bg);}
-.data-table input.err{border-color:var(--warn);background:var(--warn-bg);}
-.data-table .calc-cell{font-family:'IBM Plex Mono',monospace;font-weight:500;font-size:.78rem;color:var(--ink2);}
-.data-table .calc-wip{color:var(--wip);}
-.data-table .calc-th{color:var(--accent2);}
+.data-table td{padding:4px 4px;border-bottom:1px solid rgba(255,255,255,.04);text-align:center;vertical-align:middle;}
+.data-table td:first-child{font-weight:600;font-size:.75rem;color:var(--accent-cyan);padding-left:12px;text-align:left;white-space:nowrap;}
+.data-table tr:hover{background:rgba(57,197,207,.04);}
+.data-table input{width:52px;padding:5px 4px;border:1px solid rgba(255,255,255,.12);border-radius:4px;text-align:center;font-family:'Exo 2',sans-serif;font-size:.8rem;background:var(--bg-dark);color:var(--text-primary);transition:.2s;}
+.data-table input:focus{outline:none;border-color:var(--accent-cyan);box-shadow:0 0 0 2px rgba(57,197,207,.2);}
+.data-table input.err{border-color:var(--accent-red);background:rgba(218,54,51,.1);}
+.data-table .calc-cell{font-weight:600;font-size:.78rem;}
+.data-table .calc-wip{color:var(--wip-color);}
+.data-table .calc-th{color:var(--done-color);}
 
-/* CHART */
-.chart-container{background:#fafaf8;border:1px solid var(--card-border);border-radius:8px;padding:12px;margin-bottom:16px;position:relative;}
+/* ====== CHART ====== */
+.chart-container{background:var(--bg-column);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:12px;margin-bottom:16px;position:relative;}
 .chart-container canvas{display:block;width:100%;border-radius:4px;}
-.chart-legend{display:flex;gap:14px;justify-content:center;margin-top:8px;font-size:.72rem;color:var(--ink3);}
+.chart-legend{display:flex;gap:14px;justify-content:center;margin-top:8px;font-size:.72rem;color:var(--text-secondary);}
 .chart-legend .leg{display:flex;align-items:center;gap:5px;}
 .leg-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0;}
 
-/* THEORY */
-.theory-card{padding:16px 20px;background:var(--blue-bg);border:1px solid rgba(44,94,160,.12);border-radius:8px;font-size:.84rem;color:var(--blue);line-height:1.65;margin-bottom:14px;}
-.theory-card strong{font-weight:700;}
-.theory-card .th-title{font-family:'IBM Plex Mono',monospace;font-size:.65rem;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px;opacity:.7;}
+/* ====== THEORY ====== */
+.theory-card{padding:16px 20px;background:rgba(31,111,235,.1);border:1px solid rgba(31,111,235,.2);border-radius:8px;font-size:.84rem;color:var(--text-primary);line-height:1.65;margin-bottom:14px;}
+.theory-card strong{color:var(--accent-cyan);font-weight:700;}
+.theory-card .th-title{font-family:'Russo One',sans-serif;font-size:.7rem;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px;color:var(--accent-blue);}
 
-/* QUIZ */
+/* ====== QUIZ ====== */
 .options-list{display:flex;flex-direction:column;gap:8px;margin-bottom:14px;}
-.opt-btn{display:flex;align-items:flex-start;gap:12px;padding:14px 16px;background:var(--bg);border:1.5px solid var(--card-border);border-radius:8px;cursor:pointer;transition:.2s;text-align:left;color:var(--ink);font-family:'DM Sans',sans-serif;font-size:.86rem;line-height:1.55;}
-.opt-btn:hover{border-color:var(--accent);background:var(--accent-bg);}
-.opt-letter{font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:.75rem;color:var(--accent);background:var(--accent-bg);width:24px;height:24px;display:flex;align-items:center;justify-content:center;border-radius:4px;flex-shrink:0;}
-.opt-btn.c-best{border-color:var(--accent2);background:var(--accent2-bg);}
-.opt-btn.c-ok{border-color:var(--gold);background:rgba(160,128,48,.08);}
-.opt-btn.c-bad{border-color:var(--warn);background:var(--warn-bg);}
-.opt-btn.c-dim{opacity:.35;}
+.opt-btn{display:flex;align-items:flex-start;gap:12px;padding:14px 16px;background:var(--bg-column);border:2px solid rgba(255,255,255,.08);border-radius:8px;cursor:pointer;transition:.2s;text-align:left;color:var(--text-primary);font-family:'Exo 2',sans-serif;font-size:.86rem;line-height:1.55;}
+.opt-btn:hover{border-color:var(--accent-cyan);background:rgba(57,197,207,.06);}
+.opt-letter{font-family:'Russo One',sans-serif;font-size:.75rem;color:var(--accent-cyan);background:rgba(57,197,207,.15);width:26px;height:26px;display:flex;align-items:center;justify-content:center;border-radius:6px;flex-shrink:0;}
+.opt-btn.c-best{border-color:var(--accent-green)!important;background:rgba(35,134,54,.12)!important;}
+.opt-btn.c-ok{border-color:var(--accent-orange)!important;background:rgba(210,153,34,.1)!important;}
+.opt-btn.c-bad{border-color:var(--accent-red)!important;background:rgba(218,54,51,.1)!important;}
+.opt-btn.c-dim{opacity:.3;}
 
 .fb-box{padding:16px;border-radius:8px;font-size:.84rem;line-height:1.65;margin-bottom:12px;display:none;}
 .fb-box.show{display:block;}
-.fb-box.fb-great{background:var(--accent2-bg);border:1px solid rgba(30,107,79,.15);color:var(--accent2);}
-.fb-box.fb-ok{background:rgba(160,128,48,.08);border:1px solid rgba(160,128,48,.15);color:#7a6020;}
-.fb-box.fb-bad{background:var(--warn-bg);border:1px solid rgba(196,56,42,.15);color:var(--warn);}
+.fb-box.fb-great{background:rgba(35,134,54,.12);border:1px solid rgba(35,134,54,.3);color:var(--accent-green);}
+.fb-box.fb-ok{background:rgba(210,153,34,.1);border:1px solid rgba(210,153,34,.25);color:var(--accent-orange);}
+.fb-box.fb-bad{background:rgba(218,54,51,.1);border:1px solid rgba(218,54,51,.25);color:var(--accent-red);}
 .fb-title{font-weight:700;margin-bottom:4px;}
 
-/* METRICS GRID */
+/* ====== METRICS GRID ====== */
 .metrics-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:16px;}
-.metric-card{padding:14px;background:var(--bg);border:1px solid var(--card-border);border-radius:8px;text-align:center;}
-.metric-val{font-family:'IBM Plex Mono',monospace;font-size:1.6rem;font-weight:700;line-height:1.2;}
-.metric-val.v-accent{color:var(--accent);}
-.metric-val.v-blue{color:var(--blue);}
-.metric-val.v-green{color:var(--accent2);}
-.metric-val.v-warn{color:var(--warn);}
-.metric-val.v-purple{color:var(--purple);}
-.metric-label{font-size:.7rem;color:var(--ink3);text-transform:uppercase;letter-spacing:.5px;margin-top:2px;}
+.metric-card{padding:14px;background:var(--bg-column);border:1px solid rgba(255,255,255,.06);border-radius:8px;text-align:center;transition:.2s;}
+.metric-card:hover{border-color:rgba(57,197,207,.2);}
+.metric-val{font-family:'Russo One',sans-serif;font-size:1.6rem;line-height:1.2;}
+.metric-val.v-cyan{color:var(--accent-cyan);}
+.metric-val.v-blue{color:var(--accent-blue);}
+.metric-val.v-green{color:var(--accent-green);}
+.metric-val.v-warn{color:var(--accent-red);}
+.metric-val.v-purple{color:var(--accent-purple);}
+.metric-val.v-orange{color:var(--accent-orange);}
+.metric-label{font-size:.7rem;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.5px;margin-top:2px;}
 
-/* REPORT */
-.report-section{margin-bottom:16px;padding:16px;border-radius:8px;}
-.report-section.r-good{background:var(--accent2-bg);border:1px solid rgba(30,107,79,.15);}
-.report-section.r-warn{background:rgba(160,128,48,.08);border:1px solid rgba(160,128,48,.15);}
-.report-section.r-bad{background:var(--warn-bg);border:1px solid rgba(196,56,42,.15);}
-.report-section.r-info{background:var(--blue-bg);border:1px solid rgba(44,94,160,.12);}
-.r-title{font-family:'IBM Plex Mono',monospace;font-size:.72rem;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px;font-weight:600;}
-.r-good .r-title{color:var(--accent2);}
-.r-warn .r-title{color:var(--gold);}
-.r-bad .r-title{color:var(--warn);}
-.r-info .r-title{color:var(--blue);}
-.r-text{font-size:.86rem;line-height:1.65;color:var(--ink2);}
-.r-text strong{color:var(--ink);}
+/* ====== REPORT ====== */
+.report-section{margin-bottom:12px;padding:16px;border-radius:8px;}
+.report-section.r-good{background:rgba(35,134,54,.1);border:1px solid rgba(35,134,54,.25);}
+.report-section.r-warn{background:rgba(210,153,34,.08);border:1px solid rgba(210,153,34,.2);}
+.report-section.r-bad{background:rgba(218,54,51,.08);border:1px solid rgba(218,54,51,.2);}
+.report-section.r-info{background:rgba(31,111,235,.08);border:1px solid rgba(31,111,235,.2);}
+.r-title{font-family:'Russo One',sans-serif;font-size:.75rem;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px;}
+.r-good .r-title{color:var(--accent-green);}
+.r-warn .r-title{color:var(--accent-orange);}
+.r-bad .r-title{color:var(--accent-red);}
+.r-info .r-title{color:var(--accent-blue);}
+.r-text{font-size:.86rem;line-height:1.65;color:var(--text-secondary);}
+.r-text strong{color:var(--text-primary);}
 
-.pattern-tag{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:.68rem;padding:3px 8px;border-radius:4px;margin:2px 2px;letter-spacing:.5px;}
-.pt-good{background:var(--accent2-bg);color:var(--accent2);border:1px solid rgba(30,107,79,.15);}
-.pt-warn{background:rgba(160,128,48,.08);color:var(--gold);border:1px solid rgba(160,128,48,.15);}
-.pt-bad{background:var(--warn-bg);color:var(--warn);border:1px solid rgba(196,56,42,.15);}
+.pattern-tag{display:inline-block;font-size:.7em;padding:4px 10px;border-radius:20px;margin:2px 2px;font-weight:600;letter-spacing:.3px;}
+.pt-good{background:rgba(35,134,54,.15);color:var(--accent-green);border:1px solid rgba(35,134,54,.25);}
+.pt-warn{background:rgba(210,153,34,.12);color:var(--accent-orange);border:1px solid rgba(210,153,34,.2);}
+.pt-bad{background:rgba(218,54,51,.12);color:var(--accent-red);border:1px solid rgba(218,54,51,.2);}
 
-/* FORECAST */
-.forecast-box{background:var(--bg);border:1px solid var(--card-border);border-radius:8px;padding:16px;margin-bottom:12px;}
-.forecast-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(0,0,0,.04);font-size:.84rem;}
+/* ====== FORECAST ====== */
+.forecast-box{background:var(--bg-column);border:1px solid rgba(255,255,255,.06);border-radius:8px;padding:16px;margin-bottom:12px;}
+.forecast-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:.84rem;}
 .forecast-row:last-child{border-bottom:none;}
-.forecast-row .f-label{color:var(--ink2);}
-.forecast-row .f-val{font-family:'IBM Plex Mono',monospace;font-weight:600;color:var(--accent);}
+.forecast-row .f-label{color:var(--text-secondary);}
+.forecast-row .f-val{font-weight:700;color:var(--accent-cyan);}
 
-/* FINISH */
-.finish-card{max-width:560px;width:100%;background:var(--card);border:1px solid var(--card-border);border-radius:12px;padding:32px;box-shadow:var(--shadow2);text-align:center;}
-.finish-card .f-title{font-family:'Instrument Serif',serif;font-size:1.8rem;margin-bottom:6px;}
-.finish-card .f-score{font-family:'IBM Plex Mono',monospace;font-size:2.5rem;font-weight:700;color:var(--accent);margin:8px 0;}
-.finish-card .f-rank{font-size:.9rem;color:var(--accent2);margin-bottom:20px;}
+/* ====== FINISH ====== */
+.finish-card{max-width:560px;width:100%;background:var(--bg-card);border:1px solid rgba(255,255,255,.08);border-radius:var(--radius);padding:32px;box-shadow:0 8px 32px rgba(0,0,0,.5);text-align:center;}
+.finish-card .f-title{font-family:'Russo One',sans-serif;font-size:1.8rem;margin-bottom:6px;background:linear-gradient(135deg,var(--accent-green),var(--accent-cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.finish-card .f-score{font-family:'Russo One',sans-serif;font-size:2.5rem;color:var(--accent-cyan);margin:8px 0;}
+.finish-card .f-rank{font-size:.9rem;color:var(--accent-green);margin-bottom:20px;}
 .f-stats{text-align:left;margin:16px 0;}
-.f-stat{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--card-border);font-size:.85rem;color:var(--ink2);}
-.f-stat .fv{font-family:'IBM Plex Mono',monospace;color:var(--accent);font-weight:600;}
+.f-stat{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.06);font-size:.85rem;color:var(--text-secondary);}
+.f-stat .fv{color:var(--accent-cyan);font-weight:700;}
 .f-grade{margin:16px 0;padding:14px;border-radius:8px;font-size:.88rem;line-height:1.6;text-align:left;}
-.f-grade.g-s{background:var(--accent2-bg);border:1px solid rgba(30,107,79,.15);color:var(--accent2);}
-.f-grade.g-a{background:var(--blue-bg);border:1px solid rgba(44,94,160,.15);color:var(--blue);}
-.f-grade.g-b{background:rgba(160,128,48,.08);border:1px solid rgba(160,128,48,.15);color:#7a6020;}
-.f-grade.g-c{background:var(--warn-bg);border:1px solid rgba(196,56,42,.15);color:var(--warn);}
+.f-grade.g-s{background:rgba(35,134,54,.12);border:1px solid rgba(35,134,54,.25);color:var(--accent-green);}
+.f-grade.g-a{background:rgba(31,111,235,.1);border:1px solid rgba(31,111,235,.2);color:var(--accent-blue);}
+.f-grade.g-b{background:rgba(210,153,34,.1);border:1px solid rgba(210,153,34,.2);color:var(--accent-orange);}
+.f-grade.g-c{background:rgba(218,54,51,.1);border:1px solid rgba(218,54,51,.2);color:var(--accent-red);}
 
 .btn-row{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;}
-.btn-row .btn{flex:1;min-width:120px;}
+.btn-row .btn{flex:1;min-width:120px;justify-content:center;}
 
-.tip-box{font-size:.78rem;color:var(--ink3);padding:10px 14px;background:var(--bg2);border-radius:6px;margin-bottom:12px;}
-.tip-box strong{color:var(--ink2);}
+.tip-box{font-size:.8rem;color:var(--text-secondary);padding:12px 14px;background:var(--bg-column);border:1px solid rgba(255,255,255,.06);border-radius:8px;margin-bottom:12px;}
+.tip-box strong{color:var(--accent-cyan);}
+
+@media (max-width:768px){
+  .dataset-grid{grid-template-columns:1fr 1fr;}
+  .metrics-grid{grid-template-columns:repeat(2,1fr);}
+}
+@media (max-width:480px){
+  .dataset-grid{grid-template-columns:1fr;}
+}
 </style>
 </head>
 <body>
 
 <div class="screen" id="introScreen">
 <div class="intro-card">
-  <div class="logo">Flow<em>Lab</em></div>
-  <div class="sub">// CFD-Аналитик ваших данных</div>
-  <div class="intro-brief">
-    Вы прошли <strong>Lean Flow Simulation</strong> и получили диаграмму потока за 21 день. Теперь пришло время <span class="hl">проанализировать свои результаты</span> как настоящий Kanban-коуч.<br><br>
-    Введите данные из вашей CFD, изучите теорию анализа, ответьте на вопросы о <strong>вашей собственной</strong> диаграмме, и получите <span class="hl">аналитический отчёт с прогнозом</span>.
+  <div class="intro-logo">
+    <span class="logo-icon">📊</span>
+    <span class="logo-text">FlowLab</span>
   </div>
+  <div class="intro-sub">CFD-Аналитик ваших данных</div>
+
+  <div class="intro-brief">
+    Вы прошли <strong>Lean Flow Simulation</strong> и получили диаграмму потока за 21 день. Теперь пришло время <span class="hl">проанализировать результаты</span> как настоящий Kanban-коуч.<br><br>
+    Введите данные из вашей CFD, изучите теорию анализа, ответьте на вопросы о <strong>вашей диаграмме</strong>, и получите <span class="hl">аналитический отчёт с прогнозом</span>.
+  </div>
+
   <div class="intro-steps">
     <div class="intro-step"><span class="s-num">01</span><div><div class="s-label">Ввод данных</div><div class="s-desc">Введите ToDo, In Progress, Done за каждый из 21 дня</div></div></div>
     <div class="intro-step"><span class="s-num">02</span><div><div class="s-label">Теория + анализ</div><div class="s-desc">Изучите как читать метрики на CFD и ответьте на вопросы</div></div></div>
     <div class="intro-step"><span class="s-num">03</span><div><div class="s-label">Паттерны</div><div class="s-desc">Определите паттерны на вашей диаграмме</div></div></div>
     <div class="intro-step"><span class="s-num">04</span><div><div class="s-label">Отчёт и прогноз</div><div class="s-desc">Получите аналитику, прогноз и рекомендации</div></div></div>
   </div>
-  <button class="btn btn-primary" onclick="startGame()" style="width:100%;padding:14px;">Начать анализ</button>
+
+  <div class="dataset-section">
+    <div class="dataset-title">📋 Выберите набор данных или введите свои</div>
+    <div class="dataset-grid" id="datasetGrid"></div>
+  </div>
+
+  <button class="btn btn-primary" id="btnStart" onclick="startGame()" style="width:100%;padding:14px;justify-content:center;">▶ Начать анализ</button>
 </div>
 </div>
 
@@ -206,13 +259,13 @@ body{background:var(--bg);color:var(--ink);font-family:'DM Sans',sans-serif;min-
   <div class="f-rank" id="fRank"></div>
   <div class="f-stats" id="fStats"></div>
   <div class="f-grade" id="fGrade"></div>
-  <button class="btn btn-primary" onclick="location.reload()" style="width:100%;margin-top:12px;">Пройти заново</button>
+  <button class="btn btn-primary" onclick="location.reload()" style="width:100%;margin-top:12px;justify-content:center;">↻ Пройти заново</button>
 </div>
 </div>
 
 <div class="game-wrap" id="gameWrap">
   <div class="topbar">
-    <div class="brand">Flow<em>Lab</em></div>
+    <div class="brand"><span class="logo-icon">📊</span><span class="logo-text">FlowLab</span></div>
     <div class="phase-badge" id="phaseBadge">Ввод данных</div>
     <div class="progress-bar">
       <div class="progress-dots" id="progDots"></div>
@@ -224,21 +277,137 @@ body{background:var(--bg);color:var(--ink);font-family:'DM Sans',sans-serif;min-
 
 <script>
 // ============================================================
+// PRESET DATASETS
+// ============================================================
+var DATASETS = [
+  {
+    id: 'custom',
+    name: 'Свои данные',
+    icon: '✏️',
+    badge: 'custom',
+    badgeText: 'Ввод',
+    desc: 'Введите собственные данные из вашей Lean Flow Simulation',
+    data: null
+  },
+  {
+    id: 'stable',
+    name: 'Стабильный поток',
+    icon: '🟢',
+    badge: 'stable',
+    badgeText: 'Стабильный',
+    desc: 'Параллельные линии, WIP стабилен, Throughput предсказуем. Зрелая команда.',
+    data: {
+      todo:[20,19,18,17,16,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1,0],
+      wip: [0, 1, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+      done:[0, 0, 0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17]
+    }
+  },
+  {
+    id: 'divergent',
+    name: 'Расхождение линий',
+    icon: '🔴',
+    badge: 'danger',
+    badgeText: 'Опасный',
+    desc: 'WIP постоянно растёт, Arrival Rate > Throughput. Система перегружена.',
+    data: {
+      todo:[15,16,17,17,18,18,19,19,20,20,21,22,22,23,23,24,24,25,25,26,26],
+      wip: [0, 2, 3, 5, 6, 8, 9,10,11,13,14,14,15,16,17,17,18,18,19,19,20],
+      done:[0, 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9]
+    }
+  },
+  {
+    id: 'staircase',
+    name: 'Лестница (Scrum)',
+    icon: '🟡',
+    badge: 'warn',
+    badgeText: 'Итеративный',
+    desc: 'Задачи завершаются пачками в конце спринтов. Типичный Scrum-паттерн.',
+    data: {
+      todo:[20,19,18,17,16,15,14,13,13,13,12,11,10,9,8,7,7,7,7,6,5],
+      wip: [0, 1, 2, 3, 4, 5, 5, 5, 2, 1, 1, 2, 3, 4, 5, 5, 4, 2, 1, 1, 1],
+      done:[0, 0, 0, 0, 0, 0, 1, 2, 5, 6, 7, 7, 7, 7, 7, 8, 9,11,12,13,14]
+    }
+  },
+  {
+    id: 'bottleneck',
+    name: 'Бутылочное горлышко',
+    icon: '🟠',
+    badge: 'warn',
+    badgeText: 'Блокер',
+    desc: 'Стагнация Done в середине периода. Блокер на этапе завершения, затем прорыв.',
+    data: {
+      todo:[18,17,16,15,14,13,12,11,10,10,10,10,10,9,8,7,6,5,4,3,2],
+      wip: [0, 1, 2, 3, 4, 5, 6, 7, 8, 8, 8, 8, 8, 7, 6, 5, 5, 4, 3, 3, 2],
+      done:[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 4, 6, 7, 9,11,12,14]
+    }
+  },
+  {
+    id: 'flood',
+    name: 'Разлив WIP',
+    icon: '🌊',
+    badge: 'danger',
+    badgeText: 'Перегрузка',
+    desc: 'WIP резко возрастает в середине, затем частично нормализуется. Пик нагрузки.',
+    data: {
+      todo:[20,18,16,14,12,10,8,6,6,6,7,8,8,8,7,6,5,4,3,2,1],
+      wip: [0, 2, 4, 6, 8,10,12,14,13,12,10,8, 7, 6, 6, 5, 5, 4, 4, 3, 3],
+      done:[0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 5, 6, 7, 9,10,12,13,15,16]
+    }
+  },
+  {
+    id: 'improving',
+    name: 'Растущий Throughput',
+    icon: '📈',
+    badge: 'stable',
+    badgeText: 'Улучшение',
+    desc: 'Команда набирает скорость: Throughput растёт от начала к концу. Кривая обучения.',
+    data: {
+      todo:[25,24,23,22,21,20,19,18,17,16,14,12,10,8, 6, 4, 3, 2, 1, 0, 0],
+      wip: [0, 1, 2, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 3, 3, 2, 2, 1],
+      done:[0, 0, 0, 0, 1, 2, 3, 4, 5, 6, 7, 9,11,13,15,17,19,20,22,23,24]
+    }
+  }
+];
+
+// ============================================================
 // STATE
 // ============================================================
-const DAYS = 21;
-const G = {
+var DAYS = 21;
+var G = {
   step: 0,
   score: 0,
   best: 0,
   ok: 0,
   bad: 0,
   answered: false,
-  data: null, // {todo:[], wip:[], done:[]}
-  metrics: null
+  data: null,
+  metrics: null,
+  selectedDataset: 'custom'
 };
 
-const TOTAL_STEPS = 12; // data entry + 8 quiz + analysis + report + patterns
+var TOTAL_STEPS = 12;
+
+// ============================================================
+// DATASET SELECTION UI
+// ============================================================
+function renderDatasetCards() {
+  var grid = document.getElementById('datasetGrid');
+  grid.innerHTML = DATASETS.map(function(ds) {
+    var badgeCls = ds.badge === 'stable' ? 'badge-stable' : ds.badge === 'warn' ? 'badge-warn' : ds.badge === 'danger' ? 'badge-danger' : ds.badge === 'chaos' ? 'badge-chaos' : 'badge-custom';
+    var sel = G.selectedDataset === ds.id ? ' selected' : '';
+    return '<div class="dataset-card' + sel + '" onclick="selectDataset(\'' + ds.id + '\')">'
+      + '<span class="ds-badge ' + badgeCls + '">' + ds.badgeText + '</span>'
+      + '<div class="ds-icon">' + ds.icon + '</div>'
+      + '<div class="ds-name">' + ds.name + '</div>'
+      + '<div class="ds-desc">' + ds.desc + '</div>'
+      + '</div>';
+  }).join('');
+}
+
+function selectDataset(id) {
+  G.selectedDataset = id;
+  renderDatasetCards();
+}
 
 // ============================================================
 // CFD RENDERER
@@ -268,15 +437,15 @@ function renderCFD(canvas, data, opts) {
   function yp(v) { return pad.top + ch - (v/maxVal)*ch; }
 
   // grid
-  ctx.strokeStyle = '#e8e5e0'; ctx.lineWidth = .5;
+  ctx.strokeStyle = 'rgba(255,255,255,.06)'; ctx.lineWidth = .5;
   for (var gi=0;gi<=5;gi++) {
     var gy = pad.top + (gi/5)*ch;
     ctx.beginPath(); ctx.moveTo(pad.left, gy); ctx.lineTo(w-pad.right, gy); ctx.stroke();
   }
 
   var stacks = [cumDone, cumWip, cumTodo];
-  var fills = ['rgba(58,158,126,.35)','rgba(123,184,216,.35)','rgba(176,176,176,.3)'];
-  var strokes = ['#3a9e7e','#7bb8d8','#b0b0b0'];
+  var fills = ['rgba(35,134,54,.4)','rgba(57,197,207,.35)','rgba(139,148,158,.25)'];
+  var strokes = ['#238636','#39c5cf','#8b949e'];
 
   for (var s=2;s>=0;s--) {
     ctx.fillStyle = fills[s];
@@ -298,17 +467,17 @@ function renderCFD(canvas, data, opts) {
       ctx.save();
       if (a.type === 'vline') {
         var xi = xp(a.idx);
-        ctx.setLineDash([5,4]); ctx.strokeStyle = a.color||'#d35322'; ctx.lineWidth = 1.5;
+        ctx.setLineDash([5,4]); ctx.strokeStyle = a.color||'var(--accent-orange)'; ctx.lineWidth = 1.5;
         ctx.beginPath(); ctx.moveTo(xi, pad.top); ctx.lineTo(xi, h-pad.bottom); ctx.stroke();
-        if(a.label){ctx.fillStyle=a.color||'#d35322';ctx.font='600 10px IBM Plex Mono';ctx.fillText(a.label, xi+3, pad.top+12);}
+        if(a.label){ctx.fillStyle=a.color||'#d29922';ctx.font='600 10px Exo 2';ctx.fillText(a.label, xi+3, pad.top+12);}
       }
       if (a.type === 'hline') {
-        ctx.setLineDash([5,4]); ctx.strokeStyle = a.color||'#d35322'; ctx.lineWidth = 1.5;
+        ctx.setLineDash([5,4]); ctx.strokeStyle = a.color||'#d29922'; ctx.lineWidth = 1.5;
         ctx.beginPath(); ctx.moveTo(pad.left, yp(a.val)); ctx.lineTo(w-pad.right, yp(a.val)); ctx.stroke();
-        if(a.label){ctx.fillStyle=a.color||'#d35322';ctx.font='600 10px IBM Plex Mono';ctx.fillText(a.label, w-pad.right-ctx.measureText(a.label).width-4, yp(a.val)-4);}
+        if(a.label){ctx.fillStyle=a.color||'#d29922';ctx.font='600 10px Exo 2';ctx.fillText(a.label, w-pad.right-ctx.measureText(a.label).width-4, yp(a.val)-4);}
       }
       if (a.type === 'zone') {
-        ctx.fillStyle = a.color || 'rgba(211,83,34,.06)';
+        ctx.fillStyle = a.color || 'rgba(57,197,207,.06)';
         ctx.fillRect(xp(a.from), pad.top, xp(a.to)-xp(a.from), ch);
       }
       ctx.restore();
@@ -316,7 +485,7 @@ function renderCFD(canvas, data, opts) {
   }
 
   // axis labels
-  ctx.fillStyle = '#8a8478'; ctx.font = '10px IBM Plex Mono';
+  ctx.fillStyle = '#8b949e'; ctx.font = '10px Exo 2';
   for(var d=0;d<n;d++){
     if(d % Math.max(1,Math.floor(n/7)) === 0 || d===n-1){
       ctx.fillText('Д'+(d+1), xp(d)-8, h-pad.bottom+14);
@@ -326,7 +495,7 @@ function renderCFD(canvas, data, opts) {
     var val = Math.round((maxVal/5)*v2);
     ctx.fillText(val, 2, yp(val)+3);
   }
-  ctx.fillStyle='#8a8478'; ctx.font='600 9px IBM Plex Mono';
+  ctx.fillStyle='#8b949e'; ctx.font='600 9px Exo 2';
   ctx.fillText('Задачи', 0, pad.top-8);
 }
 
@@ -338,33 +507,27 @@ function calcMetrics(data) {
   var wips = data.wip.slice();
   var avgWip = wips.reduce(function(a,b){return a+b;},0) / n;
 
-  // Throughput per day (diff in done)
   var tputs = [];
   for(var i=1;i<n;i++) tputs.push(Math.max(0, data.done[i] - data.done[i-1]));
   var avgTh = tputs.length > 0 ? tputs.reduce(function(a,b){return a+b;},0) / tputs.length : 0;
   var totalDone = data.done[n-1] - data.done[0];
 
-  // Lead Time via Little's Law
   var avgLT = avgTh > 0 ? avgWip / avgTh : 0;
 
-  // WIP trend (first half vs second half)
   var half = Math.floor(n/2);
   var wipFirst = wips.slice(0, half).reduce(function(a,b){return a+b;},0) / half;
   var wipSecond = wips.slice(half).reduce(function(a,b){return a+b;},0) / (n-half);
   var wipTrend = wipSecond - wipFirst;
 
-  // Throughput trend
   var thFirst = tputs.slice(0, Math.floor(tputs.length/2));
   var thSecond = tputs.slice(Math.floor(tputs.length/2));
   var thFirstAvg = thFirst.length > 0 ? thFirst.reduce(function(a,b){return a+b;},0)/thFirst.length : 0;
   var thSecondAvg = thSecond.length > 0 ? thSecond.reduce(function(a,b){return a+b;},0)/thSecond.length : 0;
   var thTrend = thSecondAvg - thFirstAvg;
 
-  // Max WIP
   var maxWip = Math.max.apply(null, wips);
   var minWip = Math.min.apply(null, wips);
 
-  // Arrival rate
   var arrivals = [];
   for(var j=1;j<n;j++){
     var totalJ = data.todo[j]+data.wip[j]+data.done[j];
@@ -373,18 +536,14 @@ function calcMetrics(data) {
   }
   var avgArrival = arrivals.length > 0 ? arrivals.reduce(function(a,b){return a+b;},0)/arrivals.length : 0;
 
-  // Flow efficiency estimate
   var flowEff = avgTh > 0 && avgWip > 0 ? Math.min(100, (avgTh / avgWip) * 100) : 0;
 
-  // Remaining work at end
   var remainingTodo = data.todo[n-1];
   var remainingWip = data.wip[n-1];
   var remaining = remainingTodo + remainingWip;
 
-  // Forecast days to complete remaining
   var forecastDays = avgTh > 0 ? Math.ceil(remaining / avgTh) : Infinity;
 
-  // Stall detection (Done doesn't grow for 3+ days)
   var stallDays = 0;
   var maxStall = 0;
   for(var k=1;k<n;k++){
@@ -392,12 +551,8 @@ function calcMetrics(data) {
     else stallDays = 0;
   }
 
-  // Divergence check
-  var arrivalTotal = 0;
-  for(var m=0;m<n;m++) arrivalTotal = data.todo[m]+data.wip[m]+data.done[m];
   var isDiverging = wipTrend > 2;
 
-  // Variability (coefficient of variation of throughput)
   var thMean = avgTh;
   var thVar = tputs.reduce(function(a,b){return a + (b-thMean)*(b-thMean);},0) / Math.max(1,tputs.length);
   var thStd = Math.sqrt(thVar);
@@ -430,47 +585,30 @@ function calcMetrics(data) {
 function detectPatterns(data, m) {
   var patterns = [];
 
-  // 1. Divergence
   if (m.isDiverging) {
     patterns.push({name:'Расхождение линий', severity:'bad', desc:'WIP растёт от начала к концу. Arrival Rate > Throughput. Система нестабильна.'});
   }
-
-  // 2. Stall
   if (m.maxStall >= 3) {
     patterns.push({name:'Стагнация Done ('+m.maxStall+' дн.)', severity:'bad', desc:'Departure Line не росла '+m.maxStall+' дней подряд. Возможен блокер на завершении.'});
   }
-
-  // 3. Flood
   if (m.maxWip > m.avgWip * 1.8) {
     patterns.push({name:'Разлив WIP (пик: '+m.maxWip+')', severity:'warn', desc:'Пиковый WIP значительно выше среднего. Были периоды перегрузки.'});
   }
-
-  // 4. High WIP
   if (m.avgWip > 15) {
     patterns.push({name:'Высокий средний WIP', severity:'warn', desc:'Средний WIP = '+m.avgWip+'. Рекомендуемый для небольшой команды: 3-8.'});
   }
-
-  // 5. Good balance
   if (Math.abs(m.wipTrend) < 1.5 && m.avgWip < 12 && m.thCV < 0.8) {
     patterns.push({name:'Стабильный поток', severity:'good', desc:'WIP стабилен, Throughput предсказуем. Хороший знак!'});
   }
-
-  // 6. High variability
   if (m.thCV > 1.0) {
     patterns.push({name:'Высокая вариабельность', severity:'warn', desc:'Coefficient of Variation Throughput = '+m.thCV+'. Предсказуемость низкая.'});
   }
-
-  // 7. Improving throughput
   if (m.thTrend > 0.5) {
     patterns.push({name:'Растущий Throughput', severity:'good', desc:'Throughput увеличивается ко второй половине периода.'});
   }
-
-  // 8. Declining throughput
   if (m.thTrend < -0.5) {
     patterns.push({name:'Падающий Throughput', severity:'bad', desc:'Throughput снижается ко второй половине. Команда замедляется.'});
   }
-
-  // 9. Low throughput
   if (m.avgTh < 1) {
     patterns.push({name:'Очень низкий Throughput', severity:'warn', desc:'Менее 1 задачи в день. Проверьте блокеры и размер задач.'});
   }
@@ -505,7 +643,7 @@ function buildSteps() {
 var STEPS = [];
 
 // ============================================================
-// DYNAMIC QUIZ GENERATORS (use player data)
+// DYNAMIC QUIZ GENERATORS
 // ============================================================
 function generateQuiz(qIdx) {
   var m = G.metrics;
@@ -513,7 +651,7 @@ function generateQuiz(qIdx) {
   if (!m) return null;
 
   switch(qIdx) {
-    case 0: // q1: WIP reading
+    case 0:
       return {
         title: 'Каков средний WIP вашей команды?',
         context: 'Проанализируйте вашу CFD.',
@@ -526,7 +664,7 @@ function generateQuiz(qIdx) {
         ]
       };
 
-    case 1: // q2: Lead Time via Little's Law
+    case 1:
       var ltRound = Math.round(m.avgLT*10)/10;
       var ltWrong1 = Math.round(m.avgWip * m.avgTh * 10)/10;
       var ltWrong2 = Math.round(m.avgTh * 10)/10;
@@ -542,7 +680,7 @@ function generateQuiz(qIdx) {
         ]
       };
 
-    case 2: { // q3: pattern identification
+    case 2: {
       var patterns = detectPatterns(d, m);
       var mainPattern = patterns[0];
       var wrongPatterns = ['Лестница (итеративный процесс)', 'Идеальный баланс без аномалий', 'Каскадный отказ системы'];
@@ -559,7 +697,7 @@ function generateQuiz(qIdx) {
       };
     }
 
-    case 3: { // q4: WIP trend
+    case 3: {
       var trendWord = m.wipTrend > 1.5 ? 'растёт' : m.wipTrend < -1.5 ? 'снижается' : 'стабилен';
       var trendAdvice = m.wipTrend > 1.5
         ? 'Расхождение нарастает. Введите WIP-лимиты.'
@@ -579,7 +717,7 @@ function generateQuiz(qIdx) {
       };
     }
 
-    case 4: { // q5: forecast
+    case 4: {
       var fcDays = m.forecastDays;
       var fcText = fcDays === Infinity ? 'невозможно (Throughput = 0)' : fcDays + ' дней';
       return {
@@ -595,7 +733,7 @@ function generateQuiz(qIdx) {
       };
     }
 
-    case 5: { // q6: recommendation
+    case 5: {
       var wipHigh = m.avgWip > 10;
       var diverging = m.isDiverging;
       var bestAction = wipHigh || diverging
@@ -665,18 +803,34 @@ function renderInputStep() {
     +'<div class="cc-body">'
     +'<div class="tip-box"><strong>Подсказка:</strong> Введите количество задач в каждом статусе на конец каждого дня. ToDo = задачи в бэклоге. In Progress = задачи в работе. Done = завершённые задачи (кумулятивно).</div>'
     +'<div class="chart-container"><canvas id="liveChart"></canvas>'
-    +'<div class="chart-legend"><div class="leg"><div class="leg-dot" style="background:var(--todo);"></div>ToDo</div><div class="leg"><div class="leg-dot" style="background:var(--wip);"></div>In Progress</div><div class="leg"><div class="leg-dot" style="background:var(--done);"></div>Done</div></div></div>'
+    +'<div class="chart-legend"><div class="leg"><div class="leg-dot" style="background:var(--todo-color);"></div>ToDo</div><div class="leg"><div class="leg-dot" style="background:var(--wip-color);"></div>In Progress</div><div class="leg"><div class="leg-dot" style="background:var(--done-color);"></div>Done</div></div></div>'
     +'<div class="data-table-wrap"><table class="data-table"><thead><tr><th>День</th><th>ToDo</th><th>In Prog</th><th>Done</th><th>WIP</th><th>TH/день</th></tr></thead><tbody>'+rows+'</tbody></table></div>'
-    +'<div id="inputError" style="color:var(--warn);font-size:.8rem;margin-bottom:10px;display:none;"></div>'
-    +'<div class="btn-row"><button class="btn btn-ghost" onclick="fillSampleData()">Заполнить примером</button><button class="btn btn-primary" id="btnSubmitData" onclick="submitData()" disabled>Начать анализ</button></div>'
+    +'<div id="inputError" style="color:var(--accent-red);font-size:.8rem;margin-bottom:10px;display:none;"></div>'
+    +'<div class="btn-row"><button class="btn btn-ghost" onclick="fillSampleData()">📋 Заполнить примером</button><button class="btn btn-primary" id="btnSubmitData" onclick="submitData()" disabled>▶ Начать анализ</button></div>'
     +'</div></div>';
+
+  // Auto-fill if preset selected
+  if (G.selectedDataset !== 'custom') {
+    var ds = DATASETS.find(function(d){ return d.id === G.selectedDataset; });
+    if (ds && ds.data) {
+      fillFromDataset(ds.data);
+    }
+  }
+}
+
+function fillFromDataset(sample) {
+  for (var d=1; d<=DAYS; d++) {
+    document.getElementById('td'+d).value = sample.todo[d-1];
+    document.getElementById('wp'+d).value = sample.wip[d-1];
+    document.getElementById('dn'+d).value = sample.done[d-1];
+  }
+  onDataInput();
 }
 
 function onDataInput() {
   var data = readInputData();
   if (!data) return;
 
-  // Calc WIP and TH cells
   for (var i=0; i<data.done.length; i++) {
     var wip = data.wip[i];
     document.getElementById('wip'+(i+1)).textContent = wip;
@@ -688,13 +842,11 @@ function onDataInput() {
     }
   }
 
-  // Render live chart
   var canvas = document.getElementById('liveChart');
   if (canvas && data.done.length >= 2) {
     renderCFD(canvas, data);
   }
 
-  // Enable submit if enough data
   var filled = 0;
   for (var j=0; j<DAYS; j++) {
     if (!isNaN(data.todo[j]) && !isNaN(data.wip[j]) && !isNaN(data.done[j])) filled++;
@@ -714,24 +866,17 @@ function readInputData() {
 }
 
 function fillSampleData() {
-  // Sample data simulating a typical lean flow game
   var sample = {
     todo:[15,14,13,11,10,9,9,8,7,7,8,7,6,5,5,4,4,3,3,2,1],
     wip: [0, 1, 3, 4, 5, 5, 4, 5, 6, 5,4,5,5,5,4,4,3,4,3,3,2],
     done:[0, 0, 0, 1, 2, 3, 5, 6, 7, 9,10,11,13,14,16,17,19,20,22,23,25]
   };
-  for (var d=1; d<=DAYS; d++) {
-    document.getElementById('td'+d).value = sample.todo[d-1];
-    document.getElementById('wp'+d).value = sample.wip[d-1];
-    document.getElementById('dn'+d).value = sample.done[d-1];
-  }
-  onDataInput();
+  fillFromDataset(sample);
 }
 
 function submitData() {
   var data = readInputData();
 
-  // Validate: Done should be non-decreasing
   var errEl = document.getElementById('inputError');
   for (var i=1; i<DAYS; i++) {
     if (data.done[i] < data.done[i-1]) {
@@ -754,9 +899,9 @@ function renderTheoryStep(step) {
   area.innerHTML = '<div class="content-card"><div class="cc-header"><span class="cc-type type-theory">Теория</span><div><div class="cc-title">'+step.title+'</div></div></div>'
     +'<div class="cc-body">'
     +'<div class="chart-container"><canvas id="theoryChart"></canvas>'
-    +'<div class="chart-legend"><div class="leg"><div class="leg-dot" style="background:var(--todo);"></div>ToDo</div><div class="leg"><div class="leg-dot" style="background:var(--wip);"></div>In Progress</div><div class="leg"><div class="leg-dot" style="background:var(--done);"></div>Done</div></div></div>'
+    +'<div class="chart-legend"><div class="leg"><div class="leg-dot" style="background:var(--todo-color);"></div>ToDo</div><div class="leg"><div class="leg-dot" style="background:var(--wip-color);"></div>In Progress</div><div class="leg"><div class="leg-dot" style="background:var(--done-color);"></div>Done</div></div></div>'
     +'<div class="theory-card"><div class="th-title">Теория CFD</div>'+step.theory+'</div>'
-    +'<button class="btn btn-primary" onclick="nextStep()" style="width:100%;">Далее</button>'
+    +'<button class="btn btn-primary" onclick="nextStep()" style="width:100%;justify-content:center;">➡️ Далее</button>'
     +'</div></div>';
   setTimeout(function(){
     var c = document.getElementById('theoryChart');
@@ -771,10 +916,8 @@ function renderQuizStep() {
   quizCounter++;
   if (!qData) { nextStep(); return; }
 
-  // shuffle options
   var indices = qData.options.map(function(_,i){return i;});
   for(var i=indices.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var tmp=indices[i];indices[i]=indices[j];indices[j]=tmp;}
-  var correctShuffled = indices.indexOf(qData.correct);
 
   var letters = ['A','B','C'];
   var optsHtml = indices.map(function(oi, di){
@@ -784,15 +927,14 @@ function renderQuizStep() {
   var area = document.getElementById('mainArea');
   area.innerHTML = '<div class="content-card"><div class="cc-header"><span class="cc-type type-quiz">Вопрос</span><div><div class="cc-title">'+qData.title+'</div><div class="cc-desc">'+qData.context+'</div></div></div>'
     +'<div class="cc-body">'
-    +'<div class="cc-desc" style="padding:14px 16px;background:var(--bg);border-radius:8px;border:1px solid var(--card-border);margin-bottom:14px;">'+qData.scenario+'</div>'
+    +'<div class="cc-desc" style="padding:14px 16px;background:var(--bg-column);border-radius:8px;border:1px solid rgba(255,255,255,.08);margin-bottom:14px;">'+qData.scenario+'</div>'
     +'<div class="chart-container"><canvas id="quizChart"></canvas>'
-    +'<div class="chart-legend"><div class="leg"><div class="leg-dot" style="background:var(--todo);"></div>ToDo</div><div class="leg"><div class="leg-dot" style="background:var(--wip);"></div>In Progress</div><div class="leg"><div class="leg-dot" style="background:var(--done);"></div>Done</div></div></div>'
+    +'<div class="chart-legend"><div class="leg"><div class="leg-dot" style="background:var(--todo-color);"></div>ToDo</div><div class="leg"><div class="leg-dot" style="background:var(--wip-color);"></div>In Progress</div><div class="leg"><div class="leg-dot" style="background:var(--done-color);"></div>Done</div></div></div>'
     +'<div class="options-list" id="optList">'+optsHtml+'</div>'
     +'<div class="fb-box" id="fbBox"></div>'
     +'<div id="qActions"></div>'
     +'</div></div>';
 
-  // store for answer handler
   window._currentQuiz = qData;
   window._currentIndices = indices;
 
@@ -828,7 +970,7 @@ function handleQuizAnswer(di, oi) {
   fb.className = 'fb-box '+fbClass+' show';
   fb.innerHTML = '<div class="fb-title">'+fbTitle+' ('+(pts>0?'+':'')+pts+' pts)</div>'+opt.fb;
 
-  document.getElementById('qActions').innerHTML = '<button class="btn btn-primary" onclick="nextStep()" style="width:100%;margin-top:10px;">Далее</button>';
+  document.getElementById('qActions').innerHTML = '<button class="btn btn-primary" onclick="nextStep()" style="width:100%;margin-top:10px;justify-content:center;">➡️ Далее</button>';
   document.getElementById('scoreDisp').textContent = G.score + ' pts';
 }
 
@@ -842,31 +984,31 @@ function renderMetricsStep() {
     return '<span class="pattern-tag '+cls+'">'+p.name+'</span>';
   }).join(' ');
 
-  var ltColor = m.avgLT > 15 ? 'v-warn' : m.avgLT > 8 ? 'v-accent' : 'v-green';
-  var wipColor = m.avgWip > 15 ? 'v-warn' : m.avgWip > 8 ? 'v-accent' : 'v-green';
+  var ltColor = m.avgLT > 15 ? 'v-warn' : m.avgLT > 8 ? 'v-orange' : 'v-green';
+  var wipColor = m.avgWip > 15 ? 'v-warn' : m.avgWip > 8 ? 'v-orange' : 'v-green';
 
   var area = document.getElementById('mainArea');
   area.innerHTML = '<div class="content-card"><div class="cc-header"><span class="cc-type type-report">Метрики</span><div><div class="cc-title">Ваши ключевые метрики</div><div class="cc-desc">Расчёт на основе введённых данных за 21 день</div></div></div>'
     +'<div class="cc-body">'
     +'<div class="chart-container"><canvas id="metricsChart"></canvas>'
-    +'<div class="chart-legend"><div class="leg"><div class="leg-dot" style="background:var(--todo);"></div>ToDo</div><div class="leg"><div class="leg-dot" style="background:var(--wip);"></div>In Progress</div><div class="leg"><div class="leg-dot" style="background:var(--done);"></div>Done</div></div></div>'
+    +'<div class="chart-legend"><div class="leg"><div class="leg-dot" style="background:var(--todo-color);"></div>ToDo</div><div class="leg"><div class="leg-dot" style="background:var(--wip-color);"></div>In Progress</div><div class="leg"><div class="leg-dot" style="background:var(--done-color);"></div>Done</div></div></div>'
     +'<div class="metrics-grid">'
     +'<div class="metric-card"><div class="metric-val '+wipColor+'">'+m.avgWip+'</div><div class="metric-label">Средний WIP</div></div>'
     +'<div class="metric-card"><div class="metric-val v-blue">'+m.avgTh+'</div><div class="metric-label">Throughput/день</div></div>'
     +'<div class="metric-card"><div class="metric-val '+ltColor+'">'+m.avgLT+'</div><div class="metric-label">Lead Time (дни)</div></div>'
     +'<div class="metric-card"><div class="metric-val v-purple">'+m.totalDone+'</div><div class="metric-label">Всего завершено</div></div>'
-    +'<div class="metric-card"><div class="metric-val v-accent">'+(m.wipTrend>0?'+':'')+m.wipTrend+'</div><div class="metric-label">Тренд WIP</div></div>'
-    +'<div class="metric-card"><div class="metric-val v-blue">'+m.thCV+'</div><div class="metric-label">CV Throughput</div></div>'
+    +'<div class="metric-card"><div class="metric-val v-cyan">'+(m.wipTrend>0?'+':'')+m.wipTrend+'</div><div class="metric-label">Тренд WIP</div></div>'
+    +'<div class="metric-card"><div class="metric-val v-orange">'+m.thCV+'</div><div class="metric-label">CV Throughput</div></div>'
     +'</div>'
-    +'<div style="margin-bottom:16px;"><div style="font-family:IBM Plex Mono;font-size:.7rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--ink3);margin-bottom:8px;">Обнаруженные паттерны</div>'+patternTags+'</div>'
-    +'<button class="btn btn-primary" onclick="nextStep()" style="width:100%;">Перейти к отчёту</button>'
+    +'<div style="margin-bottom:16px;"><div style="font-family:Russo One;font-size:.7rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--text-secondary);margin-bottom:8px;">Обнаруженные паттерны</div>'+patternTags+'</div>'
+    +'<button class="btn btn-primary" onclick="nextStep()" style="width:100%;justify-content:center;">📋 Перейти к отчёту</button>'
     +'</div></div>';
 
   setTimeout(function(){
     var c = document.getElementById('metricsChart');
     if(c && G.data) {
       var anns = [];
-      anns.push({type:'hline', val:m.avgWip, color:'#7bb8d8', label:'Avg WIP: '+m.avgWip});
+      anns.push({type:'hline', val:m.avgWip, color:'#39c5cf', label:'Avg WIP: '+m.avgWip});
       renderCFD(c, G.data, {annotations:anns, height:280});
     }
   }, 50);
@@ -877,10 +1019,8 @@ function renderReportStep() {
   var m = G.metrics;
   var patterns = detectPatterns(G.data, m);
 
-  // Build report sections
   var sections = '';
 
-  // Overall health
   var health = m.isDiverging ? 'bad' : m.avgWip > 15 || m.maxStall >= 3 ? 'warn' : 'good';
   var healthTitle = health==='good'?'Система в хорошем состоянии':health==='warn'?'Есть зоны для улучшения':'Требуется вмешательство';
   var healthText = health==='good'
@@ -890,20 +1030,17 @@ function renderReportStep() {
       : 'Система нестабильна: WIP растёт (тренд: +'+m.wipTrend+'), линии расходятся. Без вмешательства Lead Time продолжит расти. Нужны срочные WIP-лимиты.';
   sections += '<div class="report-section r-'+health+'"><div class="r-title">Общая оценка</div><div class="r-text">'+healthText+'</div></div>';
 
-  // Little's Law
   sections += '<div class="report-section r-info"><div class="r-title">Закон Литтла</div><div class="r-text"><strong>WIP = '+m.avgWip+'</strong> | <strong>Throughput = '+m.avgTh+'/день</strong> | <strong>Lead Time = '+m.avgLT+' дней</strong><br>Формула: LT = WIP / TH = '+m.avgWip+' / '+m.avgTh+' = '+m.avgLT+' дней.<br>'
     +(m.avgLT > 10 ? 'Lead Time высокий. Снижение WIP до '+ Math.max(3,Math.round(m.avgWip*0.5))+' даст Lead Time ~'+Math.round(Math.max(3,Math.round(m.avgWip*0.5))/m.avgTh*10)/10+' дней.'
       : 'Lead Time в приемлемых пределах.')
     +'</div></div>';
 
-  // Patterns
   var pHtml = patterns.map(function(p){
     var cls = p.severity==='good'?'r-good':p.severity==='warn'?'r-warn':'r-bad';
     return '<div class="report-section '+cls+'"><div class="r-title">'+p.name+'</div><div class="r-text">'+p.desc+'</div></div>';
   }).join('');
   sections += pHtml;
 
-  // Forecast
   var fcDays = m.forecastDays;
   var fcText = fcDays === Infinity ? 'Невозможно (Throughput = 0)' : fcDays + ' дней';
   var recWip = Math.max(3, Math.round(m.avgWip * 0.6));
@@ -918,7 +1055,6 @@ function renderReportStep() {
     +'</div>'
     +'</div></div>';
 
-  // Recommendations
   var recs = [];
   if (m.isDiverging || m.avgWip > 10) recs.push('Введите WIP-лимит = '+recWip+'. Это снизит Lead Time до ~'+recLT+' дней.');
   if (m.maxStall >= 3) recs.push('Устраните блокеры завершения. '+m.maxStall+' дней стагнации Done — критический сигнал.');
@@ -931,17 +1067,17 @@ function renderReportStep() {
   area.innerHTML = '<div class="content-card"><div class="cc-header"><span class="cc-type type-report">Отчёт</span><div><div class="cc-title">Аналитический отчёт по вашей CFD</div><div class="cc-desc">21 день, '+m.totalDone+' завершённых задач</div></div></div>'
     +'<div class="cc-body">'
     +'<div class="chart-container"><canvas id="reportChart"></canvas>'
-    +'<div class="chart-legend"><div class="leg"><div class="leg-dot" style="background:var(--todo);"></div>ToDo</div><div class="leg"><div class="leg-dot" style="background:var(--wip);"></div>In Progress</div><div class="leg"><div class="leg-dot" style="background:var(--done);"></div>Done</div></div></div>'
+    +'<div class="chart-legend"><div class="leg"><div class="leg-dot" style="background:var(--todo-color);"></div>ToDo</div><div class="leg"><div class="leg-dot" style="background:var(--wip-color);"></div>In Progress</div><div class="leg"><div class="leg-dot" style="background:var(--done-color);"></div>Done</div></div></div>'
     + sections
-    +'<button class="btn btn-accent" onclick="nextStep()" style="width:100%;margin-top:8px;">Завершить</button>'
+    +'<button class="btn btn-accent" onclick="nextStep()" style="width:100%;margin-top:8px;justify-content:center;">🏁 Завершить</button>'
     +'</div></div>';
 
   setTimeout(function(){
     var c = document.getElementById('reportChart');
     if(c && G.data) {
       var anns = [
-        {type:'hline', val:m.avgWip, color:'#7bb8d8', label:'Avg WIP'},
-        {type:'hline', val:recWip, color:'#1e6b4f', label:'WIP Limit: '+recWip}
+        {type:'hline', val:m.avgWip, color:'#39c5cf', label:'Avg WIP'},
+        {type:'hline', val:recWip, color:'#238636', label:'WIP Limit: '+recWip}
       ];
       renderCFD(c, G.data, {annotations:anns, height:300});
     }
@@ -998,6 +1134,9 @@ function startGame() {
   renderProgress();
   showStep();
 }
+
+// ---- INIT ----
+renderDatasetCards();
 </script>
 </body>
 </html>
