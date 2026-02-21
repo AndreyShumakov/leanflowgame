@@ -1,0 +1,1206 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ITIL Quest: Миссия Ценности</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-deep: #0a0e1a;
+  --bg-panel: #111827;
+  --bg-card: #1a2236;
+  --accent-cyan: #00f0ff;
+  --accent-magenta: #ff2d78;
+  --accent-gold: #ffd700;
+  --accent-green: #00ff88;
+  --accent-purple: #a855f7;
+  --text-primary: #e2e8f0;
+  --text-muted: #64748b;
+  --glow-cyan: 0 0 20px rgba(0,240,255,0.3);
+  --glow-magenta: 0 0 20px rgba(255,45,120,0.3);
+  --glow-gold: 0 0 20px rgba(255,215,0,0.3);
+  --cell-size: 70px;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  background: var(--bg-deep);
+  color: var(--text-primary);
+  font-family: 'Exo 2', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+body::before {
+  content:'';
+  position:fixed; inset:0;
+  background:
+    radial-gradient(ellipse at 20% 50%, rgba(0,240,255,0.05) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(255,45,120,0.04) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 80%, rgba(168,85,247,0.03) 0%, transparent 50%);
+  pointer-events:none; z-index:0;
+}
+
+/* HEADER */
+.game-header {
+  text-align:center; padding:20px 20px 10px; position:relative; z-index:1;
+}
+.game-header h1 {
+  font-family:'Orbitron',sans-serif;
+  font-size:clamp(1.4rem,3.5vw,2.2rem);
+  font-weight:900;
+  background:linear-gradient(135deg, var(--accent-cyan), var(--accent-magenta));
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  text-transform:uppercase; letter-spacing:3px;
+}
+.game-header .subtitle {
+  font-size:0.85rem; color:var(--text-muted); margin-top:4px; letter-spacing:1px;
+}
+
+/* LAYOUT */
+.game-container {
+  display:grid;
+  grid-template-columns: 280px 1fr 280px;
+  gap:16px;
+  max-width:1400px;
+  margin:0 auto;
+  padding:10px 16px 20px;
+  position:relative; z-index:1;
+}
+@media(max-width:1100px) {
+  .game-container { grid-template-columns:1fr; }
+}
+
+/* PANELS */
+.panel {
+  background: var(--bg-panel);
+  border:1px solid rgba(255,255,255,0.06);
+  border-radius:12px;
+  padding:16px;
+  backdrop-filter:blur(10px);
+}
+.panel-title {
+  font-family:'Orbitron',sans-serif;
+  font-size:0.75rem;
+  text-transform:uppercase;
+  letter-spacing:2px;
+  color:var(--accent-cyan);
+  margin-bottom:12px;
+  padding-bottom:8px;
+  border-bottom:1px solid rgba(0,240,255,0.15);
+}
+
+/* STORY */
+#storyPanel .story-text {
+  font-size:0.85rem; line-height:1.6; color:var(--text-primary);
+  max-height:200px; overflow-y:auto;
+}
+#storyPanel .story-text::-webkit-scrollbar { width:4px; }
+#storyPanel .story-text::-webkit-scrollbar-thumb { background:var(--accent-cyan); border-radius:4px; }
+
+/* SCORE PANEL */
+.score-grid {
+  display:grid; grid-template-columns:1fr 1fr; gap:8px;
+}
+.score-item {
+  background:rgba(255,255,255,0.03);
+  border-radius:8px; padding:10px; text-align:center;
+}
+.score-item .label { font-size:0.65rem; text-transform:uppercase; color:var(--text-muted); letter-spacing:1px; }
+.score-item .value {
+  font-family:'Orbitron',sans-serif;
+  font-size:1.3rem; font-weight:700;
+  margin-top:2px;
+}
+.score-item .value.cyan { color:var(--accent-cyan); }
+.score-item .value.gold { color:var(--accent-gold); }
+.score-item .value.green { color:var(--accent-green); }
+.score-item .value.magenta { color:var(--accent-magenta); }
+
+/* INVENTORY */
+.inventory-list {
+  display:flex; flex-wrap:wrap; gap:6px; margin-top:8px;
+}
+.inv-badge {
+  font-size:0.7rem; padding:4px 8px; border-radius:20px;
+  background:rgba(0,240,255,0.1); border:1px solid rgba(0,240,255,0.2);
+  color:var(--accent-cyan);
+}
+.inv-badge.principle { background:rgba(255,215,0,0.1); border-color:rgba(255,215,0,0.2); color:var(--accent-gold); }
+.inv-badge.svs { background:rgba(0,255,136,0.1); border-color:rgba(0,255,136,0.2); color:var(--accent-green); }
+
+/* BOARD */
+.board-area {
+  display:flex; flex-direction:column; align-items:center; gap:12px;
+}
+.board-wrapper {
+  position:relative;
+  width:100%;
+  max-width:700px;
+}
+#gameBoard {
+  width:100%;
+  display:grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap:6px;
+  padding:16px;
+  background: rgba(0,0,0,0.3);
+  border-radius:16px;
+  border:1px solid rgba(255,255,255,0.05);
+}
+.cell {
+  aspect-ratio:1;
+  border-radius:10px;
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  font-size:0.55rem; text-align:center;
+  cursor:default;
+  position:relative;
+  transition: all 0.3s ease;
+  border:2px solid transparent;
+  padding:4px;
+  min-height:60px;
+}
+.cell .cell-num {
+  font-family:'Orbitron',sans-serif;
+  font-size:0.6rem; font-weight:700;
+  opacity:0.5; position:absolute; top:3px; left:6px;
+}
+.cell .cell-icon { font-size:1.3rem; margin-bottom:2px; }
+.cell .cell-label { font-size:0.5rem; line-height:1.2; opacity:0.8; }
+
+/* Cell types */
+.cell-start { background:linear-gradient(135deg,#1a3a2a,#0d2818); border-color:var(--accent-green); box-shadow:var(--glow-cyan); }
+.cell-finish { background:linear-gradient(135deg,#3a1a2a,#2a0d18); border-color:var(--accent-gold); box-shadow:var(--glow-gold); }
+.cell-svs { background:linear-gradient(135deg,#0f1f3a,#0a1628); border-color:rgba(0,240,255,0.3); }
+.cell-principle { background:linear-gradient(135deg,#2a1f0f,#1a1408); border-color:rgba(255,215,0,0.3); }
+.cell-event { background:linear-gradient(135deg,#2a0f2a,#1a081a); border-color:rgba(168,85,247,0.3); }
+.cell-bonus { background:linear-gradient(135deg,#0f2a1a,#081a10); border-color:rgba(0,255,136,0.3); }
+.cell-risk { background:linear-gradient(135deg,#2a0f0f,#1a0808); border-color:rgba(255,45,120,0.3); }
+
+.cell.active {
+  transform:scale(1.08);
+  box-shadow: 0 0 25px rgba(0,240,255,0.5);
+  z-index:2;
+}
+.cell .player-token {
+  position:absolute;
+  width:22px; height:22px;
+  border-radius:50%;
+  background:linear-gradient(135deg, var(--accent-cyan), var(--accent-magenta));
+  box-shadow:0 0 12px rgba(0,240,255,0.6);
+  z-index:3;
+  transition: all 0.5s cubic-bezier(0.34,1.56,0.64,1);
+  display:flex; align-items:center; justify-content:center;
+  font-size:0.6rem; font-weight:900; color:#fff;
+}
+
+/* DICE & CONTROLS */
+.controls-row {
+  display:flex; gap:12px; align-items:center; justify-content:center; flex-wrap:wrap;
+}
+.btn {
+  font-family:'Orbitron',sans-serif;
+  font-size:0.8rem; font-weight:700;
+  padding:12px 28px;
+  border:none; border-radius:8px;
+  cursor:pointer;
+  text-transform:uppercase;
+  letter-spacing:2px;
+  transition: all 0.3s ease;
+  position:relative; overflow:hidden;
+}
+.btn-primary {
+  background:linear-gradient(135deg, var(--accent-cyan), #0088aa);
+  color:#000;
+  box-shadow:var(--glow-cyan);
+}
+.btn-primary:hover { transform:translateY(-2px); box-shadow:0 0 30px rgba(0,240,255,0.5); }
+.btn-primary:disabled { opacity:0.3; cursor:not-allowed; transform:none; box-shadow:none; }
+.btn-secondary {
+  background:rgba(255,255,255,0.05);
+  color:var(--text-primary);
+  border:1px solid rgba(255,255,255,0.1);
+}
+.btn-secondary:hover { background:rgba(255,255,255,0.1); }
+
+.dice-display {
+  font-family:'Orbitron',sans-serif;
+  font-size:2.5rem; font-weight:900;
+  width:70px; height:70px;
+  display:flex; align-items:center; justify-content:center;
+  background:var(--bg-card);
+  border:2px solid var(--accent-cyan);
+  border-radius:12px;
+  color:var(--accent-cyan);
+  text-shadow:0 0 10px var(--accent-cyan);
+}
+.dice-display.rolling {
+  animation: diceShake 0.1s infinite;
+}
+@keyframes diceShake {
+  0%,100% { transform:rotate(0); }
+  25% { transform:rotate(5deg) scale(1.05); }
+  75% { transform:rotate(-5deg) scale(0.95); }
+}
+
+/* MODAL */
+.modal-overlay {
+  position:fixed; inset:0;
+  background:rgba(0,0,0,0.85);
+  backdrop-filter:blur(8px);
+  display:none; align-items:center; justify-content:center;
+  z-index:100;
+  padding:20px;
+}
+.modal-overlay.show { display:flex; }
+.modal {
+  background:var(--bg-panel);
+  border:1px solid rgba(0,240,255,0.2);
+  border-radius:16px;
+  padding:30px;
+  max-width:550px; width:100%;
+  position:relative;
+  animation: modalIn 0.3s ease;
+}
+@keyframes modalIn {
+  from { transform:translateY(30px) scale(0.95); opacity:0; }
+  to { transform:translateY(0) scale(1); opacity:1; }
+}
+.modal-type {
+  font-family:'Orbitron',sans-serif;
+  font-size:0.65rem;
+  text-transform:uppercase;
+  letter-spacing:3px;
+  margin-bottom:6px;
+}
+.modal-type.svs { color:var(--accent-cyan); }
+.modal-type.principle { color:var(--accent-gold); }
+.modal-type.event { color:var(--accent-purple); }
+.modal-type.bonus { color:var(--accent-green); }
+.modal-type.risk { color:var(--accent-magenta); }
+
+.modal h2 {
+  font-family:'Orbitron',sans-serif;
+  font-size:1.1rem;
+  margin-bottom:16px;
+}
+.modal p { font-size:0.9rem; line-height:1.6; margin-bottom:16px; }
+.modal .question-text {
+  font-size:0.95rem; line-height:1.6; margin-bottom:20px;
+  padding:16px; background:rgba(0,0,0,0.3); border-radius:10px;
+  border-left:3px solid var(--accent-cyan);
+}
+
+.answers-grid {
+  display:grid; grid-template-columns:1fr; gap:8px; margin-bottom:16px;
+}
+.answer-btn {
+  padding:12px 16px;
+  background:rgba(255,255,255,0.04);
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:8px;
+  color:var(--text-primary);
+  font-family:'Exo 2',sans-serif;
+  font-size:0.85rem;
+  text-align:left;
+  cursor:pointer;
+  transition:all 0.2s ease;
+  line-height:1.4;
+}
+.answer-btn:hover { background:rgba(0,240,255,0.08); border-color:rgba(0,240,255,0.3); }
+.answer-btn.correct {
+  background:rgba(0,255,136,0.15); border-color:var(--accent-green); color:var(--accent-green);
+  animation: correctPulse 0.5s ease;
+}
+.answer-btn.wrong {
+  background:rgba(255,45,120,0.15); border-color:var(--accent-magenta); color:var(--accent-magenta);
+}
+@keyframes correctPulse {
+  0%,100% { transform:scale(1); }
+  50% { transform:scale(1.02); }
+}
+
+.result-text {
+  font-size:0.85rem; line-height:1.5; padding:12px; border-radius:8px; margin-bottom:12px;
+  display:none;
+}
+.result-text.show { display:block; }
+.result-text.correct-result {
+  background:rgba(0,255,136,0.08); border:1px solid rgba(0,255,136,0.2); color:var(--accent-green);
+}
+.result-text.wrong-result {
+  background:rgba(255,45,120,0.08); border:1px solid rgba(255,45,120,0.2); color:var(--accent-magenta);
+}
+
+/* INTRO SCREEN */
+.intro-screen {
+  position:fixed; inset:0;
+  background:var(--bg-deep);
+  display:flex; align-items:center; justify-content:center;
+  z-index:200;
+  padding:20px;
+}
+.intro-screen.hidden { display:none; }
+.intro-content {
+  text-align:center;
+  max-width:600px;
+}
+.intro-content h1 {
+  font-family:'Orbitron',sans-serif;
+  font-size:clamp(1.8rem,5vw,3rem);
+  font-weight:900;
+  background:linear-gradient(135deg, var(--accent-cyan), var(--accent-magenta), var(--accent-gold));
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  margin-bottom:20px;
+  text-transform:uppercase;
+  letter-spacing:4px;
+}
+.intro-content .lore {
+  font-size:0.95rem; line-height:1.8; color:var(--text-muted); margin-bottom:30px;
+  text-align:left;
+  padding:20px;
+  background:rgba(0,0,0,0.3);
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,0.05);
+}
+.intro-content .lore strong { color:var(--text-primary); }
+.intro-content .lore em { color:var(--accent-cyan); font-style:normal; }
+
+/* PROGRESS BAR */
+.progress-bar {
+  width:100%; height:6px;
+  background:rgba(255,255,255,0.05);
+  border-radius:3px;
+  overflow:hidden;
+  margin-top:8px;
+}
+.progress-bar .fill {
+  height:100%;
+  background:linear-gradient(90deg, var(--accent-cyan), var(--accent-magenta));
+  border-radius:3px;
+  transition:width 0.5s ease;
+}
+
+/* FINISH SCREEN */
+.finish-screen {
+  position:fixed; inset:0; background:rgba(0,0,0,0.9);
+  display:none; align-items:center; justify-content:center;
+  z-index:200; padding:20px;
+}
+.finish-screen.show { display:flex; }
+.finish-content {
+  text-align:center; max-width:500px;
+}
+.finish-content h1 {
+  font-family:'Orbitron',sans-serif;
+  font-size:2rem; font-weight:900;
+  margin-bottom:12px;
+}
+.finish-content .final-score {
+  font-family:'Orbitron',sans-serif;
+  font-size:3rem; font-weight:900;
+  color:var(--accent-gold);
+  text-shadow:var(--glow-gold);
+  margin:16px 0;
+}
+.finish-content .rank {
+  font-size:1.1rem; color:var(--accent-cyan); margin-bottom:20px;
+}
+.finish-content .stats { text-align:left; margin:20px 0; }
+.finish-content .stat-row {
+  display:flex; justify-content:space-between;
+  padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.05);
+  font-size:0.9rem;
+}
+.finish-content .stat-row .val { color:var(--accent-cyan); font-weight:600; }
+
+/* SCROLLBAR */
+::-webkit-scrollbar { width:6px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:rgba(0,240,255,0.2); border-radius:3px; }
+</style>
+</head>
+<body>
+
+<!-- INTRO -->
+<div class="intro-screen" id="introScreen">
+  <div class="intro-content">
+    <h1>ITIL Quest</h1>
+    <div class="lore">
+      <strong>Год 2026. Корпорация «НеоСервис»</strong><br><br>
+      Вы — новый <em>IT-директор</em> компании «НеоСервис». Компания в кризисе: сервисы падают, клиенты уходят, команды работают разрозненно, а ценность для потребителей теряется на каждом этапе.<br><br>
+      Совет директоров дал вам <strong>одну миссию</strong>: пройти путь от хаоса к эффективной <em>Системе создания ценности (SVS)</em>, внедряя <em>7 руководящих принципов ITIL 4</em>.<br><br>
+      Двигайтесь по игровому полю, отвечайте на вопросы, принимайте решения и собирайте <em>очки ценности</em>. Каждая клетка — новое испытание. Ваша цель — добраться до финиша, набрав максимум очков и восстановив компанию.<br><br>
+      <strong>Бросайте кубик и начинайте трансформацию!</strong>
+    </div>
+    <button class="btn btn-primary" onclick="startGame()" style="font-size:1rem;padding:16px 40px;">
+      Начать миссию
+    </button>
+  </div>
+</div>
+
+<!-- FINISH -->
+<div class="finish-screen" id="finishScreen">
+  <div class="finish-content">
+    <h1 id="finishTitle">Миссия завершена!</h1>
+    <div class="final-score" id="finalScore">0</div>
+    <div class="rank" id="finalRank">очков ценности</div>
+    <div class="stats" id="finalStats"></div>
+    <button class="btn btn-primary" onclick="location.reload()" style="margin-top:20px;">
+      Играть снова
+    </button>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" id="modal">
+    <div class="modal-type" id="modalType"></div>
+    <h2 id="modalTitle"></h2>
+    <p id="modalDesc" style="display:none;"></p>
+    <div class="question-text" id="modalQuestion" style="display:none;"></div>
+    <div class="answers-grid" id="answersGrid"></div>
+    <div class="result-text" id="resultText"></div>
+    <div id="modalActions"></div>
+  </div>
+</div>
+
+<!-- GAME -->
+<div class="game-header">
+  <h1>ITIL Quest: Миссия Ценности</h1>
+  <div class="subtitle">Трансформация «НеоСервис» &bull; Темы 2 и 3 ITIL 4</div>
+</div>
+
+<div class="game-container">
+  <!-- LEFT PANEL -->
+  <div style="display:flex;flex-direction:column;gap:12px;">
+    <div class="panel" id="storyPanel">
+      <div class="panel-title">Сюжет</div>
+      <div class="story-text" id="storyText">Добро пожаловать в «НеоСервис». Впереди — путь трансформации...</div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">Показатели</div>
+      <div class="score-grid">
+        <div class="score-item">
+          <div class="label">Очки</div>
+          <div class="value cyan" id="scoreDisplay">0</div>
+        </div>
+        <div class="score-item">
+          <div class="label">Ход</div>
+          <div class="value gold" id="turnDisplay">0</div>
+        </div>
+        <div class="score-item">
+          <div class="label">Верно</div>
+          <div class="value green" id="correctDisplay">0</div>
+        </div>
+        <div class="score-item">
+          <div class="label">Серия</div>
+          <div class="value magenta" id="streakDisplay">0</div>
+        </div>
+      </div>
+      <div class="progress-bar" style="margin-top:12px;">
+        <div class="fill" id="progressFill" style="width:0%"></div>
+      </div>
+      <div style="font-size:0.65rem;color:var(--text-muted);margin-top:4px;text-align:center;" id="progressLabel">Прогресс: 0%</div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">Собранные артефакты</div>
+      <div class="inventory-list" id="inventory">
+        <span style="font-size:0.75rem;color:var(--text-muted);">Пока пусто...</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- CENTER: BOARD -->
+  <div class="board-area">
+    <div class="board-wrapper">
+      <div id="gameBoard"></div>
+    </div>
+    <div class="controls-row">
+      <div class="dice-display" id="diceDisplay">?</div>
+      <button class="btn btn-primary" id="rollBtn" onclick="rollDice()" disabled>
+        Бросить кубик
+      </button>
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div style="display:flex;flex-direction:column;gap:12px;">
+    <div class="panel">
+      <div class="panel-title">Легенда поля</div>
+      <div style="font-size:0.8rem;line-height:2;">
+        <div><span style="color:var(--accent-green);">&#9632;</span> <span style="color:var(--accent-green);">Старт / Бонус</span> — награда</div>
+        <div><span style="color:var(--accent-cyan);">&#9632;</span> <span style="color:var(--accent-cyan);">SVS</span> — вопросы о системе создания ценности</div>
+        <div><span style="color:var(--accent-gold);">&#9632;</span> <span style="color:var(--accent-gold);">Принципы</span> — 7 руководящих принципов</div>
+        <div><span style="color:var(--accent-purple);">&#9632;</span> <span style="color:var(--accent-purple);">Событие</span> — бизнес-ситуация</div>
+        <div><span style="color:var(--accent-magenta);">&#9632;</span> <span style="color:var(--accent-magenta);">Риск</span> — опасность!</div>
+        <div><span style="color:var(--accent-gold);">&#9733;</span> <span style="color:var(--accent-gold);">Финиш</span> — цель миссии</div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">Подсказка</div>
+      <div id="tipText" style="font-size:0.8rem;line-height:1.6;color:var(--text-muted);">
+        Бросьте кубик, чтобы начать движение. Отвечайте на вопросы правильно для получения очков. Серия верных ответов даёт множитель!
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">История ходов</div>
+      <div id="moveLog" style="font-size:0.75rem;line-height:1.8;max-height:180px;overflow-y:auto;color:var(--text-muted);">
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ==================== GAME STATE ====================
+const state = {
+  position: 0,
+  score: 0,
+  turn: 0,
+  correctAnswers: 0,
+  wrongAnswers: 0,
+  streak: 0,
+  maxStreak: 0,
+  inventory: [],
+  usedQuestions: new Set(),
+  started: false
+};
+
+// ==================== BOARD DEFINITION ====================
+const BOARD = [
+  { type:'start', icon:'\u{1F680}', label:'Старт', story:'Вы приступаете к должности IT-директора «НеоСервис». Впереди долгий путь.' },
+  { type:'svs', icon:'\u2699\uFE0F', label:'SVS', story:'Первое знакомство с Системой создания ценности. Из чего она состоит?' },
+  { type:'principle', icon:'\u{1F9ED}', label:'Принцип', story:'Команда спрашивает: «С чего начать?» Время обратиться к руководящим принципам.' },
+  { type:'event', icon:'\u{1F4CB}', label:'Событие', story:'Крупный клиент угрожает уйти — сервис не соответствует ожиданиям.' },
+  { type:'svs', icon:'\u{1F517}', label:'SVC', story:'Вы изучаете Цепочку создания ценности — сердце SVS.' },
+  { type:'bonus', icon:'\u{1F48E}', label:'Бонус', story:'Команда предложила блестящую идею! Бонусные очки.' },
+  { type:'principle', icon:'\u{1F3AF}', label:'Принцип', story:'Нужно определить, что действительно ценно для клиентов.' },
+  { type:'risk', icon:'\u26A1', label:'Риск', story:'Система мониторинга показывает аномалии. Инцидент на горизонте!' },
+  { type:'svs', icon:'\u{1F4CA}', label:'Управление', story:'Совет директоров требует отчёт. Как работает управление в SVS?' },
+  { type:'principle', icon:'\u{1F50D}', label:'Принцип', story:'Прежде чем менять процессы, нужно понять текущее состояние.' },
+  { type:'event', icon:'\u{1F91D}', label:'Событие', story:'Новый партнёр предлагает совместный проект. Оцените ситуацию.' },
+  { type:'svs', icon:'\u{1F527}', label:'Практики', story:'Пора разобраться в практиках ITIL 4 — инструментарии организации.' },
+  { type:'risk', icon:'\u{1F525}', label:'Риск', story:'Масштабный сбой! Критический сервис недоступен.' },
+  { type:'principle', icon:'\u{1F504}', label:'Принцип', story:'Итеративный подход спасает проект от провала.' },
+  { type:'bonus', icon:'\u2B50', label:'Бонус', story:'Отличная обратная связь от пользователей! Ваши усилия заметили.' },
+  { type:'svs', icon:'\u{1F4C8}', label:'Улучшение', story:'Постоянное улучшение — ключ к долгосрочному успеху.' },
+  { type:'principle', icon:'\u{1F465}', label:'Принцип', story:'Разрушаем силосы между командами. Сотрудничество — ключ.' },
+  { type:'event', icon:'\u{1F4A1}', label:'Событие', story:'Стартап-конкурент запустил аналогичный продукт быстрее вас.' },
+  { type:'svs', icon:'\u{1F3D7}\uFE0F', label:'Потоки', story:'Потоки создания ценности — как спрос превращается в результат.' },
+  { type:'principle', icon:'\u{1F9E9}', label:'Принцип', story:'Целостное мышление: каждый элемент влияет на всю систему.' },
+  { type:'risk', icon:'\u{1F480}', label:'Риск', story:'Регулятор проводит внезапную проверку соответствия стандартам.' },
+  { type:'svs', icon:'\u2699\uFE0F', label:'SVC', story:'Шесть действий цепочки ценности работают слаженно.' },
+  { type:'principle', icon:'\u2702\uFE0F', label:'Принцип', story:'Избыточная бюрократия тормозит. Время упростить.' },
+  { type:'bonus', icon:'\u{1F3C6}', label:'Бонус', story:'Команда выиграла внутренний хакатон! Мораль на высоте.' },
+  { type:'event', icon:'\u{1F4E1}', label:'Событие', story:'Новые технологии открывают возможности для автоматизации.' },
+  { type:'principle', icon:'\u{1F916}', label:'Принцип', story:'Оптимизация перед автоматизацией — золотое правило.' },
+  { type:'svs', icon:'\u{1F517}', label:'SVS', story:'Все компоненты SVS работают как единый организм.' },
+  { type:'risk', icon:'\u26A0\uFE0F', label:'Риск', story:'Ключевой специалист уходит из команды. Знания под угрозой.' },
+  { type:'event', icon:'\u{1F389}', label:'Событие', story:'Годовой отчёт показывает первые результаты трансформации.' },
+  { type:'finish', icon:'\u{1F3C1}', label:'Финиш', story:'Вы завершили трансформацию «НеоСервис»! Компания создаёт ценность.' }
+];
+
+// ==================== QUESTIONS DATABASE ====================
+const questions = {
+  svs: [
+    {
+      q: 'Что является основной задачей Системы создания ценности (SVS)?',
+      a: ['Преобразование спроса и возможностей в ценность', 'Максимизация прибыли компании', 'Автоматизация всех процессов', 'Сокращение персонала'],
+      correct: 0,
+      explain: 'SVS преобразует возможности (Opportunity) и спрос (Demand) в ценность (Value) для заинтересованных сторон.',
+      artifact: { name:'Модель SVS', type:'svs' }
+    },
+    {
+      q: 'Сколько ключевых компонентов входит в SVS?',
+      a: ['5', '3', '7', '4'],
+      correct: 0,
+      explain: 'SVS включает 5 компонентов: Руководящие принципы, Управление, Цепочка создания ценности, Практики и Постоянное улучшение.',
+      artifact: { name:'5 компонентов', type:'svs' }
+    },
+    {
+      q: 'Какой компонент SVS называют «сердцем» системы?',
+      a: ['Цепочка создания ценности (SVC)', 'Руководящие принципы', 'Управление', 'Практики'],
+      correct: 0,
+      explain: 'SVC является центральным элементом SVS, где происходит основная работа по созданию ценности.',
+      artifact: { name:'SVC — сердце SVS', type:'svs' }
+    },
+    {
+      q: 'Сколько действий входит в Цепочку создания ценности (SVC)?',
+      a: ['6', '5', '7', '4'],
+      correct: 0,
+      explain: '6 действий: Планирование, Улучшение, Взаимодействие, Проектирование и преобразование, Получение/создание, Поставка и поддержка.',
+      artifact: { name:'6 действий SVC', type:'svs' }
+    },
+    {
+      q: 'Какие три действия выполняет Управление (Governance) в SVS?',
+      a: ['Оценка, Направление, Мониторинг', 'Планирование, Выполнение, Контроль', 'Анализ, Разработка, Внедрение', 'Стратегия, Тактика, Операции'],
+      correct: 0,
+      explain: 'Управление включает три ключевых действия: Evaluate (Оценка), Direct (Направление), Monitor (Мониторинг).',
+      artifact: { name:'EDM-модель', type:'svs' }
+    },
+    {
+      q: 'Чем Управление (Governance) отличается от Менеджмента (Management)?',
+      a: ['Управление определяет «ЧТО», менеджмент — «КАК»', 'Управление — операционный, менеджмент — стратегический уровень', 'Это синонимы', 'Управление занимается только финансами'],
+      correct: 0,
+      explain: 'Governance определяет «ЧТО» (стратегический уровень), Management — «КАК» (тактический и операционный).',
+      artifact: { name:'Governance vs Management', type:'svs' }
+    },
+    {
+      q: 'Что такое поток создания ценности (Value Stream)?',
+      a: ['Конкретная последовательность действий SVC для выполнения задачи', 'Финансовый поток компании', 'Поток данных между серверами', 'Процесс найма сотрудников'],
+      correct: 0,
+      explain: 'Value Stream — конкретная последовательность действий из SVC для реагирования на ситуацию или выполнение задачи.',
+      artifact: { name:'Value Stream', type:'svs' }
+    },
+    {
+      q: 'Сколько практик описано в ITIL 4?',
+      a: ['34', '26', '40', '15'],
+      correct: 0,
+      explain: 'ITIL 4 описывает 34 практики, разделённые на три группы: общие, управления услугами и технические.',
+      artifact: { name:'34 практики', type:'svs' }
+    },
+    {
+      q: 'Какое действие SVC является «лицом» IT для конечных пользователей?',
+      a: ['Поставка и поддержка', 'Взаимодействие', 'Планирование', 'Получение/создание'],
+      correct: 0,
+      explain: 'Deliver & Support — действие, через которое пользователи непосредственно получают и используют услуги.',
+      artifact: { name:'Deliver & Support', type:'svs' }
+    },
+    {
+      q: 'Какой компонент SVS можно сравнить с «ДНК» организации?',
+      a: ['Руководящие принципы', 'Управление', 'Практики', 'Цепочка создания ценности'],
+      correct: 0,
+      explain: 'Руководящие принципы действуют как ДНК организации, влияя на все решения в рамках SVS.',
+      artifact: { name:'Принципы = ДНК', type:'svs' }
+    },
+    {
+      q: 'Что является результатом работы Цепочки создания ценности (SVC)?',
+      a: ['Продукты и услуги, создающие ценность', 'Финансовые отчёты', 'Новые сотрудники', 'Технологическая инфраструктура'],
+      correct: 0,
+      explain: 'Результат SVC — продукты и услуги, которые создают ценность для заинтересованных сторон.',
+      artifact: null
+    },
+    {
+      q: 'Какое действие SVC обеспечивает общее понимание видения и направлений?',
+      a: ['Планирование (Plan)', 'Улучшение (Improve)', 'Взаимодействие (Engage)', 'Проектирование (Design & Transition)'],
+      correct: 0,
+      explain: 'Plan обеспечивает общее понимание видения, текущего состояния и направлений улучшения.',
+      artifact: null
+    },
+    {
+      q: 'Модель постоянного улучшения ITIL начинается с вопроса:',
+      a: ['Каково видение?', 'Где мы сейчас?', 'Сколько стоит улучшение?', 'Кто виноват?'],
+      correct: 0,
+      explain: 'Первый шаг модели — «What is the vision?» (Каково видение?), далее идут остальные шаги.',
+      artifact: { name:'Модель улучшения', type:'svs' }
+    },
+    {
+      q: 'На какие три группы делятся практики ITIL 4?',
+      a: ['Общие, управления услугами, технические', 'Стратегические, тактические, операционные', 'Простые, средние, сложные', 'Входные, процессные, выходные'],
+      correct: 0,
+      explain: 'General Management, Service Management и Technical Management — три группы практик ITIL 4.',
+      artifact: null
+    }
+  ],
+  principle: [
+    {
+      q: 'Какой принцип гласит: «Всё, что делает организация, должно создавать ценность»?',
+      a: ['Фокусируйтесь на ценности', 'Мыслите целостно', 'Придерживайтесь простоты', 'Оптимизируйте и автоматизируйте'],
+      correct: 0,
+      explain: 'Принцип «Фокусируйтесь на ценности» — всё должно прямо или косвенно создавать ценность.',
+      artifact: { name:'Фокус на ценности', type:'principle' }
+    },
+    {
+      q: 'Принцип «Начинайте с того, где вы находитесь» призывает:',
+      a: ['Оценить текущее состояние перед изменениями', 'Начинать всё с нуля', 'Копировать лучшие практики конкурентов', 'Ждать идеального момента'],
+      correct: 0,
+      explain: 'Этот принцип требует честного анализа текущего состояния, а не предположений.',
+      artifact: { name:'Начинай отсюда', type:'principle' }
+    },
+    {
+      q: 'Что означает аббревиатура MVP в контексте принципа «Продвигайтесь итеративно»?',
+      a: ['Minimum Viable Product — минимально жизнеспособный продукт', 'Maximum Value Process', 'Managed Verification Protocol', 'Multi-Version Platform'],
+      correct: 0,
+      explain: 'MVP — минимально жизнеспособный продукт, позволяющий быстро получить обратную связь.',
+      artifact: { name:'MVP-подход', type:'principle' }
+    },
+    {
+      q: 'Какой принцип направлен на разрушение «колодцев» (silos) в организации?',
+      a: ['Сотрудничайте и обеспечьте прозрачность', 'Мыслите целостно', 'Фокусируйтесь на ценности', 'Придерживайтесь простоты'],
+      correct: 0,
+      explain: '«Collaborate and promote visibility» разрушает организационные силосы через сотрудничество.',
+      artifact: { name:'Без силосов', type:'principle' }
+    },
+    {
+      q: 'Принцип «Мыслите и работайте целостно» акцентирует внимание на:',
+      a: ['End-to-end видении, системном мышлении и 4 измерениях', 'Детализации каждого процесса', 'Работе только в своём отделе', 'Фокусе на технологиях'],
+      correct: 0,
+      explain: 'Целостное мышление: ни одна услуга не существует изолированно, важен end-to-end подход.',
+      artifact: { name:'Целостное мышление', type:'principle' }
+    },
+    {
+      q: 'Сколько руководящих принципов описано в ITIL 4?',
+      a: ['7', '5', '10', '3'],
+      correct: 0,
+      explain: '7 принципов: Фокус на ценности, Начинайте отсюда, Итеративно, Сотрудничество, Целостно, Просто, Оптимизируйте.',
+      artifact: { name:'7 принципов', type:'principle' }
+    },
+    {
+      q: 'Принцип «Придерживайтесь простоты» рекомендует:',
+      a: ['Избегать излишней сложности и мыслить от результата', 'Упрощать всё до минимума', 'Отказаться от документации', 'Использовать только простые инструменты'],
+      correct: 0,
+      explain: 'Принцип не о примитивности, а об избегании ненужной сложности и фокусе на результате.',
+      artifact: { name:'KISS-подход', type:'principle' }
+    },
+    {
+      q: 'Что нужно сделать ПЕРЕД автоматизацией, согласно 7-му принципу?',
+      a: ['Оптимизировать процесс', 'Купить лучшее ПО', 'Набрать новых сотрудников', 'Написать документацию'],
+      correct: 0,
+      explain: '«Оптимизируйте и автоматизируйте» — сначала оптимизация, потом автоматизация.',
+      artifact: { name:'Сначала оптимизируй', type:'principle' }
+    },
+    {
+      q: 'Какой принцип напоминает о важности циклов обратной связи?',
+      a: ['Продвигайтесь итеративно с обратной связью', 'Фокусируйтесь на ценности', 'Сотрудничайте', 'Оптимизируйте'],
+      correct: 0,
+      explain: 'Итеративный подход с обратной связью обеспечивает постоянное обучение и адаптацию.',
+      artifact: null
+    },
+    {
+      q: 'Принцип «Начинайте с того, где вы находитесь» предостерегает от:',
+      a: ['Ненужных предположений о текущем состоянии', 'Использования старых технологий', 'Общения с клиентами', 'Измерения показателей'],
+      correct: 0,
+      explain: 'Ключевое предостережение — не делайте предположений, а измеряйте и наблюдайте.',
+      artifact: null
+    },
+    {
+      q: 'CX и UX связаны с каким руководящим принципом?',
+      a: ['Фокусируйтесь на ценности', 'Сотрудничайте', 'Мыслите целостно', 'Продвигайтесь итеративно'],
+      correct: 0,
+      explain: 'Customer Experience и User Experience — ключевые аспекты определения ценности с точки зрения клиента.',
+      artifact: null
+    },
+    {
+      q: 'Какой принцип наиболее тесно связан с понятием «четырёх измерений»?',
+      a: ['Мыслите и работайте целостно', 'Фокусируйтесь на ценности', 'Придерживайтесь простоты', 'Начинайте с того, где вы находитесь'],
+      correct: 0,
+      explain: 'Принцип целостности напрямую связан с четырьмя измерениями управления услугами.',
+      artifact: null
+    }
+  ],
+  event: [
+    {
+      q: 'Клиент жалуется, что не получает ожидаемой ценности от вашего сервиса. Какое действие SVC вы активируете первым?',
+      a: ['Взаимодействие (Engage) — понять потребности', 'Получение/создание — переписать код', 'Планирование — составить новый план', 'Улучшение — запустить проект улучшения'],
+      correct: 0,
+      explain: 'Engage — первый шаг для понимания потребностей и ожиданий заинтересованных сторон.',
+      artifact: null
+    },
+    {
+      q: 'Руководство хочет внедрить новую CRM-систему. С чего начнёте?',
+      a: ['Оценить текущее состояние (принцип «Начинайте с того, где вы»)', 'Сразу закупить лучшую CRM', 'Уволить всех, кто против', 'Написать ТЗ на 200 страниц'],
+      correct: 0,
+      explain: 'Принцип «Начинайте с того, где вы находитесь» — сначала оцените текущее состояние.',
+      artifact: null
+    },
+    {
+      q: 'Два отдела не могут договориться о приоритетах. Какой принцип ITIL 4 поможет?',
+      a: ['Сотрудничайте и обеспечьте прозрачность', 'Придерживайтесь простоты', 'Оптимизируйте и автоматизируйте', 'Продвигайтесь итеративно'],
+      correct: 0,
+      explain: 'Прозрачность и сотрудничество — ключ к разрешению межкомандных конфликтов.',
+      artifact: null
+    },
+    {
+      q: 'Новый сервис разрабатывается уже год без результата. Что посоветуете?',
+      a: ['Применить итеративный подход с MVP', 'Добавить больше разработчиков', 'Увеличить бюджет вдвое', 'Подождать ещё полгода'],
+      correct: 0,
+      explain: 'Принцип «Продвигайтесь итеративно с обратной связью» и MVP-подход решат проблему.',
+      artifact: null
+    },
+    {
+      q: 'В компании 15 уровней согласования для любого изменения. Это пример нарушения какого принципа?',
+      a: ['Придерживайтесь простоты и практичности', 'Фокусируйтесь на ценности', 'Оптимизируйте и автоматизируйте', 'Мыслите целостно'],
+      correct: 0,
+      explain: 'Избыточная бюрократия — классический пример нарушения принципа простоты.',
+      artifact: null
+    }
+  ],
+  risk: [
+    {
+      q: 'Критический сервис упал! Какая практика ITIL 4 активируется первой?',
+      a: ['Управление инцидентами', 'Управление проблемами', 'Управление изменениями', 'Управление релизами'],
+      correct: 0,
+      explain: 'Incident Management — первая практика для восстановления нормальной работы сервиса.',
+      penalty: -5
+    },
+    {
+      q: 'Команда автоматизировала хаотичный процесс. Что не так?',
+      a: ['Нарушен принцип: сначала оптимизируй, потом автоматизируй', 'Всё отлично, автоматизация — всегда хорошо', 'Нужно было автоматизировать быстрее', 'Следовало автоматизировать только часть'],
+      correct: 0,
+      explain: 'Автоматизация хаоса = быстрый хаос. Сначала оптимизируйте процесс!',
+      penalty: -5
+    },
+    {
+      q: 'Вы обнаружили, что отделы оптимизируют только свою работу, игнорируя общую картину. Это проблема:',
+      a: ['Работы в «колодцах» (silos) — нарушение целостного подхода', 'Недостатка финансирования', 'Плохого ПО', 'Отсутствия KPI'],
+      correct: 0,
+      explain: 'Силосное мышление — противоположность принципа «Мыслите и работайте целостно».',
+      penalty: -5
+    },
+    {
+      q: 'Регулятор спрашивает: кто в организации отвечает за стратегическое направление? Правильный ответ:',
+      a: ['Управление (Governance) — через оценку, направление и мониторинг', 'IT-отдел', 'Менеджеры проектов', 'Служба поддержки'],
+      correct: 0,
+      explain: 'Governance осуществляется на уровне высшего руководства через EDM.',
+      penalty: -5
+    }
+  ],
+  bonus: [
+    {
+      q: 'Бонусный вопрос! SVS можно сравнить с:',
+      a: ['Двигателем, преобразующим топливо в движение', 'Конвейером без остановок', 'Пирамидой без вершины', 'Линейной трубой'],
+      correct: 0,
+      explain: 'SVS как двигатель: спрос/возможности = топливо, ценность = движение, принципы = смазка.',
+      bonus: 15
+    },
+    {
+      q: 'За бонус! Какой вопрос НЕ входит в модель постоянного улучшения?',
+      a: ['Кто виноват?', 'Каково видение?', 'Где мы сейчас?', 'Как нам туда добраться?'],
+      correct: 0,
+      explain: 'Модель улучшения не ищет виноватых, а фокусируется на видении, состоянии и действиях.',
+      bonus: 15
+    },
+    {
+      q: 'Бонус! Действие «Улучшение» в SVC может быть задействовано:',
+      a: ['На любом этапе потока ценности', 'Только в конце проекта', 'Только при наличии жалоб', 'Раз в год на ретроспективе'],
+      correct: 0,
+      explain: 'Improve — активность, которая может быть задействована на любом этапе.',
+      bonus: 15
+    }
+  ]
+};
+
+// ==================== SHUFFLE HELPER ====================
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// ==================== BOARD RENDERING ====================
+function renderBoard() {
+  const board = document.getElementById('gameBoard');
+  board.innerHTML = '';
+
+  // Create snake-like path
+  const order = [];
+  const cols = 8;
+  const rows = Math.ceil(BOARD.length / cols);
+  for (let r = 0; r < rows; r++) {
+    const rowCells = [];
+    for (let c = 0; c < cols; c++) {
+      const idx = r * cols + c;
+      if (idx < BOARD.length) rowCells.push(idx);
+    }
+    if (r % 2 === 1) rowCells.reverse();
+    order.push(...rowCells);
+  }
+
+  // Create cell elements in grid order
+  const cellElements = new Array(BOARD.length);
+  order.forEach((boardIdx, gridPos) => {
+    const cell = BOARD[boardIdx];
+    const div = document.createElement('div');
+    div.className = 'cell cell-' + cell.type;
+    div.id = 'cell-' + boardIdx;
+    div.innerHTML =
+      '<span class="cell-num">' + boardIdx + '</span>' +
+      '<span class="cell-icon">' + cell.icon + '</span>' +
+      '<span class="cell-label">' + cell.label + '</span>';
+    div.style.order = gridPos;
+    cellElements[boardIdx] = div;
+  });
+
+  cellElements.forEach(function(el) { board.appendChild(el); });
+
+  // Place player token
+  updatePlayerPosition();
+}
+
+function updatePlayerPosition() {
+  // Remove old token
+  document.querySelectorAll('.player-token').forEach(function(t) { t.remove(); });
+  document.querySelectorAll('.cell.active').forEach(function(c) { c.classList.remove('active'); });
+
+  var cell = document.getElementById('cell-' + state.position);
+  if (cell) {
+    cell.classList.add('active');
+    var token = document.createElement('div');
+    token.className = 'player-token';
+    token.textContent = '\u{1F464}';
+    cell.appendChild(token);
+    cell.scrollIntoView({ behavior:'smooth', block:'nearest' });
+  }
+
+  // Update progress
+  var pct = Math.round((state.position / (BOARD.length - 1)) * 100);
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressLabel').textContent = 'Прогресс: ' + pct + '%';
+}
+
+// ==================== UI UPDATES ====================
+function updateUI() {
+  document.getElementById('scoreDisplay').textContent = state.score;
+  document.getElementById('turnDisplay').textContent = state.turn;
+  document.getElementById('correctDisplay').textContent = state.correctAnswers;
+  document.getElementById('streakDisplay').textContent = state.streak;
+}
+
+function addLog(text) {
+  var log = document.getElementById('moveLog');
+  log.innerHTML = '<div>' + text + '</div>' + log.innerHTML;
+}
+
+function updateStory(text) {
+  document.getElementById('storyText').innerHTML = text;
+}
+
+function updateTip(text) {
+  document.getElementById('tipText').textContent = text;
+}
+
+function updateInventory() {
+  var inv = document.getElementById('inventory');
+  if (state.inventory.length === 0) {
+    inv.innerHTML = '<span style="font-size:0.75rem;color:var(--text-muted);">Пока пусто...</span>';
+    return;
+  }
+  inv.innerHTML = state.inventory.map(function(item) {
+    return '<span class="inv-badge ' + item.type + '">' + item.name + '</span>';
+  }).join('');
+}
+
+// ==================== GAME LOGIC ====================
+function startGame() {
+  document.getElementById('introScreen').classList.add('hidden');
+  state.started = true;
+  renderBoard();
+  updateUI();
+  document.getElementById('rollBtn').disabled = false;
+  updateStory('<strong>День 1.</strong> Вы входите в офис «НеоСервис». На столе — стопка жалоб от клиентов и отчёт о падении сервисов. Пора действовать!');
+  updateTip('Бросьте кубик, чтобы начать движение по полю. На каждой клетке вас ждёт испытание!');
+  addLog('Миссия началась! Позиция: Старт');
+}
+
+function rollDice() {
+  var btn = document.getElementById('rollBtn');
+  btn.disabled = true;
+
+  var dice = document.getElementById('diceDisplay');
+  dice.classList.add('rolling');
+
+  var rolls = 0;
+  var maxRolls = 12;
+  var interval = setInterval(function() {
+    dice.textContent = Math.floor(Math.random() * 6) + 1;
+    rolls++;
+    if (rolls >= maxRolls) {
+      clearInterval(interval);
+      var result = Math.floor(Math.random() * 6) + 1;
+      dice.textContent = result;
+      dice.classList.remove('rolling');
+
+      state.turn++;
+      movePlayer(result);
+    }
+  }, 80);
+}
+
+function movePlayer(steps) {
+  var targetPos = Math.min(state.position + steps, BOARD.length - 1);
+
+  // Animate step by step
+  var current = state.position;
+  var stepInterval = setInterval(function() {
+    current++;
+    if (current > targetPos) {
+      clearInterval(stepInterval);
+      state.position = targetPos;
+      updatePlayerPosition();
+      updateUI();
+      addLog('Ход ' + state.turn + ': кубик ' + steps + ', клетка ' + state.position);
+
+      // Trigger cell action
+      setTimeout(function() { handleCell(); }, 400);
+      return;
+    }
+    state.position = current;
+    updatePlayerPosition();
+  }, 250);
+}
+
+function handleCell() {
+  var cell = BOARD[state.position];
+  updateStory('<strong>Клетка ' + state.position + ':</strong> ' + cell.story);
+
+  if (state.position === BOARD.length - 1) {
+    finishGame();
+    return;
+  }
+
+  if (cell.type === 'start') {
+    document.getElementById('rollBtn').disabled = false;
+    return;
+  }
+
+  showQuestion(cell.type);
+}
+
+function getQuestion(type) {
+  var pool = questions[type] || questions.svs;
+  var available = pool.filter(function(_, i) { return !state.usedQuestions.has(type + '-' + i); });
+
+  if (available.length === 0) {
+    // Reset pool for this type
+    pool.forEach(function(_, i) { state.usedQuestions.delete(type + '-' + i); });
+    return getQuestion(type);
+  }
+
+  var picked = available[Math.floor(Math.random() * available.length)];
+  var origIdx = pool.indexOf(picked);
+  state.usedQuestions.add(type + '-' + origIdx);
+  return pool[origIdx];
+}
+
+function showQuestion(type) {
+  var q = getQuestion(type);
+  var overlay = document.getElementById('modalOverlay');
+  var typeLabel = { svs:'Система создания ценности', principle:'Руководящий принцип', event:'Бизнес-ситуация', risk:'Рисковое событие', bonus:'Бонусный раунд' };
+  var typeCss = type;
+
+  document.getElementById('modalType').className = 'modal-type ' + typeCss;
+  document.getElementById('modalType').textContent = typeLabel[type] || 'Вопрос';
+  document.getElementById('modalTitle').textContent = BOARD[state.position].icon + ' ' + BOARD[state.position].label;
+  document.getElementById('modalDesc').style.display = 'none';
+
+  var qText = document.getElementById('modalQuestion');
+  qText.style.display = 'block';
+  qText.textContent = q.q;
+
+  var resultEl = document.getElementById('resultText');
+  resultEl.className = 'result-text';
+  resultEl.style.display = 'none';
+
+  // Shuffle answers but track correct
+  var indices = [0, 1, 2, 3];
+  var shuffled = shuffle(indices);
+  var correctShuffled = shuffled.indexOf(q.correct);
+
+  var grid = document.getElementById('answersGrid');
+  grid.innerHTML = '';
+  shuffled.forEach(function(origIdx, displayIdx) {
+    var btn = document.createElement('button');
+    btn.className = 'answer-btn';
+    btn.textContent = q.a[origIdx];
+    btn.onclick = function() { handleAnswer(displayIdx, correctShuffled, q, type); };
+    grid.appendChild(btn);
+  });
+
+  document.getElementById('modalActions').innerHTML = '';
+  overlay.classList.add('show');
+}
+
+function handleAnswer(chosen, correct, q, type) {
+  var grid = document.getElementById('answersGrid');
+  var buttons = grid.querySelectorAll('.answer-btn');
+  buttons.forEach(function(btn, i) {
+    btn.onclick = null;
+    btn.style.cursor = 'default';
+    if (i === correct) btn.classList.add('correct');
+    if (i === chosen && chosen !== correct) btn.classList.add('wrong');
+  });
+
+  var resultEl = document.getElementById('resultText');
+  var isCorrect = chosen === correct;
+
+  var points = 0;
+  if (isCorrect) {
+    state.correctAnswers++;
+    state.streak++;
+    if (state.streak > state.maxStreak) state.maxStreak = state.streak;
+
+    var streakMultiplier = Math.min(state.streak, 5);
+    points = (type === 'bonus' ? (q.bonus || 15) : 10) + (streakMultiplier - 1) * 2;
+    state.score += points;
+
+    resultEl.className = 'result-text correct-result show';
+    resultEl.innerHTML = '<strong>Верно! +' + points + ' очков</strong>' + (state.streak > 1 ? ' (серия x' + streakMultiplier + ')' : '') + '<br>' + q.explain;
+
+    if (q.artifact) {
+      var exists = state.inventory.find(function(i) { return i.name === q.artifact.name; });
+      if (!exists) {
+        state.inventory.push(q.artifact);
+        updateInventory();
+        resultEl.innerHTML += '<br><em>Новый артефакт: ' + q.artifact.name + '</em>';
+      }
+    }
+  } else {
+    state.wrongAnswers++;
+    state.streak = 0;
+    var penalty = q.penalty || 0;
+    state.score += penalty;
+
+    resultEl.className = 'result-text wrong-result show';
+    resultEl.innerHTML = '<strong>Неверно!' + (penalty ? ' ' + penalty + ' очков' : '') + '</strong><br>' + q.explain;
+  }
+
+  updateUI();
+
+  var actions = document.getElementById('modalActions');
+  actions.innerHTML = '<button class="btn btn-primary" onclick="closeModal()" style="width:100%;margin-top:8px;">Продолжить</button>';
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('show');
+
+  if (state.position >= BOARD.length - 1) {
+    finishGame();
+  } else {
+    document.getElementById('rollBtn').disabled = false;
+    updateTip('Ход ' + (state.turn + 1) + '. Бросьте кубик! Текущий счёт: ' + state.score + ' очков.');
+  }
+}
+
+function finishGame() {
+  var total = state.correctAnswers + state.wrongAnswers;
+  var accuracy = total > 0 ? Math.round((state.correctAnswers / total) * 100) : 0;
+
+  var rank, title;
+  if (state.score >= 200) { rank = 'Легенда ITIL'; title = 'Невероятно!'; }
+  else if (state.score >= 150) { rank = 'ITIL-мастер'; title = 'Великолепно!'; }
+  else if (state.score >= 100) { rank = 'Эксперт SVS'; title = 'Отличный результат!'; }
+  else if (state.score >= 50) { rank = 'Практик ITIL'; title = 'Хорошая работа!'; }
+  else { rank = 'Новичок'; title = 'Есть куда расти!'; }
+
+  document.getElementById('finishTitle').textContent = title;
+  document.getElementById('finalScore').textContent = state.score;
+  document.getElementById('finalRank').textContent = rank;
+
+  document.getElementById('finalStats').innerHTML =
+    '<div class="stat-row"><span>Всего ходов</span><span class="val">' + state.turn + '</span></div>' +
+    '<div class="stat-row"><span>Правильных ответов</span><span class="val">' + state.correctAnswers + ' из ' + total + '</span></div>' +
+    '<div class="stat-row"><span>Точность</span><span class="val">' + accuracy + '%</span></div>' +
+    '<div class="stat-row"><span>Максимальная серия</span><span class="val">' + state.maxStreak + '</span></div>' +
+    '<div class="stat-row"><span>Собрано артефактов</span><span class="val">' + state.inventory.length + '</span></div>';
+
+  document.getElementById('finishScreen').classList.add('show');
+}
+
+// Init
+renderBoard();
+</script>
+</body>
+</html>
