@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FlowLab: CFD-Аналитик</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f6f4f0; --bg2:#edeae4; --bg3:#e3dfd8;
+  --card:#fff; --card-border:#e0dcd5;
+  --ink:#1a1714; --ink2:#4a453d; --ink3:#8a8478;
+  --accent:#d35322; --accent-bg:rgba(211,83,34,.07);
+  --accent2:#1e6b4f; --accent2-bg:rgba(30,107,79,.07);
+  --blue:#2c5ea0; --blue-bg:rgba(44,94,160,.07);
+  --warn:#c4382a; --warn-bg:rgba(196,56,42,.07);
+  --purple:#6b4fa0; --purple-bg:rgba(107,79,160,.07);
+  --gold:#a08030;
+  --todo:#b0b0b0; --wip:#7bb8d8; --done:#3a9e7e;
+  --radius:10px;
+  --shadow:0 1px 3px rgba(0,0,0,.05),0 4px 12px rgba(0,0,0,.04);
+  --shadow2:0 2px 8px rgba(0,0,0,.06),0 8px 24px rgba(0,0,0,.06);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--ink);font-family:'DM Sans',sans-serif;min-height:100vh;line-height:1.6;}
+::-webkit-scrollbar{width:6px;} ::-webkit-scrollbar-thumb{background:var(--bg3);border-radius:3px;}
+
+.screen{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:500;background:var(--bg);padding:20px;overflow-y:auto;}
+.screen.hidden{display:none!important;}
+
+.intro-card{max-width:600px;width:100%;}
+.intro-card .logo{font-family:'Instrument Serif',serif;font-size:clamp(2.2rem,5vw,3rem);color:var(--ink);margin-bottom:2px;line-height:1.15;}
+.intro-card .logo em{color:var(--accent);font-style:italic;}
+.intro-card .sub{font-family:'IBM Plex Mono',monospace;font-size:.7rem;text-transform:uppercase;letter-spacing:2.5px;color:var(--ink3);margin-bottom:28px;}
+.intro-brief{background:var(--card);border:1px solid var(--card-border);border-radius:var(--radius);padding:24px;margin-bottom:20px;font-size:.9rem;color:var(--ink2);box-shadow:var(--shadow);}
+.intro-brief strong{color:var(--ink);}
+.intro-brief .hl{color:var(--accent);font-weight:600;}
+
+.intro-steps{margin:20px 0;display:flex;flex-direction:column;gap:8px;}
+.intro-step{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--card);border:1px solid var(--card-border);border-radius:8px;font-size:.85rem;}
+.intro-step .s-num{font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:.7rem;color:var(--accent);background:var(--accent-bg);padding:3px 8px;border-radius:4px;flex-shrink:0;}
+.intro-step .s-label{color:var(--ink);}
+.intro-step .s-desc{color:var(--ink3);font-size:.78rem;}
+
+.btn{font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:.75rem;padding:12px 24px;border:none;border-radius:6px;cursor:pointer;transition:.2s;letter-spacing:.5px;text-transform:uppercase;}
+.btn:disabled{opacity:.3;cursor:not-allowed;}
+.btn-primary{background:var(--ink);color:var(--bg);} .btn-primary:hover:not(:disabled){background:#333;transform:translateY(-1px);box-shadow:var(--shadow2);}
+.btn-accent{background:var(--accent);color:#fff;} .btn-accent:hover:not(:disabled){opacity:.9;transform:translateY(-1px);}
+.btn-ghost{background:transparent;color:var(--ink2);border:1px solid var(--card-border);} .btn-ghost:hover{background:var(--bg2);}
+
+.game-wrap{display:none;flex-direction:column;min-height:100vh;}
+.game-wrap.active{display:flex;}
+
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:10px 20px;background:var(--card);border-bottom:1px solid var(--card-border);flex-wrap:wrap;gap:8px;}
+.topbar .brand{font-family:'Instrument Serif',serif;font-size:1.1rem;}
+.topbar .brand em{color:var(--accent);font-style:italic;}
+.phase-badge{font-family:'IBM Plex Mono',monospace;font-size:.65rem;padding:4px 10px;border-radius:20px;background:var(--accent-bg);color:var(--accent);letter-spacing:1px;text-transform:uppercase;border:1px solid rgba(211,83,34,.15);}
+.progress-bar{display:flex;align-items:center;gap:8px;}
+.progress-dots{display:flex;gap:4px;}
+.p-dot{width:10px;height:10px;border-radius:50%;background:var(--bg2);border:1.5px solid var(--card-border);transition:.3s;}
+.p-dot.done{background:var(--accent2);border-color:var(--accent2);}
+.p-dot.current{background:var(--accent);border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-bg);}
+.score-display{font-family:'IBM Plex Mono',monospace;font-size:.75rem;color:var(--ink3);}
+
+.main-area{flex:1;display:flex;flex-direction:column;align-items:center;padding:20px;overflow-y:auto;}
+.content-card{max-width:900px;width:100%;background:var(--card);border:1px solid var(--card-border);border-radius:12px;box-shadow:var(--shadow);overflow:hidden;animation:fadeUp .35s ease;margin-bottom:20px;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+.cc-header{padding:20px 24px 0;display:flex;align-items:flex-start;gap:12px;}
+.cc-type{font-family:'IBM Plex Mono',monospace;font-size:.6rem;text-transform:uppercase;letter-spacing:2px;padding:4px 10px;border-radius:4px;flex-shrink:0;}
+.type-input{background:var(--accent-bg);color:var(--accent);}
+.type-theory{background:var(--blue-bg);color:var(--blue);}
+.type-quiz{background:var(--purple-bg);color:var(--purple);}
+.type-report{background:var(--accent2-bg);color:var(--accent2);}
+
+.cc-body{padding:16px 24px 24px;}
+.cc-title{font-family:'Instrument Serif',serif;font-size:1.3rem;margin-bottom:4px;line-height:1.3;}
+.cc-desc{font-size:.85rem;color:var(--ink3);margin-bottom:16px;line-height:1.6;}
+
+/* DATA TABLE */
+.data-table-wrap{overflow-x:auto;margin-bottom:16px;border:1px solid var(--card-border);border-radius:8px;}
+.data-table{width:100%;border-collapse:collapse;font-size:.8rem;}
+.data-table th{font-family:'IBM Plex Mono',monospace;font-size:.65rem;text-transform:uppercase;letter-spacing:1px;padding:8px 6px;background:var(--bg2);color:var(--ink3);border-bottom:1px solid var(--card-border);text-align:center;position:sticky;top:0;}
+.data-table th:first-child{text-align:left;padding-left:12px;}
+.data-table td{padding:4px 4px;border-bottom:1px solid rgba(0,0,0,.04);text-align:center;vertical-align:middle;}
+.data-table td:first-child{font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:.72rem;color:var(--accent);padding-left:12px;text-align:left;white-space:nowrap;}
+.data-table tr:hover{background:var(--accent-bg);}
+.data-table input{width:52px;padding:5px 4px;border:1px solid var(--card-border);border-radius:4px;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:.78rem;background:var(--bg);color:var(--ink);transition:.2s;}
+.data-table input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-bg);}
+.data-table input.err{border-color:var(--warn);background:var(--warn-bg);}
+.data-table .calc-cell{font-family:'IBM Plex Mono',monospace;font-weight:500;font-size:.78rem;color:var(--ink2);}
+.data-table .calc-wip{color:var(--wip);}
+.data-table .calc-th{color:var(--accent2);}
+
+/* CHART */
+.chart-container{background:#fafaf8;border:1px solid var(--card-border);border-radius:8px;padding:12px;margin-bottom:16px;position:relative;}
+.chart-container canvas{display:block;width:100%;border-radius:4px;}
+.chart-legend{display:flex;gap:14px;justify-content:center;margin-top:8px;font-size:.72rem;color:var(--ink3);}
+.chart-legend .leg{display:flex;align-items:center;gap:5px;}
+.leg-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0;}
+
+/* THEORY */
+.theory-card{padding:16px 20px;background:var(--blue-bg);border:1px solid rgba(44,94,160,.12);border-radius:8px;font-size:.84rem;color:var(--blue);line-height:1.65;margin-bottom:14px;}
+.theory-card strong{font-weight:700;}
+.theory-card .th-title{font-family:'IBM Plex Mono',monospace;font-size:.65rem;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px;opacity:.7;}
+
+/* QUIZ */
+.options-list{display:flex;flex-direction:column;gap:8px;margin-bottom:14px;}
+.opt-btn{display:flex;align-items:flex-start;gap:12px;padding:14px 16px;background:var(--bg);border:1.5px solid var(--card-border);border-radius:8px;cursor:pointer;transition:.2s;text-align:left;color:var(--ink);font-family:'DM Sans',sans-serif;font-size:.86rem;line-height:1.55;}
+.opt-btn:hover{border-color:var(--accent);background:var(--accent-bg);}
+.opt-letter{font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:.75rem;color:var(--accent);background:var(--accent-bg);width:24px;height:24px;display:flex;align-items:center;justify-content:center;border-radius:4px;flex-shrink:0;}
+.opt-btn.c-best{border-color:var(--accent2);background:var(--accent2-bg);}
+.opt-btn.c-ok{border-color:var(--gold);background:rgba(160,128,48,.08);}
+.opt-btn.c-bad{border-color:var(--warn);background:var(--warn-bg);}
+.opt-btn.c-dim{opacity:.35;}
+
+.fb-box{padding:16px;border-radius:8px;font-size:.84rem;line-height:1.65;margin-bottom:12px;display:none;}
+.fb-box.show{display:block;}
+.fb-box.fb-great{background:var(--accent2-bg);border:1px solid rgba(30,107,79,.15);color:var(--accent2);}
+.fb-box.fb-ok{background:rgba(160,128,48,.08);border:1px solid rgba(160,128,48,.15);color:#7a6020;}
+.fb-box.fb-bad{background:var(--warn-bg);border:1px solid rgba(196,56,42,.15);color:var(--warn);}
+.fb-title{font-weight:700;margin-bottom:4px;}
+
+/* METRICS GRID */
+.metrics-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:16px;}
+.metric-card{padding:14px;background:var(--bg);border:1px solid var(--card-border);border-radius:8px;text-align:center;}
+.metric-val{font-family:'IBM Plex Mono',monospace;font-size:1.6rem;font-weight:700;line-height:1.2;}
+.metric-val.v-accent{color:var(--accent);}
+.metric-val.v-blue{color:var(--blue);}
+.metric-val.v-green{color:var(--accent2);}
+.metric-val.v-warn{color:var(--warn);}
+.metric-val.v-purple{color:var(--purple);}
+.metric-label{font-size:.7rem;color:var(--ink3);text-transform:uppercase;letter-spacing:.5px;margin-top:2px;}
+
+/* REPORT */
+.report-section{margin-bottom:16px;padding:16px;border-radius:8px;}
+.report-section.r-good{background:var(--accent2-bg);border:1px solid rgba(30,107,79,.15);}
+.report-section.r-warn{background:rgba(160,128,48,.08);border:1px solid rgba(160,128,48,.15);}
+.report-section.r-bad{background:var(--warn-bg);border:1px solid rgba(196,56,42,.15);}
+.report-section.r-info{background:var(--blue-bg);border:1px solid rgba(44,94,160,.12);}
+.r-title{font-family:'IBM Plex Mono',monospace;font-size:.72rem;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px;font-weight:600;}
+.r-good .r-title{color:var(--accent2);}
+.r-warn .r-title{color:var(--gold);}
+.r-bad .r-title{color:var(--warn);}
+.r-info .r-title{color:var(--blue);}
+.r-text{font-size:.86rem;line-height:1.65;color:var(--ink2);}
+.r-text strong{color:var(--ink);}
+
+.pattern-tag{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:.68rem;padding:3px 8px;border-radius:4px;margin:2px 2px;letter-spacing:.5px;}
+.pt-good{background:var(--accent2-bg);color:var(--accent2);border:1px solid rgba(30,107,79,.15);}
+.pt-warn{background:rgba(160,128,48,.08);color:var(--gold);border:1px solid rgba(160,128,48,.15);}
+.pt-bad{background:var(--warn-bg);color:var(--warn);border:1px solid rgba(196,56,42,.15);}
+
+/* FORECAST */
+.forecast-box{background:var(--bg);border:1px solid var(--card-border);border-radius:8px;padding:16px;margin-bottom:12px;}
+.forecast-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(0,0,0,.04);font-size:.84rem;}
+.forecast-row:last-child{border-bottom:none;}
+.forecast-row .f-label{color:var(--ink2);}
+.forecast-row .f-val{font-family:'IBM Plex Mono',monospace;font-weight:600;color:var(--accent);}
+
+/* FINISH */
+.finish-card{max-width:560px;width:100%;background:var(--card);border:1px solid var(--card-border);border-radius:12px;padding:32px;box-shadow:var(--shadow2);text-align:center;}
+.finish-card .f-title{font-family:'Instrument Serif',serif;font-size:1.8rem;margin-bottom:6px;}
+.finish-card .f-score{font-family:'IBM Plex Mono',monospace;font-size:2.5rem;font-weight:700;color:var(--accent);margin:8px 0;}
+.finish-card .f-rank{font-size:.9rem;color:var(--accent2);margin-bottom:20px;}
+.f-stats{text-align:left;margin:16px 0;}
+.f-stat{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--card-border);font-size:.85rem;color:var(--ink2);}
+.f-stat .fv{font-family:'IBM Plex Mono',monospace;color:var(--accent);font-weight:600;}
+.f-grade{margin:16px 0;padding:14px;border-radius:8px;font-size:.88rem;line-height:1.6;text-align:left;}
+.f-grade.g-s{background:var(--accent2-bg);border:1px solid rgba(30,107,79,.15);color:var(--accent2);}
+.f-grade.g-a{background:var(--blue-bg);border:1px solid rgba(44,94,160,.15);color:var(--blue);}
+.f-grade.g-b{background:rgba(160,128,48,.08);border:1px solid rgba(160,128,48,.15);color:#7a6020;}
+.f-grade.g-c{background:var(--warn-bg);border:1px solid rgba(196,56,42,.15);color:var(--warn);}
+
+.btn-row{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;}
+.btn-row .btn{flex:1;min-width:120px;}
+
+.tip-box{font-size:.78rem;color:var(--ink3);padding:10px 14px;background:var(--bg2);border-radius:6px;margin-bottom:12px;}
+.tip-box strong{color:var(--ink2);}
+</style>
+</head>
+<body>
+
+<div class="screen" id="introScreen">
+<div class="intro-card">
+  <div class="logo">Flow<em>Lab</em></div>
+  <div class="sub">// CFD-Аналитик ваших данных</div>
+  <div class="intro-brief">
+    Вы прошли <strong>Lean Flow Simulation</strong> и получили диаграмму потока за 21 день. Теперь пришло время <span class="hl">проанализировать свои результаты</span> как настоящий Kanban-коуч.<br><br>
+    Введите данные из вашей CFD, изучите теорию анализа, ответьте на вопросы о <strong>вашей собственной</strong> диаграмме, и получите <span class="hl">аналитический отчёт с прогнозом</span>.
+  </div>
+  <div class="intro-steps">
+    <div class="intro-step"><span class="s-num">01</span><div><div class="s-label">Ввод данных</div><div class="s-desc">Введите ToDo, In Progress, Done за каждый из 21 дня</div></div></div>
+    <div class="intro-step"><span class="s-num">02</span><div><div class="s-label">Теория + анализ</div><div class="s-desc">Изучите как читать метрики на CFD и ответьте на вопросы</div></div></div>
+    <div class="intro-step"><span class="s-num">03</span><div><div class="s-label">Паттерны</div><div class="s-desc">Определите паттерны на вашей диаграмме</div></div></div>
+    <div class="intro-step"><span class="s-num">04</span><div><div class="s-label">Отчёт и прогноз</div><div class="s-desc">Получите аналитику, прогноз и рекомендации</div></div></div>
+  </div>
+  <button class="btn btn-primary" onclick="startGame()" style="width:100%;padding:14px;">Начать анализ</button>
+</div>
+</div>
+
+<div class="screen hidden" id="finishScreen">
+<div class="finish-card">
+  <div class="f-title" id="fTitle"></div>
+  <div class="f-score" id="fScore"></div>
+  <div class="f-rank" id="fRank"></div>
+  <div class="f-stats" id="fStats"></div>
+  <div class="f-grade" id="fGrade"></div>
+  <button class="btn btn-primary" onclick="location.reload()" style="width:100%;margin-top:12px;">Пройти заново</button>
+</div>
+</div>
+
+<div class="game-wrap" id="gameWrap">
+  <div class="topbar">
+    <div class="brand">Flow<em>Lab</em></div>
+    <div class="phase-badge" id="phaseBadge">Ввод данных</div>
+    <div class="progress-bar">
+      <div class="progress-dots" id="progDots"></div>
+      <div class="score-display" id="scoreDisp">0 pts</div>
+    </div>
+  </div>
+  <div class="main-area" id="mainArea"></div>
+</div>
+
+<script>
+// ============================================================
+// STATE
+// ============================================================
+const DAYS = 21;
+const G = {
+  step: 0,
+  score: 0,
+  best: 0,
+  ok: 0,
+  bad: 0,
+  answered: false,
+  data: null, // {todo:[], wip:[], done:[]}
+  metrics: null
+};
+
+const TOTAL_STEPS = 12; // data entry + 8 quiz + analysis + report + patterns
+
+// ============================================================
+// CFD RENDERER
+// ============================================================
+function renderCFD(canvas, data, opts) {
+  opts = opts || {};
+  var dpr = window.devicePixelRatio || 1;
+  var w = canvas.parentElement.clientWidth - 24;
+  var h = opts.height || 260;
+  canvas.width = w * dpr; canvas.height = h * dpr;
+  canvas.style.width = w+'px'; canvas.style.height = h+'px';
+  var ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+
+  var pad = { top:24, right:20, bottom:32, left:48 };
+  var cw = w - pad.left - pad.right;
+  var ch = h - pad.top - pad.bottom;
+  var n = data.done.length;
+  if (n < 2) return;
+
+  var cumDone = data.done.slice();
+  var cumWip = data.done.map(function(v,i){return v + data.wip[i];});
+  var cumTodo = data.done.map(function(v,i){return v + data.wip[i] + data.todo[i];});
+  var maxVal = Math.max.apply(null, cumTodo) * 1.1 || 10;
+
+  function xp(i) { return pad.left + (i/(n-1))*cw; }
+  function yp(v) { return pad.top + ch - (v/maxVal)*ch; }
+
+  // grid
+  ctx.strokeStyle = '#e8e5e0'; ctx.lineWidth = .5;
+  for (var gi=0;gi<=5;gi++) {
+    var gy = pad.top + (gi/5)*ch;
+    ctx.beginPath(); ctx.moveTo(pad.left, gy); ctx.lineTo(w-pad.right, gy); ctx.stroke();
+  }
+
+  var stacks = [cumDone, cumWip, cumTodo];
+  var fills = ['rgba(58,158,126,.35)','rgba(123,184,216,.35)','rgba(176,176,176,.3)'];
+  var strokes = ['#3a9e7e','#7bb8d8','#b0b0b0'];
+
+  for (var s=2;s>=0;s--) {
+    ctx.fillStyle = fills[s];
+    ctx.beginPath();
+    ctx.moveTo(xp(0), yp(stacks[s][0]));
+    for(var i=1;i<n;i++) ctx.lineTo(xp(i), yp(stacks[s][i]));
+    if(s===0) { ctx.lineTo(xp(n-1), yp(0)); ctx.lineTo(xp(0), yp(0)); }
+    else { for(var i2=n-1;i2>=0;i2--) ctx.lineTo(xp(i2), yp(stacks[s-1][i2])); }
+    ctx.closePath(); ctx.fill();
+    ctx.strokeStyle = strokes[s]; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(xp(0), yp(stacks[s][0]));
+    for(var i3=1;i3<n;i3++) ctx.lineTo(xp(i3), yp(stacks[s][i3]));
+    ctx.stroke();
+  }
+
+  // annotations
+  if (opts.annotations) {
+    opts.annotations.forEach(function(a) {
+      ctx.save();
+      if (a.type === 'vline') {
+        var xi = xp(a.idx);
+        ctx.setLineDash([5,4]); ctx.strokeStyle = a.color||'#d35322'; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.moveTo(xi, pad.top); ctx.lineTo(xi, h-pad.bottom); ctx.stroke();
+        if(a.label){ctx.fillStyle=a.color||'#d35322';ctx.font='600 10px IBM Plex Mono';ctx.fillText(a.label, xi+3, pad.top+12);}
+      }
+      if (a.type === 'hline') {
+        ctx.setLineDash([5,4]); ctx.strokeStyle = a.color||'#d35322'; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.moveTo(pad.left, yp(a.val)); ctx.lineTo(w-pad.right, yp(a.val)); ctx.stroke();
+        if(a.label){ctx.fillStyle=a.color||'#d35322';ctx.font='600 10px IBM Plex Mono';ctx.fillText(a.label, w-pad.right-ctx.measureText(a.label).width-4, yp(a.val)-4);}
+      }
+      if (a.type === 'zone') {
+        ctx.fillStyle = a.color || 'rgba(211,83,34,.06)';
+        ctx.fillRect(xp(a.from), pad.top, xp(a.to)-xp(a.from), ch);
+      }
+      ctx.restore();
+    });
+  }
+
+  // axis labels
+  ctx.fillStyle = '#8a8478'; ctx.font = '10px IBM Plex Mono';
+  for(var d=0;d<n;d++){
+    if(d % Math.max(1,Math.floor(n/7)) === 0 || d===n-1){
+      ctx.fillText('Д'+(d+1), xp(d)-8, h-pad.bottom+14);
+    }
+  }
+  for(var v2=0;v2<=5;v2++){
+    var val = Math.round((maxVal/5)*v2);
+    ctx.fillText(val, 2, yp(val)+3);
+  }
+  ctx.fillStyle='#8a8478'; ctx.font='600 9px IBM Plex Mono';
+  ctx.fillText('Задачи', 0, pad.top-8);
+}
+
+// ============================================================
+// METRICS CALCULATION
+// ============================================================
+function calcMetrics(data) {
+  var n = data.done.length;
+  var wips = data.wip.slice();
+  var avgWip = wips.reduce(function(a,b){return a+b;},0) / n;
+
+  // Throughput per day (diff in done)
+  var tputs = [];
+  for(var i=1;i<n;i++) tputs.push(Math.max(0, data.done[i] - data.done[i-1]));
+  var avgTh = tputs.length > 0 ? tputs.reduce(function(a,b){return a+b;},0) / tputs.length : 0;
+  var totalDone = data.done[n-1] - data.done[0];
+
+  // Lead Time via Little's Law
+  var avgLT = avgTh > 0 ? avgWip / avgTh : 0;
+
+  // WIP trend (first half vs second half)
+  var half = Math.floor(n/2);
+  var wipFirst = wips.slice(0, half).reduce(function(a,b){return a+b;},0) / half;
+  var wipSecond = wips.slice(half).reduce(function(a,b){return a+b;},0) / (n-half);
+  var wipTrend = wipSecond - wipFirst;
+
+  // Throughput trend
+  var thFirst = tputs.slice(0, Math.floor(tputs.length/2));
+  var thSecond = tputs.slice(Math.floor(tputs.length/2));
+  var thFirstAvg = thFirst.length > 0 ? thFirst.reduce(function(a,b){return a+b;},0)/thFirst.length : 0;
+  var thSecondAvg = thSecond.length > 0 ? thSecond.reduce(function(a,b){return a+b;},0)/thSecond.length : 0;
+  var thTrend = thSecondAvg - thFirstAvg;
+
+  // Max WIP
+  var maxWip = Math.max.apply(null, wips);
+  var minWip = Math.min.apply(null, wips);
+
+  // Arrival rate
+  var arrivals = [];
+  for(var j=1;j<n;j++){
+    var totalJ = data.todo[j]+data.wip[j]+data.done[j];
+    var totalPrev = data.todo[j-1]+data.wip[j-1]+data.done[j-1];
+    arrivals.push(Math.max(0, totalJ - totalPrev));
+  }
+  var avgArrival = arrivals.length > 0 ? arrivals.reduce(function(a,b){return a+b;},0)/arrivals.length : 0;
+
+  // Flow efficiency estimate
+  var flowEff = avgTh > 0 && avgWip > 0 ? Math.min(100, (avgTh / avgWip) * 100) : 0;
+
+  // Remaining work at end
+  var remainingTodo = data.todo[n-1];
+  var remainingWip = data.wip[n-1];
+  var remaining = remainingTodo + remainingWip;
+
+  // Forecast days to complete remaining
+  var forecastDays = avgTh > 0 ? Math.ceil(remaining / avgTh) : Infinity;
+
+  // Stall detection (Done doesn't grow for 3+ days)
+  var stallDays = 0;
+  var maxStall = 0;
+  for(var k=1;k<n;k++){
+    if(data.done[k] <= data.done[k-1]) { stallDays++; if(stallDays > maxStall) maxStall = stallDays; }
+    else stallDays = 0;
+  }
+
+  // Divergence check
+  var arrivalTotal = 0;
+  for(var m=0;m<n;m++) arrivalTotal = data.todo[m]+data.wip[m]+data.done[m];
+  var isDiverging = wipTrend > 2;
+
+  // Variability (coefficient of variation of throughput)
+  var thMean = avgTh;
+  var thVar = tputs.reduce(function(a,b){return a + (b-thMean)*(b-thMean);},0) / Math.max(1,tputs.length);
+  var thStd = Math.sqrt(thVar);
+  var thCV = thMean > 0 ? thStd / thMean : 0;
+
+  return {
+    avgWip: Math.round(avgWip*10)/10,
+    avgTh: Math.round(avgTh*10)/10,
+    avgLT: Math.round(avgLT*10)/10,
+    totalDone: totalDone,
+    maxWip: maxWip,
+    minWip: minWip,
+    wipTrend: Math.round(wipTrend*10)/10,
+    thTrend: Math.round(thTrend*10)/10,
+    avgArrival: Math.round(avgArrival*10)/10,
+    flowEff: Math.round(flowEff),
+    remaining: remaining,
+    forecastDays: forecastDays,
+    maxStall: maxStall,
+    isDiverging: isDiverging,
+    thCV: Math.round(thCV*100)/100,
+    tputs: tputs,
+    wips: wips
+  };
+}
+
+// ============================================================
+// PATTERN DETECTION
+// ============================================================
+function detectPatterns(data, m) {
+  var patterns = [];
+
+  // 1. Divergence
+  if (m.isDiverging) {
+    patterns.push({name:'Расхождение линий', severity:'bad', desc:'WIP растёт от начала к концу. Arrival Rate > Throughput. Система нестабильна.'});
+  }
+
+  // 2. Stall
+  if (m.maxStall >= 3) {
+    patterns.push({name:'Стагнация Done ('+m.maxStall+' дн.)', severity:'bad', desc:'Departure Line не росла '+m.maxStall+' дней подряд. Возможен блокер на завершении.'});
+  }
+
+  // 3. Flood
+  if (m.maxWip > m.avgWip * 1.8) {
+    patterns.push({name:'Разлив WIP (пик: '+m.maxWip+')', severity:'warn', desc:'Пиковый WIP значительно выше среднего. Были периоды перегрузки.'});
+  }
+
+  // 4. High WIP
+  if (m.avgWip > 15) {
+    patterns.push({name:'Высокий средний WIP', severity:'warn', desc:'Средний WIP = '+m.avgWip+'. Рекомендуемый для небольшой команды: 3-8.'});
+  }
+
+  // 5. Good balance
+  if (Math.abs(m.wipTrend) < 1.5 && m.avgWip < 12 && m.thCV < 0.8) {
+    patterns.push({name:'Стабильный поток', severity:'good', desc:'WIP стабилен, Throughput предсказуем. Хороший знак!'});
+  }
+
+  // 6. High variability
+  if (m.thCV > 1.0) {
+    patterns.push({name:'Высокая вариабельность', severity:'warn', desc:'Coefficient of Variation Throughput = '+m.thCV+'. Предсказуемость низкая.'});
+  }
+
+  // 7. Improving throughput
+  if (m.thTrend > 0.5) {
+    patterns.push({name:'Растущий Throughput', severity:'good', desc:'Throughput увеличивается ко второй половине периода.'});
+  }
+
+  // 8. Declining throughput
+  if (m.thTrend < -0.5) {
+    patterns.push({name:'Падающий Throughput', severity:'bad', desc:'Throughput снижается ко второй половине. Команда замедляется.'});
+  }
+
+  // 9. Low throughput
+  if (m.avgTh < 1) {
+    patterns.push({name:'Очень низкий Throughput', severity:'warn', desc:'Менее 1 задачи в день. Проверьте блокеры и размер задач.'});
+  }
+
+  if (patterns.length === 0) {
+    patterns.push({name:'Типичный поток', severity:'good', desc:'Явных аномалий не обнаружено. Поток в пределах нормы.'});
+  }
+
+  return patterns;
+}
+
+// ============================================================
+// STEPS
+// ============================================================
+function buildSteps() {
+  return [
+    { id:'input', phase:'Ввод данных', type:'input' },
+    { id:'theory1', phase:'Теория', type:'theory', title:'Три метрики CFD', theory:'На Cumulative Flow Diagram читаются <strong>три ключевые метрики</strong>:<br><br><strong>1. WIP</strong> (Work In Progress) — вертикальное расстояние между верхней (Arrival) и нижней (Departure) линиями. Показывает, сколько задач начато, но не завершено.<br><br><strong>2. Lead Time</strong> — горизонтальное расстояние между линиями на одной высоте. Показывает, сколько времени задача проводит в системе.<br><br><strong>3. Throughput</strong> — угол наклона линии Done (Departure Line). Чем круче наклон, тем быстрее завершаются задачи.<br><br><strong>Закон Литтла:</strong> Lead Time = WIP / Throughput. Это фундаментальная связь. Чтобы сократить Lead Time — снижайте WIP или повышайте Throughput.' },
+    { id:'q1', phase:'Анализ', type:'quiz' },
+    { id:'q2', phase:'Анализ', type:'quiz' },
+    { id:'theory2', phase:'Теория', type:'theory', title:'Паттерны CFD', theory:'<strong>Расхождение</strong> — Arrival Line растёт быстрее Departure Line. WIP копится. Опасный сигнал: система не справляется.<br><br><strong>Параллельные линии</strong> — баланс. Arrival Rate = Throughput. Стабильный WIP и предсказуемый Lead Time.<br><br><strong>Лестница</strong> — задачи завершаются «пачками» (итерации/спринты). Типично для Scrum.<br><br><strong>Разлив</strong> — полоса WIP расширяется. Задачи начинаются, но не завершаются. Нужны WIP-лимиты.<br><br><strong>Горизонтали</strong> — все линии плоские = полный простой. Одна линия плоская = блокер на этапе.<br><br><strong>Яма</strong> — линии падают вниз = задачи удалены из системы.' },
+    { id:'q3', phase:'Паттерны', type:'quiz' },
+    { id:'q4', phase:'Паттерны', type:'quiz' },
+    { id:'theory3', phase:'Теория', type:'theory', title:'Закон Литтла и прогнозирование', theory:'<strong>Закон Литтла: LT = WIP / TH</strong><br><br>Это не просто формула, а основа прогнозирования. Если вы знаете средний Throughput и оставшееся количество задач, вы можете предсказать, когда работа будет завершена:<br><br><strong>Прогноз = Оставшиеся задачи / Средний Throughput</strong><br><br>Важные оговорки:<br>- Прогноз работает только если система стабильна (линии параллельны)<br>- При расхождении линий прогноз будет оптимистичным (реально дольше)<br>- Для точного прогноза используйте Monte Carlo симуляцию<br><br><strong>Два рычага улучшения:</strong><br>1. Снизить WIP (быстро, бесплатно, надёжно) = снизить Lead Time<br>2. Увеличить Throughput (долго, дорого, рискованно) = снизить Lead Time' },
+    { id:'q5', phase:'Прогноз', type:'quiz' },
+    { id:'q6', phase:'Прогноз', type:'quiz' },
+    { id:'metrics', phase:'Метрики', type:'metrics' },
+    { id:'report', phase:'Отчёт', type:'report' }
+  ];
+}
+
+var STEPS = [];
+
+// ============================================================
+// DYNAMIC QUIZ GENERATORS (use player data)
+// ============================================================
+function generateQuiz(qIdx) {
+  var m = G.metrics;
+  var d = G.data;
+  if (!m) return null;
+
+  switch(qIdx) {
+    case 0: // q1: WIP reading
+      return {
+        title: 'Каков средний WIP вашей команды?',
+        context: 'Проанализируйте вашу CFD.',
+        scenario: 'Посмотрите на вашу диаграмму. Оцените <strong>среднее расстояние по вертикали</strong> между верхней и нижней линиями. Это ваш средний WIP.',
+        correct: 0,
+        options: [
+          { text: 'Средний WIP = '+m.avgWip+'. Это видно по вертикальному расстоянию между Arrival и Departure Line', q:'best', fb:'Верно! Вы точно прочитали WIP с диаграммы. Вертикальное расстояние между линиями = количество задач в работе.' },
+          { text: 'WIP определить невозможно — нужны дополнительные данные', q:'bad', fb:'WIP всегда виден на CFD! Это вертикальное расстояние между верхней и нижней границами. По вашим данным WIP = '+m.avgWip+'.' },
+          { text: 'WIP = '+m.totalDone+' — столько задач было выполнено', q:'bad', fb:'Нет, '+m.totalDone+' — это Throughput за весь период (сколько завершили), а не WIP. WIP — это задачи В РАБОТЕ, не завершённые.' },
+        ]
+      };
+
+    case 1: // q2: Lead Time via Little's Law
+      var ltRound = Math.round(m.avgLT*10)/10;
+      var ltWrong1 = Math.round(m.avgWip * m.avgTh * 10)/10;
+      var ltWrong2 = Math.round(m.avgTh * 10)/10;
+      return {
+        title: 'Рассчитайте Lead Time по закону Литтла',
+        context: 'WIP = '+m.avgWip+', Throughput = '+m.avgTh+' задач/день.',
+        scenario: 'Используя данные вашей CFD, рассчитайте <strong>средний Lead Time</strong> по закону Литтла. Формула: Lead Time = WIP / Throughput.',
+        correct: 0,
+        options: [
+          { text: 'Lead Time = '+m.avgWip+' / '+m.avgTh+' = '+ltRound+' дней', q:'best', fb:'Верно! Закон Литтла: LT = WIP / TH = '+m.avgWip+' / '+m.avgTh+' = '+ltRound+' дней. Это среднее время задачи в системе.' },
+          { text: 'Lead Time = '+m.avgWip+' x '+m.avgTh+' = '+ltWrong1+' дней', q:'bad', fb:'Ошибка! Lead Time = WIP / Throughput (деление, не умножение). Правильный ответ: '+ltRound+' дней.' },
+          { text: 'Lead Time = Throughput = '+ltWrong2+' дней', q:'bad', fb:'Lead Time и Throughput — разные метрики! LT = WIP / TH = '+ltRound+' дней.' },
+        ]
+      };
+
+    case 2: { // q3: pattern identification
+      var patterns = detectPatterns(d, m);
+      var mainPattern = patterns[0];
+      var wrongPatterns = ['Лестница (итеративный процесс)', 'Идеальный баланс без аномалий', 'Каскадный отказ системы'];
+      return {
+        title: 'Какой главный паттерн вы видите?',
+        context: 'Внимательно посмотрите на форму вашей CFD.',
+        scenario: 'Проанализируйте <strong>форму линий</strong> на вашей диаграмме. Расходятся ли линии? Есть ли горизонтали? Расширяется ли полоса WIP? Определите <strong>основной паттерн</strong>.',
+        correct: 0,
+        options: [
+          { text: mainPattern.name+': '+mainPattern.desc, q:'best', fb:'Верно! Вы правильно определили основной паттерн вашей CFD. '+mainPattern.desc },
+          { text: wrongPatterns[Math.floor(Math.random()*wrongPatterns.length)], q:'bad', fb:'Не совсем. Основной паттерн вашей диаграммы: '+mainPattern.name+'. '+mainPattern.desc },
+          { text: 'Нет явных паттернов — данных недостаточно', q:'ok', fb:'21 день — достаточно для базового анализа. На вашей диаграмме виден паттерн: '+mainPattern.name+'.' },
+        ]
+      };
+    }
+
+    case 3: { // q4: WIP trend
+      var trendWord = m.wipTrend > 1.5 ? 'растёт' : m.wipTrend < -1.5 ? 'снижается' : 'стабилен';
+      var trendAdvice = m.wipTrend > 1.5
+        ? 'Расхождение нарастает. Введите WIP-лимиты.'
+        : m.wipTrend < -1.5
+          ? 'WIP снижается — поток улучшается.'
+          : 'WIP стабилен — хороший знак предсказуемости.';
+      return {
+        title: 'Как меняется WIP в вашей системе?',
+        context: 'Сравните первую и вторую половину периода.',
+        scenario: 'Посмотрите на <strong>ширину полосы In Progress</strong> в начале и в конце периода. WIP <strong>'+trendWord+'</strong> (тренд: '+(m.wipTrend>0?'+':'')+m.wipTrend+'). Что это означает?',
+        correct: 0,
+        options: [
+          { text: 'WIP '+trendWord+'. '+trendAdvice, q:'best', fb:'Верно! '+trendAdvice+' Тренд WIP: '+(m.wipTrend>0?'+':'')+m.wipTrend+' задач от первой ко второй половине.' },
+          { text: 'Тренд WIP не важен — главное Throughput', q:'ok', fb:'Тренд WIP критически важен! Растущий WIP = растущий Lead Time (закон Литтла). WIP '+trendWord+': тренд '+(m.wipTrend>0?'+':'')+m.wipTrend+'.' },
+          { text: 'WIP не меняется — линии параллельны', q: Math.abs(m.wipTrend) < 1.5 ? 'best' : 'bad', fb: Math.abs(m.wipTrend)<1.5 ? 'Верно! WIP стабилен.' : 'Нет, WIP '+trendWord+'. Тренд: '+(m.wipTrend>0?'+':'')+m.wipTrend+'. Посмотрите внимательнее на ширину полосы WIP.' },
+        ]
+      };
+    }
+
+    case 4: { // q5: forecast
+      var fcDays = m.forecastDays;
+      var fcText = fcDays === Infinity ? 'невозможно (Throughput = 0)' : fcDays + ' дней';
+      return {
+        title: 'Когда завершится оставшаяся работа?',
+        context: 'Оставшиеся задачи: '+m.remaining+', средний Throughput: '+m.avgTh+'/день.',
+        scenario: 'В конце 21-го дня у вас <strong>'+m.remaining+' незавершённых задач</strong> (ToDo + In Progress). При среднем Throughput <strong>'+m.avgTh+' задач/день</strong>, сколько дней понадобится для завершения?',
+        correct: 0,
+        options: [
+          { text: 'Прогноз: '+m.remaining+' / '+m.avgTh+' = '+fcText, q:'best', fb:'Верно! Простой прогноз: оставшаяся работа / Throughput = '+fcText+'. Но помните: это работает только при стабильном потоке!' },
+          { text: 'Невозможно прогнозировать — данных мало', q:'ok', fb:'21 день — достаточно для базовой оценки. Прогноз: '+fcText+'. Для точности можно использовать Monte Carlo симуляцию.' },
+          { text: 'Прогноз = '+m.remaining+' x '+m.avgTh+' = '+Math.round(m.remaining*m.avgTh)+' дней', q:'bad', fb:'Ошибка! Прогноз = Остаток / Throughput (деление). Правильно: '+fcText+'.' },
+        ]
+      };
+    }
+
+    case 5: { // q6: recommendation
+      var wipHigh = m.avgWip > 10;
+      var diverging = m.isDiverging;
+      var bestAction = wipHigh || diverging
+        ? 'Ввести WIP-лимит (рекомендуемый: '+Math.max(3,Math.round(m.avgWip*0.6))+') для снижения Lead Time'
+        : 'Поддерживать текущий баланс и фокусироваться на стабильности Throughput';
+      var bestFb = wipHigh || diverging
+        ? 'Верно! WIP-лимит — самый надёжный рычаг. При WIP '+Math.max(3,Math.round(m.avgWip*0.6))+' прогнозный Lead Time: '+Math.round(Math.max(3,Math.round(m.avgWip*0.6))/m.avgTh*10)/10+' дней.'
+        : 'Верно! При стабильном потоке главное — не ломать то, что работает. Фокус на предсказуемости.';
+      return {
+        title: 'Что вы порекомендуете команде?',
+        context: 'На основе всего анализа вашей CFD.',
+        scenario: 'Вы провели полный анализ: WIP = '+m.avgWip+', Lead Time = '+m.avgLT+' дн., Throughput = '+m.avgTh+'/день, тренд WIP: '+(m.wipTrend>0?'+':'')+m.wipTrend+'. <strong>Какой главный совет?</strong>',
+        correct: 0,
+        options: [
+          { text: bestAction, q:'best', fb: bestFb },
+          { text: 'Нанять больше людей для увеличения Throughput', q:'bad', fb:'Наём — дорогой и медленный рычаг. Новые люди сначала замедляют (onboarding). Снижение WIP — быстрее и бесплатно.' },
+          { text: 'Работать по выходным, чтобы сократить Lead Time', q:'bad', fb:'Переработки снижают качество и увеличивают WIP (больше багов = больше работы). Это петля деградации, а не решение.' },
+        ]
+      };
+    }
+  }
+  return null;
+}
+
+// ============================================================
+// RENDERING
+// ============================================================
+function renderProgress() {
+  var dots = document.getElementById('progDots');
+  dots.innerHTML = STEPS.map(function(_,i){
+    var cls = i < G.step ? 'done' : i === G.step ? 'current' : '';
+    return '<div class="p-dot '+cls+'"></div>';
+  }).join('');
+  document.getElementById('scoreDisp').textContent = G.score + ' pts';
+  if (STEPS[G.step]) document.getElementById('phaseBadge').textContent = STEPS[G.step].phase;
+}
+
+function showStep() {
+  if (G.step >= STEPS.length) { finishGame(); return; }
+  G.answered = false;
+  var step = STEPS[G.step];
+  renderProgress();
+
+  switch(step.type) {
+    case 'input': renderInputStep(); break;
+    case 'theory': renderTheoryStep(step); break;
+    case 'quiz': renderQuizStep(); break;
+    case 'metrics': renderMetricsStep(); break;
+    case 'report': renderReportStep(); break;
+  }
+  window.scrollTo(0, 0);
+}
+
+// ---- INPUT STEP ----
+function renderInputStep() {
+  var area = document.getElementById('mainArea');
+  var rows = '';
+  for (var d=1; d<=DAYS; d++) {
+    rows += '<tr><td>День '+d+'</td>'
+      +'<td><input type="number" min="0" id="td'+d+'" placeholder="0" oninput="onDataInput()"></td>'
+      +'<td><input type="number" min="0" id="wp'+d+'" placeholder="0" oninput="onDataInput()"></td>'
+      +'<td><input type="number" min="0" id="dn'+d+'" placeholder="0" oninput="onDataInput()"></td>'
+      +'<td class="calc-cell calc-wip" id="wip'+d+'">-</td>'
+      +'<td class="calc-cell calc-th" id="th'+d+'">-</td></tr>';
+  }
+  area.innerHTML = '<div class="content-card"><div class="cc-header"><span class="cc-type type-input">Ввод данных</span><div><div class="cc-title">Введите данные вашей CFD</div><div class="cc-desc">Заполните таблицу данными из вашей Lean Flow Simulation за 21 день</div></div></div>'
+    +'<div class="cc-body">'
+    +'<div class="tip-box"><strong>Подсказка:</strong> Введите количество задач в каждом статусе на конец каждого дня. ToDo = задачи в бэклоге. In Progress = задачи в работе. Done = завершённые задачи (кумулятивно).</div>'
+    +'<div class="chart-container"><canvas id="liveChart"></canvas>'
+    +'<div class="chart-legend"><div class="leg"><div class="leg-dot" style="background:var(--todo);"></div>ToDo</div><div class="leg"><div class="leg-dot" style="background:var(--wip);"></div>In Progress</div><div class="leg"><div class="leg-dot" style="background:var(--done);"></div>Done</div></div></div>'
+    +'<div class="data-table-wrap"><table class="data-table"><thead><tr><th>День</th><th>ToDo</th><th>In Prog</th><th>Done</th><th>WIP</th><th>TH/день</th></tr></thead><tbody>'+rows+'</tbody></table></div>'
+    +'<div id="inputError" style="color:var(--warn);font-size:.8rem;margin-bottom:10px;display:none;"></div>'
+    +'<div class="btn-row"><button class="btn btn-ghost" onclick="fillSampleData()">Заполнить примером</button><button class="btn btn-primary" id="btnSubmitData" onclick="submitData()" disabled>Начать анализ</button></div>'
+    +'</div></div>';
+}
+
+function onDataInput() {
+  var data = readInputData();
+  if (!data) return;
+
+  // Calc WIP and TH cells
+  for (var i=0; i<data.done.length; i++) {
+    var wip = data.wip[i];
+    document.getElementById('wip'+(i+1)).textContent = wip;
+    if (i > 0) {
+      var th = Math.max(0, data.done[i] - data.done[i-1]);
+      document.getElementById('th'+(i+1)).textContent = th;
+    } else {
+      document.getElementById('th1').textContent = '-';
+    }
+  }
+
+  // Render live chart
+  var canvas = document.getElementById('liveChart');
+  if (canvas && data.done.length >= 2) {
+    renderCFD(canvas, data);
+  }
+
+  // Enable submit if enough data
+  var filled = 0;
+  for (var j=0; j<DAYS; j++) {
+    if (!isNaN(data.todo[j]) && !isNaN(data.wip[j]) && !isNaN(data.done[j])) filled++;
+  }
+  document.getElementById('btnSubmitData').disabled = filled < DAYS;
+}
+
+function readInputData() {
+  var todo=[], wip=[], done=[];
+  for (var d=1; d<=DAYS; d++) {
+    var t = parseInt(document.getElementById('td'+d).value) || 0;
+    var w = parseInt(document.getElementById('wp'+d).value) || 0;
+    var dn = parseInt(document.getElementById('dn'+d).value) || 0;
+    todo.push(t); wip.push(w); done.push(dn);
+  }
+  return {todo:todo, wip:wip, done:done};
+}
+
+function fillSampleData() {
+  // Sample data simulating a typical lean flow game
+  var sample = {
+    todo:[15,14,13,11,10,9,9,8,7,7,8,7,6,5,5,4,4,3,3,2,1],
+    wip: [0, 1, 3, 4, 5, 5, 4, 5, 6, 5,4,5,5,5,4,4,3,4,3,3,2],
+    done:[0, 0, 0, 1, 2, 3, 5, 6, 7, 9,10,11,13,14,16,17,19,20,22,23,25]
+  };
+  for (var d=1; d<=DAYS; d++) {
+    document.getElementById('td'+d).value = sample.todo[d-1];
+    document.getElementById('wp'+d).value = sample.wip[d-1];
+    document.getElementById('dn'+d).value = sample.done[d-1];
+  }
+  onDataInput();
+}
+
+function submitData() {
+  var data = readInputData();
+
+  // Validate: Done should be non-decreasing
+  var errEl = document.getElementById('inputError');
+  for (var i=1; i<DAYS; i++) {
+    if (data.done[i] < data.done[i-1]) {
+      errEl.textContent = 'Done на день '+(i+1)+' меньше, чем на день '+i+'. Done — кумулятивная метрика (не может уменьшаться).';
+      errEl.style.display = 'block';
+      return;
+    }
+  }
+  errEl.style.display = 'none';
+
+  G.data = data;
+  G.metrics = calcMetrics(data);
+  G.step++;
+  showStep();
+}
+
+// ---- THEORY STEP ----
+function renderTheoryStep(step) {
+  var area = document.getElementById('mainArea');
+  area.innerHTML = '<div class="content-card"><div class="cc-header"><span class="cc-type type-theory">Теория</span><div><div class="cc-title">'+step.title+'</div></div></div>'
+    +'<div class="cc-body">'
+    +'<div class="chart-container"><canvas id="theoryChart"></canvas>'
+    +'<div class="chart-legend"><div class="leg"><div class="leg-dot" style="background:var(--todo);"></div>ToDo</div><div class="leg"><div class="leg-dot" style="background:var(--wip);"></div>In Progress</div><div class="leg"><div class="leg-dot" style="background:var(--done);"></div>Done</div></div></div>'
+    +'<div class="theory-card"><div class="th-title">Теория CFD</div>'+step.theory+'</div>'
+    +'<button class="btn btn-primary" onclick="nextStep()" style="width:100%;">Далее</button>'
+    +'</div></div>';
+  setTimeout(function(){
+    var c = document.getElementById('theoryChart');
+    if(c && G.data) renderCFD(c, G.data);
+  }, 50);
+}
+
+// ---- QUIZ STEP ----
+var quizCounter = 0;
+function renderQuizStep() {
+  var qData = generateQuiz(quizCounter);
+  quizCounter++;
+  if (!qData) { nextStep(); return; }
+
+  // shuffle options
+  var indices = qData.options.map(function(_,i){return i;});
+  for(var i=indices.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var tmp=indices[i];indices[i]=indices[j];indices[j]=tmp;}
+  var correctShuffled = indices.indexOf(qData.correct);
+
+  var letters = ['A','B','C'];
+  var optsHtml = indices.map(function(oi, di){
+    return '<button class="opt-btn" data-di="'+di+'" data-oi="'+oi+'" onclick="handleQuizAnswer('+di+','+oi+')"><span class="opt-letter">'+letters[di]+'</span><span>'+qData.options[oi].text+'</span></button>';
+  }).join('');
+
+  var area = document.getElementById('mainArea');
+  area.innerHTML = '<div class="content-card"><div class="cc-header"><span class="cc-type type-quiz">Вопрос</span><div><div class="cc-title">'+qData.title+'</div><div class="cc-desc">'+qData.context+'</div></div></div>'
+    +'<div class="cc-body">'
+    +'<div class="cc-desc" style="padding:14px 16px;background:var(--bg);border-radius:8px;border:1px solid var(--card-border);margin-bottom:14px;">'+qData.scenario+'</div>'
+    +'<div class="chart-container"><canvas id="quizChart"></canvas>'
+    +'<div class="chart-legend"><div class="leg"><div class="leg-dot" style="background:var(--todo);"></div>ToDo</div><div class="leg"><div class="leg-dot" style="background:var(--wip);"></div>In Progress</div><div class="leg"><div class="leg-dot" style="background:var(--done);"></div>Done</div></div></div>'
+    +'<div class="options-list" id="optList">'+optsHtml+'</div>'
+    +'<div class="fb-box" id="fbBox"></div>'
+    +'<div id="qActions"></div>'
+    +'</div></div>';
+
+  // store for answer handler
+  window._currentQuiz = qData;
+  window._currentIndices = indices;
+
+  setTimeout(function(){
+    var c = document.getElementById('quizChart');
+    if(c && G.data) renderCFD(c, G.data);
+  }, 50);
+}
+
+function handleQuizAnswer(di, oi) {
+  if (G.answered) return;
+  G.answered = true;
+  var q = window._currentQuiz;
+  var opt = q.options[oi];
+
+  var btns = document.querySelectorAll('#optList .opt-btn');
+  btns.forEach(function(btn){
+    btn.onclick = null; btn.style.cursor = 'default';
+    var boi = parseInt(btn.dataset.oi);
+    var bdi = parseInt(btn.dataset.di);
+    var bq = q.options[boi].q;
+    if(bdi === di) btn.classList.add(bq==='best'?'c-best':bq==='ok'?'c-ok':'c-bad');
+    else btn.classList.add('c-dim');
+  });
+
+  var pts = opt.q==='best'?10:opt.q==='ok'?4:-2;
+  G.score += pts;
+  if(opt.q==='best') G.best++; else if(opt.q==='ok') G.ok++; else G.bad++;
+
+  var fb = document.getElementById('fbBox');
+  var fbClass = opt.q==='best'?'fb-great':opt.q==='ok'?'fb-ok':'fb-bad';
+  var fbTitle = opt.q==='best'?'Верно!':opt.q==='ok'?'Неплохо, но есть нюанс':'Неверно';
+  fb.className = 'fb-box '+fbClass+' show';
+  fb.innerHTML = '<div class="fb-title">'+fbTitle+' ('+(pts>0?'+':'')+pts+' pts)</div>'+opt.fb;
+
+  document.getElementById('qActions').innerHTML = '<button class="btn btn-primary" onclick="nextStep()" style="width:100%;margin-top:10px;">Далее</button>';
+  document.getElementById('scoreDisp').textContent = G.score + ' pts';
+}
+
+// ---- METRICS STEP ----
+function renderMetricsStep() {
+  var m = G.metrics;
+  var patterns = detectPatterns(G.data, m);
+
+  var patternTags = patterns.map(function(p){
+    var cls = p.severity==='good'?'pt-good':p.severity==='warn'?'pt-warn':'pt-bad';
+    return '<span class="pattern-tag '+cls+'">'+p.name+'</span>';
+  }).join(' ');
+
+  var ltColor = m.avgLT > 15 ? 'v-warn' : m.avgLT > 8 ? 'v-accent' : 'v-green';
+  var wipColor = m.avgWip > 15 ? 'v-warn' : m.avgWip > 8 ? 'v-accent' : 'v-green';
+
+  var area = document.getElementById('mainArea');
+  area.innerHTML = '<div class="content-card"><div class="cc-header"><span class="cc-type type-report">Метрики</span><div><div class="cc-title">Ваши ключевые метрики</div><div class="cc-desc">Расчёт на основе введённых данных за 21 день</div></div></div>'
+    +'<div class="cc-body">'
+    +'<div class="chart-container"><canvas id="metricsChart"></canvas>'
+    +'<div class="chart-legend"><div class="leg"><div class="leg-dot" style="background:var(--todo);"></div>ToDo</div><div class="leg"><div class="leg-dot" style="background:var(--wip);"></div>In Progress</div><div class="leg"><div class="leg-dot" style="background:var(--done);"></div>Done</div></div></div>'
+    +'<div class="metrics-grid">'
+    +'<div class="metric-card"><div class="metric-val '+wipColor+'">'+m.avgWip+'</div><div class="metric-label">Средний WIP</div></div>'
+    +'<div class="metric-card"><div class="metric-val v-blue">'+m.avgTh+'</div><div class="metric-label">Throughput/день</div></div>'
+    +'<div class="metric-card"><div class="metric-val '+ltColor+'">'+m.avgLT+'</div><div class="metric-label">Lead Time (дни)</div></div>'
+    +'<div class="metric-card"><div class="metric-val v-purple">'+m.totalDone+'</div><div class="metric-label">Всего завершено</div></div>'
+    +'<div class="metric-card"><div class="metric-val v-accent">'+(m.wipTrend>0?'+':'')+m.wipTrend+'</div><div class="metric-label">Тренд WIP</div></div>'
+    +'<div class="metric-card"><div class="metric-val v-blue">'+m.thCV+'</div><div class="metric-label">CV Throughput</div></div>'
+    +'</div>'
+    +'<div style="margin-bottom:16px;"><div style="font-family:IBM Plex Mono;font-size:.7rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--ink3);margin-bottom:8px;">Обнаруженные паттерны</div>'+patternTags+'</div>'
+    +'<button class="btn btn-primary" onclick="nextStep()" style="width:100%;">Перейти к отчёту</button>'
+    +'</div></div>';
+
+  setTimeout(function(){
+    var c = document.getElementById('metricsChart');
+    if(c && G.data) {
+      var anns = [];
+      anns.push({type:'hline', val:m.avgWip, color:'#7bb8d8', label:'Avg WIP: '+m.avgWip});
+      renderCFD(c, G.data, {annotations:anns, height:280});
+    }
+  }, 50);
+}
+
+// ---- REPORT STEP ----
+function renderReportStep() {
+  var m = G.metrics;
+  var patterns = detectPatterns(G.data, m);
+
+  // Build report sections
+  var sections = '';
+
+  // Overall health
+  var health = m.isDiverging ? 'bad' : m.avgWip > 15 || m.maxStall >= 3 ? 'warn' : 'good';
+  var healthTitle = health==='good'?'Система в хорошем состоянии':health==='warn'?'Есть зоны для улучшения':'Требуется вмешательство';
+  var healthText = health==='good'
+    ? 'Ваш поток стабилен. WIP контролируем, Throughput предсказуем. Фокус — на поддержании баланса и постепенной оптимизации.'
+    : health==='warn'
+      ? 'Есть признаки нестабильности: '+(m.avgWip>15?'высокий WIP ('+m.avgWip+'), ':'')+(m.maxStall>=3?'стагнация Done ('+m.maxStall+' дн.), ':'')+'вариабельность CV='+m.thCV+'. Рекомендуется ввести WIP-лимиты.'
+      : 'Система нестабильна: WIP растёт (тренд: +'+m.wipTrend+'), линии расходятся. Без вмешательства Lead Time продолжит расти. Нужны срочные WIP-лимиты.';
+  sections += '<div class="report-section r-'+health+'"><div class="r-title">Общая оценка</div><div class="r-text">'+healthText+'</div></div>';
+
+  // Little's Law
+  sections += '<div class="report-section r-info"><div class="r-title">Закон Литтла</div><div class="r-text"><strong>WIP = '+m.avgWip+'</strong> | <strong>Throughput = '+m.avgTh+'/день</strong> | <strong>Lead Time = '+m.avgLT+' дней</strong><br>Формула: LT = WIP / TH = '+m.avgWip+' / '+m.avgTh+' = '+m.avgLT+' дней.<br>'
+    +(m.avgLT > 10 ? 'Lead Time высокий. Снижение WIP до '+ Math.max(3,Math.round(m.avgWip*0.5))+' даст Lead Time ~'+Math.round(Math.max(3,Math.round(m.avgWip*0.5))/m.avgTh*10)/10+' дней.'
+      : 'Lead Time в приемлемых пределах.')
+    +'</div></div>';
+
+  // Patterns
+  var pHtml = patterns.map(function(p){
+    var cls = p.severity==='good'?'r-good':p.severity==='warn'?'r-warn':'r-bad';
+    return '<div class="report-section '+cls+'"><div class="r-title">'+p.name+'</div><div class="r-text">'+p.desc+'</div></div>';
+  }).join('');
+  sections += pHtml;
+
+  // Forecast
+  var fcDays = m.forecastDays;
+  var fcText = fcDays === Infinity ? 'Невозможно (Throughput = 0)' : fcDays + ' дней';
+  var recWip = Math.max(3, Math.round(m.avgWip * 0.6));
+  var recLT = m.avgTh > 0 ? Math.round(recWip / m.avgTh * 10)/10 : '-';
+  sections += '<div class="report-section r-info"><div class="r-title">Прогноз</div><div class="r-text">'
+    +'<div class="forecast-box">'
+    +'<div class="forecast-row"><span class="f-label">Оставшиеся задачи</span><span class="f-val">'+m.remaining+'</span></div>'
+    +'<div class="forecast-row"><span class="f-label">Средний Throughput</span><span class="f-val">'+m.avgTh+' / день</span></div>'
+    +'<div class="forecast-row"><span class="f-label">Прогноз завершения</span><span class="f-val">'+fcText+'</span></div>'
+    +'<div class="forecast-row"><span class="f-label">Рекомендуемый WIP-лимит</span><span class="f-val">'+recWip+'</span></div>'
+    +'<div class="forecast-row"><span class="f-label">Целевой Lead Time (при WIP '+recWip+')</span><span class="f-val">'+recLT+' дней</span></div>'
+    +'</div>'
+    +'</div></div>';
+
+  // Recommendations
+  var recs = [];
+  if (m.isDiverging || m.avgWip > 10) recs.push('Введите WIP-лимит = '+recWip+'. Это снизит Lead Time до ~'+recLT+' дней.');
+  if (m.maxStall >= 3) recs.push('Устраните блокеры завершения. '+m.maxStall+' дней стагнации Done — критический сигнал.');
+  if (m.thCV > 1.0) recs.push('Стабилизируйте Throughput: уменьшите размер задач, уберите зависимости.');
+  if (m.avgArrival > m.avgTh * 1.3) recs.push('Управляйте входящим потоком: Arrival Rate ('+m.avgArrival+') значительно выше Throughput ('+m.avgTh+').');
+  if (recs.length === 0) recs.push('Продолжайте в том же духе. Фокус — на предсказуемости и постоянном улучшении.');
+  sections += '<div class="report-section r-'+(health==='good'?'good':'warn')+'"><div class="r-title">Рекомендации</div><div class="r-text"><ul style="padding-left:18px;">'+recs.map(function(r){return '<li style="margin-bottom:6px;">'+r+'</li>';}).join('')+'</ul></div></div>';
+
+  var area = document.getElementById('mainArea');
+  area.innerHTML = '<div class="content-card"><div class="cc-header"><span class="cc-type type-report">Отчёт</span><div><div class="cc-title">Аналитический отчёт по вашей CFD</div><div class="cc-desc">21 день, '+m.totalDone+' завершённых задач</div></div></div>'
+    +'<div class="cc-body">'
+    +'<div class="chart-container"><canvas id="reportChart"></canvas>'
+    +'<div class="chart-legend"><div class="leg"><div class="leg-dot" style="background:var(--todo);"></div>ToDo</div><div class="leg"><div class="leg-dot" style="background:var(--wip);"></div>In Progress</div><div class="leg"><div class="leg-dot" style="background:var(--done);"></div>Done</div></div></div>'
+    + sections
+    +'<button class="btn btn-accent" onclick="nextStep()" style="width:100%;margin-top:8px;">Завершить</button>'
+    +'</div></div>';
+
+  setTimeout(function(){
+    var c = document.getElementById('reportChart');
+    if(c && G.data) {
+      var anns = [
+        {type:'hline', val:m.avgWip, color:'#7bb8d8', label:'Avg WIP'},
+        {type:'hline', val:recWip, color:'#1e6b4f', label:'WIP Limit: '+recWip}
+      ];
+      renderCFD(c, G.data, {annotations:anns, height:300});
+    }
+  }, 50);
+}
+
+// ---- NAVIGATION ----
+function nextStep() {
+  G.step++;
+  showStep();
+}
+
+// ---- FINISH ----
+function finishGame() {
+  document.getElementById('gameWrap').classList.remove('active');
+  var total = G.best + G.ok + G.bad;
+  var bestPct = total > 0 ? Math.round((G.best/total)*100) : 0;
+  var title, rank, gc, gradeText;
+
+  if (G.score >= 50 && bestPct >= 60) {
+    title = 'CFD-Мастер'; rank = 'Грейд S — Экспертный уровень'; gc='g-s';
+    gradeText = 'Вы отлично анализируете CFD, верно рассчитываете метрики и даёте обоснованные рекомендации. Ваш аналитический отчёт — профессионального качества.';
+  } else if (G.score >= 35) {
+    title = 'CFD-Аналитик'; rank = 'Грейд A — Продвинутый'; gc='g-a';
+    gradeText = 'Хороший уровень анализа CFD. Некоторые нюансы ещё требуют проработки, но фундамент крепкий.';
+  } else if (G.score >= 18) {
+    title = 'CFD-Наблюдатель'; rank = 'Грейд B — Средний'; gc='g-b';
+    gradeText = 'Базовое понимание CFD есть, но рекомендации и расчёты требуют доработки. Пересмотрите закон Литтла и паттерны.';
+  } else {
+    title = 'CFD-Новичок'; rank = 'Грейд C — Начальный'; gc='g-c';
+    gradeText = 'Анализ CFD пока даётся с трудом. Рекомендуем повторить теорию: три метрики, закон Литтла, основные паттерны.';
+  }
+
+  document.getElementById('fTitle').textContent = title;
+  document.getElementById('fScore').textContent = G.score + ' pts';
+  document.getElementById('fRank').textContent = rank;
+  document.getElementById('fStats').innerHTML =
+    '<div class="f-stat"><span>Вопросов</span><span class="fv">'+total+'</span></div>'
+    +'<div class="f-stat"><span>Верных ответов</span><span class="fv">'+G.best+'</span></div>'
+    +'<div class="f-stat"><span>Компромиссов</span><span class="fv">'+G.ok+'</span></div>'
+    +'<div class="f-stat"><span>Ошибок</span><span class="fv">'+G.bad+'</span></div>'
+    +'<div class="f-stat"><span>Точность</span><span class="fv">'+bestPct+'%</span></div>';
+  document.getElementById('fGrade').className = 'f-grade '+gc;
+  document.getElementById('fGrade').textContent = gradeText;
+  document.getElementById('finishScreen').classList.remove('hidden');
+}
+
+// ---- START ----
+function startGame() {
+  STEPS = buildSteps();
+  quizCounter = 0;
+  document.getElementById('introScreen').classList.add('hidden');
+  document.getElementById('gameWrap').classList.add('active');
+  renderProgress();
+  showStep();
+}
+</script>
+</body>
+</html>
