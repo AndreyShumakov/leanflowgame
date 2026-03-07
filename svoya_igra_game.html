@@ -468,6 +468,11 @@
         }
         .result-delta.positive { color: var(--success); }
         .result-delta.negative { color: var(--danger); }
+        .result-confidence {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+        }
         .result-explanation {
             color: var(--text-secondary);
             font-size: 0.9rem;
@@ -896,6 +901,7 @@
             <div class="answer-result" id="answerResult">
                 <div class="result-icon" id="resultIcon"></div>
                 <div class="result-delta" id="resultDelta"></div>
+                <div class="result-confidence" id="resultConfidence" style="display:none;"></div>
                 <div class="result-correct-answer" id="resultCorrectAnswer"></div>
                 <div class="result-explanation" id="resultExplanation"></div>
                 <button class="btn btn-secondary btn-sm" onclick="closeQuestion()" style="margin-top:15px;">
@@ -1324,6 +1330,10 @@ function onTimer(msg) {
 function onError(msg) {
     console.error('Server error:', msg.message);
     alert(msg.message);
+    // Re-enable answer buttons in case error occurred during submission
+    const textBtn = document.querySelector('#textArea .btn');
+    if (textBtn) textBtn.disabled = false;
+    document.querySelectorAll('#optionsGrid .option-btn').forEach(b => b.disabled = false);
 }
 
 // ============================================================
@@ -1391,19 +1401,15 @@ function renderScores() {
 }
 
 function updateTurnIndicator() {
-    const nameEl = document.getElementById('turnPlayerName');
-    if (players[currentTurn]) {
-        nameEl.textContent = players[currentTurn].name;
-    }
-    // Highlight whose turn
+    const el = document.getElementById('turnIndicator');
+    if (!el) return;
+    const name = players[currentTurn]?.name || '---';
     if (currentTurn === myPlayerId) {
-        document.getElementById('turnIndicator').innerHTML =
-            'Ваш ход! Выберите вопрос';
-        document.getElementById('turnIndicator').style.color = 'var(--gold)';
+        el.innerHTML = 'Ваш ход! Выберите вопрос';
+        el.style.color = 'var(--gold)';
     } else {
-        document.getElementById('turnIndicator').innerHTML =
-            'Ход: <span class="player-name">' + escapeHtml(players[currentTurn]?.name || '---') + '</span>';
-        document.getElementById('turnIndicator').style.color = 'var(--accent)';
+        el.innerHTML = 'Ход: <span class="player-name">' + escapeHtml(name) + '</span>';
+        el.style.color = 'var(--accent)';
     }
 }
 
@@ -1448,10 +1454,13 @@ function showQuestionOverlay(question, special, answerer) {
         document.getElementById('choiceArea').style.display = 'none';
         document.getElementById('textArea').style.display = canAnswer ? 'block' : 'none';
         document.getElementById('textAnswer').value = '';
+        const textBtn = document.querySelector('#textArea .btn');
+        if (textBtn) textBtn.disabled = false;
     }
 
     showOverlay('questionOverlay');
-    startTimer(30);
+    const isText = !(question.format === 'choice' || question.options);
+    startTimer(isText ? 180 : 30);
 }
 
 function renderOptions(options, canAnswer) {
@@ -1509,6 +1518,14 @@ function showAnswerResult(msg) {
     document.getElementById('resultCorrectAnswer').textContent =
         isCorrect ? '' : 'Правильный ответ: ' + (msg['correct-answer'] || '');
     document.getElementById('resultExplanation').textContent = msg.explanation || '';
+
+    const confEl = document.getElementById('resultConfidence');
+    if (msg.confidence != null) {
+        confEl.textContent = 'Уверенность: ' + msg.confidence + '%';
+        confEl.style.display = 'block';
+    } else {
+        confEl.style.display = 'none';
+    }
 
     // Highlight correct/incorrect options
     if (msg['correct-answer']) {

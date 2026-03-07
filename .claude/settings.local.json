@@ -25,7 +25,11 @@
       "WebFetch(domain:hub.docker.com)",
       "Bash(git -C \"D:/zoo/itil-games\" status)",
       "Bash(git -C \"D:\\\\zoo\\\\itil-games\" rev-parse --show-toplevel)",
-      "Bash(git -C:*)"
+      "Bash(git -C:*)",
+      "Bash(git rev-parse:*)",
+      "Bash(git pull:*)",
+      "Bash(git stash:*)",
+      "Bash(git checkout:*)"
     ]
   }
 }
