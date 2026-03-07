@@ -3,7 +3,29 @@
     "allow": [
       "Bash(git push)",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(git remote set-url:*)",
+      "Bash(ssh-keygen:*)",
+      "Bash(~/.ssh/config)",
+      "Bash(chmod:*)",
+      "Bash(ssh:*)",
+      "Bash(wsl bash -c \"cd /mnt/d/zoo/itil-games/html && git push\")",
+      "WebSearch",
+      "Bash(ls:*)",
+      "WebFetch(domain:cljdoc.org)",
+      "WebFetch(domain:nextjournal.com)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:hyperfiddle.notion.site)",
+      "WebFetch(domain:http-kit.github.io)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:openrouter.ai)",
+      "Bash(docker-compose build:*)",
+      "Bash(docker:*)",
+      "Bash(docker-compose:*)",
+      "WebFetch(domain:hub.docker.com)",
+      "Bash(git -C \"D:/zoo/itil-games\" status)",
+      "Bash(git -C \"D:\\\\zoo\\\\itil-games\" rev-parse --show-toplevel)",
+      "Bash(git -C:*)"
     ]
   }
 }
