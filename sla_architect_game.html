@@ -1,0 +1,2232 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SLA Architect: Переговоры — Построй идеальный SLA</title>
+    <link href="https://fonts.googleapis.com/css2?family=Russo+One&family=Exo+2:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0a0e17;
+            --bg-card: #131a2b;
+            --bg-panel: #1a2236;
+            --bg-hover: #222d44;
+            --text-primary: #e8eaf0;
+            --text-secondary: #8892a0;
+            --text-muted: #5a6370;
+            --gold: #f0c040;
+            --gold-dim: rgba(240,192,64,0.15);
+            --gold-glow: rgba(240,192,64,0.4);
+            --cyan: #00d4ff;
+            --cyan-dim: rgba(0,212,255,0.15);
+            --cyan-glow: rgba(0,212,255,0.4);
+            --accent-green: #3fb950;
+            --accent-red: #f85149;
+            --accent-orange: #f0883e;
+            --accent-purple: #a371f7;
+            --border: #253049;
+            --glass: rgba(19,26,43,0.85);
+            --glass-border: rgba(255,255,255,0.08);
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family:'Exo 2',sans-serif;
+            background:var(--bg-dark);
+            background-image:
+                radial-gradient(ellipse at 20% 20%, rgba(240,192,64,0.06) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(0,212,255,0.06) 0%, transparent 50%);
+            min-height:100vh;
+            color:var(--text-primary);
+            overflow-x:hidden;
+        }
+        .screen { display:none; min-height:100vh; }
+        .screen.active { display:flex; flex-direction:column; }
+
+        /* ===== BUTTONS ===== */
+        .btn {
+            display:inline-flex; align-items:center; justify-content:center; gap:8px;
+            padding:12px 28px; border:none; border-radius:12px; cursor:pointer;
+            font-family:'Exo 2',sans-serif; font-weight:600; font-size:1rem;
+            transition:all .3s; text-decoration:none; color:#fff;
+        }
+        .btn-gold { background:linear-gradient(135deg,#f0c040,#e6a800); color:#000; }
+        .btn-gold:hover { transform:translateY(-2px); box-shadow:0 8px 25px var(--gold-glow); }
+        .btn-cyan { background:linear-gradient(135deg,#00d4ff,#0090b0); }
+        .btn-cyan:hover { transform:translateY(-2px); box-shadow:0 8px 25px var(--cyan-glow); }
+        .btn-outline {
+            background:transparent; border:1px solid var(--border); color:var(--text-primary);
+        }
+        .btn-outline:hover { border-color:var(--cyan); color:var(--cyan); }
+        .btn-sm { padding:8px 18px; font-size:.85rem; border-radius:8px; }
+        .btn:disabled { opacity:.4; cursor:not-allowed; transform:none!important; box-shadow:none!important; }
+
+        /* ===== GLASS PANELS ===== */
+        .glass {
+            background:var(--glass); border:1px solid var(--glass-border);
+            border-radius:16px; backdrop-filter:blur(12px); padding:24px;
+        }
+        .glass-sm { padding:16px; border-radius:12px; }
+
+        /* ===== SCREEN: MENU ===== */
+        #screen-menu { align-items:center; justify-content:center; text-align:center; padding:40px 20px; }
+        .menu-logo { font-size:5rem; margin-bottom:16px; }
+        .menu-title {
+            font-family:'Russo One',sans-serif; font-size:2.8rem;
+            background:linear-gradient(135deg,var(--gold),var(--cyan));
+            -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+            background-clip:text; margin-bottom:8px;
+        }
+        .menu-subtitle { color:var(--text-secondary); font-size:1.15rem; margin-bottom:40px; }
+        .mode-cards { display:flex; gap:20px; flex-wrap:wrap; justify-content:center; max-width:900px; }
+        .mode-card {
+            background:var(--bg-card); border:1px solid var(--border); border-radius:16px;
+            padding:30px 24px; width:260px; cursor:pointer; transition:all .3s; text-align:center;
+        }
+        .mode-card:hover { transform:translateY(-6px); border-color:var(--cyan); box-shadow:0 12px 40px rgba(0,212,255,0.15); }
+        .mode-card.disabled { opacity:.4; cursor:not-allowed; }
+        .mode-card.disabled:hover { transform:none; border-color:var(--border); box-shadow:none; }
+        .mode-icon { font-size:2.5rem; margin-bottom:12px; }
+        .mode-name { font-family:'Russo One',sans-serif; font-size:1.15rem; margin-bottom:8px; }
+        .mode-desc { color:var(--text-secondary); font-size:.85rem; line-height:1.5; }
+        .mode-badge { display:inline-block; margin-top:10px; padding:3px 10px; border-radius:10px; font-size:.7rem; font-weight:700; }
+        .badge-ready { background:rgba(63,185,80,0.2); color:var(--accent-green); }
+        .badge-soon { background:rgba(248,81,73,0.2); color:var(--accent-red); }
+
+        /* ===== SCREEN: ROLE SELECT ===== */
+        #screen-role-select { align-items:center; justify-content:center; text-align:center; padding:40px 20px; }
+        .role-cards { display:flex; gap:30px; flex-wrap:wrap; justify-content:center; margin:30px 0; }
+        .role-card {
+            width:300px; padding:30px; border-radius:16px; cursor:pointer; transition:all .3s;
+            border:2px solid transparent; text-align:center;
+        }
+        .role-card.business { background:var(--gold-dim); border-color:rgba(240,192,64,0.3); }
+        .role-card.business:hover,.role-card.business.selected { border-color:var(--gold); box-shadow:0 0 30px var(--gold-glow); }
+        .role-card.it { background:var(--cyan-dim); border-color:rgba(0,212,255,0.3); }
+        .role-card.it:hover,.role-card.it.selected { border-color:var(--cyan); box-shadow:0 0 30px var(--cyan-glow); }
+        .role-emoji { font-size:3rem; margin-bottom:12px; }
+        .role-name { font-family:'Russo One',sans-serif; font-size:1.3rem; margin-bottom:8px; }
+        .role-desc { color:var(--text-secondary); font-size:.9rem; line-height:1.5; }
+
+        /* ===== SCREEN: SCENARIO ===== */
+        #screen-scenario { padding:40px 20px; align-items:center; }
+        .scenario-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:20px; max-width:1100px; width:100%; margin:30px 0; }
+        .scenario-card {
+            background:var(--bg-card); border:1px solid var(--border); border-radius:16px;
+            padding:24px; cursor:pointer; transition:all .3s; position:relative;
+        }
+        .scenario-card:hover { transform:translateY(-4px); border-color:var(--cyan); }
+        .scenario-card.selected { border-color:var(--gold); box-shadow:0 0 25px var(--gold-glow); }
+        .scenario-badge {
+            position:absolute; top:12px; right:12px; padding:4px 10px; border-radius:8px;
+            font-size:.7rem; font-weight:700; text-transform:uppercase;
+        }
+        .badge-critical { background:rgba(248,81,73,0.2); color:var(--accent-red); }
+        .badge-high { background:rgba(240,136,62,0.2); color:var(--accent-orange); }
+        .badge-medium { background:rgba(240,192,64,0.2); color:var(--gold); }
+        .scenario-icon { font-size:2.5rem; margin-bottom:10px; }
+        .scenario-name { font-family:'Russo One',sans-serif; font-size:1.1rem; margin-bottom:6px; }
+        .scenario-desc { color:var(--text-secondary); font-size:.85rem; line-height:1.5; margin-bottom:12px; }
+        .scenario-tags { display:flex; flex-wrap:wrap; gap:6px; }
+        .stag { padding:3px 8px; border-radius:6px; font-size:.7rem; font-weight:600; background:rgba(255,255,255,0.06); color:var(--text-secondary); }
+
+        /* ===== SCREEN: GAME ===== */
+        #screen-game { padding:0; }
+        .game-topbar {
+            display:flex; align-items:center; justify-content:space-between;
+            padding:12px 24px; background:rgba(10,14,23,0.95); border-bottom:1px solid var(--border);
+            position:sticky; top:0; z-index:100; flex-wrap:wrap; gap:10px;
+        }
+        .topbar-left { display:flex; align-items:center; gap:16px; }
+        .topbar-title { font-family:'Russo One',sans-serif; font-size:1rem; }
+        .topbar-scenario { color:var(--text-secondary); font-size:.85rem; }
+        .topbar-center { display:flex; align-items:center; gap:4px; }
+        .phase-step {
+            display:flex; align-items:center; gap:4px; padding:6px 14px;
+            border-radius:8px; font-size:.8rem; font-weight:600; color:var(--text-muted);
+            background:transparent; transition:all .3s; white-space:nowrap;
+        }
+        .phase-step.active { background:var(--cyan-dim); color:var(--cyan); }
+        .phase-step.done { color:var(--accent-green); }
+        .phase-step .step-num {
+            width:22px; height:22px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+            font-size:.7rem; border:2px solid var(--text-muted); transition:all .3s;
+        }
+        .phase-step.active .step-num { border-color:var(--cyan); background:var(--cyan); color:#000; }
+        .phase-step.done .step-num { border-color:var(--accent-green); background:var(--accent-green); color:#000; }
+        .topbar-right { display:flex; align-items:center; gap:16px; }
+        .np-display {
+            display:flex; align-items:center; gap:6px; padding:6px 12px;
+            border-radius:8px; font-size:.85rem; font-weight:600;
+        }
+        .np-biz { background:var(--gold-dim); color:var(--gold); }
+        .np-it { background:var(--cyan-dim); color:var(--cyan); }
+
+        .game-body { display:flex; flex:1; min-height:calc(100vh - 60px); }
+        .panel-left, .panel-right {
+            width:280px; min-width:220px; padding:20px; overflow-y:auto;
+            border-right:1px solid var(--border); background:rgba(19,26,43,0.5);
+        }
+        .panel-right { border-right:none; border-left:1px solid var(--border); }
+        .panel-center { flex:1; padding:24px; overflow-y:auto; }
+
+        .panel-header {
+            font-family:'Russo One',sans-serif; font-size:.9rem; margin-bottom:16px;
+            padding-bottom:8px; border-bottom:1px solid var(--border);
+        }
+        .panel-header.biz-color { color:var(--gold); border-bottom-color:rgba(240,192,64,0.3); }
+        .panel-header.it-color { color:var(--cyan); border-bottom-color:rgba(0,212,255,0.3); }
+
+        /* Cards in hand */
+        .arg-card {
+            background:var(--bg-card); border:1px solid var(--border); border-radius:10px;
+            padding:12px; margin-bottom:10px; cursor:pointer; transition:all .3s; font-size:.82rem;
+        }
+        .arg-card:hover { border-color:var(--gold); }
+        .arg-card.it-card:hover { border-color:var(--cyan); }
+        .arg-card.used { opacity:.35; cursor:not-allowed; }
+        .arg-card.selected { border-color:var(--gold); box-shadow:0 0 15px var(--gold-glow); transform:scale(1.03); }
+        .arg-card.it-card.selected { border-color:var(--cyan); box-shadow:0 0 15px var(--cyan-glow); }
+        .arg-card-name { font-weight:700; margin-bottom:4px; }
+        .arg-card-desc { color:var(--text-secondary); font-size:.78rem; line-height:1.4; }
+        .arg-card-cost { margin-top:6px; font-size:.75rem; font-weight:600; }
+        .arg-card-cost.biz { color:var(--gold); }
+        .arg-card-cost.it { color:var(--cyan); }
+
+        /* Phase content area */
+        .phase-content { max-width:800px; margin:0 auto; }
+        .phase-title {
+            font-family:'Russo One',sans-serif; font-size:1.5rem; margin-bottom:6px;
+            background:linear-gradient(135deg,var(--gold),var(--cyan));
+            -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+        }
+        .phase-desc { color:var(--text-secondary); margin-bottom:24px; font-size:.95rem; }
+
+        /* Metric items */
+        .metric-item {
+            background:var(--bg-card); border:1px solid var(--border); border-radius:12px;
+            padding:16px; margin-bottom:12px; transition:all .3s;
+        }
+        .metric-item:hover { border-color:rgba(255,255,255,0.15); }
+        .metric-item.selected-metric { border-color:var(--cyan); background:rgba(0,212,255,0.05); }
+        .metric-name { font-weight:700; font-size:1rem; margin-bottom:4px; }
+        .metric-desc { color:var(--text-secondary); font-size:.83rem; line-height:1.4; }
+        .metric-tags { display:flex; gap:6px; margin-top:8px; flex-wrap:wrap; }
+
+        /* Slider negotiation */
+        .nego-metric {
+            background:var(--bg-card); border:1px solid var(--border); border-radius:14px;
+            padding:20px; margin-bottom:16px;
+        }
+        .nego-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
+        .nego-title { font-weight:700; font-size:1.05rem; }
+        .nego-status { font-size:.8rem; padding:4px 10px; border-radius:8px; }
+        .status-pending { background:rgba(240,192,64,0.15); color:var(--gold); }
+        .status-negotiating { background:rgba(0,212,255,0.15); color:var(--cyan); }
+        .status-agreed { background:rgba(63,185,80,0.15); color:var(--accent-green); }
+
+        .slider-row { display:flex; align-items:center; gap:12px; margin-bottom:8px; }
+        .slider-label { width:80px; font-size:.82rem; font-weight:600; text-align:right; }
+        .slider-label.biz { color:var(--gold); }
+        .slider-label.it { color:var(--cyan); }
+        .slider-wrap { flex:1; position:relative; }
+        input[type="range"] {
+            width:100%; -webkit-appearance:none; appearance:none;
+            height:6px; border-radius:3px; outline:none; background:#253049;
+        }
+        input[type="range"].biz-slider::-webkit-slider-thumb {
+            -webkit-appearance:none; width:18px; height:18px; border-radius:50%;
+            background:var(--gold); cursor:pointer; box-shadow:0 0 8px var(--gold-glow);
+        }
+        input[type="range"].it-slider::-webkit-slider-thumb {
+            -webkit-appearance:none; width:18px; height:18px; border-radius:50%;
+            background:var(--cyan); cursor:pointer; box-shadow:0 0 8px var(--cyan-glow);
+        }
+        .slider-value { width:70px; text-align:center; font-weight:700; font-size:.95rem; }
+
+        .gap-bar {
+            height:8px; border-radius:4px; background:#253049; margin:10px 0; position:relative; overflow:hidden;
+        }
+        .gap-fill { height:100%; border-radius:4px; transition:width .4s; }
+        .gap-small { background:var(--accent-green); }
+        .gap-medium { background:var(--gold); }
+        .gap-large { background:var(--accent-orange); }
+        .gap-huge { background:var(--accent-red); }
+        .gap-text { font-size:.78rem; color:var(--text-secondary); margin-bottom:10px; }
+
+        /* Cost visualization */
+        .cost-chart { margin:20px 0; }
+        .cost-bar-row { display:flex; align-items:center; gap:10px; margin-bottom:6px; }
+        .cost-label { width:60px; font-size:.78rem; color:var(--text-secondary); text-align:right; }
+        .cost-bar-bg { flex:1; height:20px; background:#1a2236; border-radius:4px; overflow:hidden; }
+        .cost-bar-fill { height:100%; border-radius:4px; transition:width .5s; }
+        .cost-val { width:80px; font-size:.78rem; font-weight:600; }
+
+        /* Penalty/Bonus templates */
+        .template-card {
+            background:var(--bg-panel); border:1px solid var(--border); border-radius:12px;
+            padding:16px; margin-bottom:12px; cursor:pointer; transition:all .3s;
+        }
+        .template-card:hover { border-color:var(--cyan); }
+        .template-card.selected { border-color:var(--accent-green); background:rgba(63,185,80,0.05); }
+        .template-name { font-weight:700; margin-bottom:4px; }
+        .template-desc { color:var(--text-secondary); font-size:.83rem; }
+
+        /* Turn overlay for hot-seat */
+        .turn-overlay {
+            display:none; position:fixed; top:0; left:0; right:0; bottom:0;
+            background:rgba(10,14,23,0.97); z-index:1000;
+            flex-direction:column; align-items:center; justify-content:center; text-align:center;
+        }
+        .turn-overlay.active { display:flex; }
+        .turn-overlay h2 { font-family:'Russo One',sans-serif; font-size:2rem; margin-bottom:12px; }
+        .turn-overlay p { color:var(--text-secondary); margin-bottom:24px; }
+
+        /* ===== SCREEN: RESULTS ===== */
+        #screen-results { padding:40px 20px; align-items:center; }
+        .results-container { max-width:900px; width:100%; }
+        .radar-container { display:flex; justify-content:center; margin:30px 0; }
+        .verdict-box {
+            text-align:center; padding:24px; border-radius:16px; margin:20px 0;
+        }
+        .verdict-title { font-family:'Russo One',sans-serif; font-size:2rem; margin-bottom:8px; }
+        .verdict-score { font-size:3rem; font-family:'Russo One',sans-serif; }
+        .verdict-label { font-size:1.1rem; margin-top:8px; }
+
+        .expert-section { margin-top:30px; }
+        .expert-card {
+            background:var(--bg-card); border:1px solid var(--border); border-radius:12px;
+            padding:16px; margin-bottom:12px;
+        }
+        .expert-axis { font-weight:700; color:var(--cyan); margin-bottom:6px; }
+        .expert-text { color:var(--text-secondary); font-size:.9rem; line-height:1.6; }
+        .expert-score-inline { float:right; font-weight:700; }
+
+        .sla-doc {
+            background:var(--bg-card); border:1px solid var(--border); border-radius:16px;
+            padding:24px; margin:20px 0; font-size:.9rem; line-height:1.7;
+        }
+        .sla-doc h3 { font-family:'Russo One',sans-serif; color:var(--gold); margin-bottom:12px; }
+        .sla-doc table { width:100%; border-collapse:collapse; margin:12px 0; }
+        .sla-doc th,.sla-doc td { padding:8px 12px; border:1px solid var(--border); text-align:left; font-size:.85rem; }
+        .sla-doc th { background:var(--bg-panel); color:var(--cyan); font-weight:600; }
+
+        /* Responsive */
+        @media(max-width:1024px) {
+            .game-body { flex-direction:column; }
+            .panel-left,.panel-right { width:100%; min-width:auto; border:none; border-bottom:1px solid var(--border); }
+            .topbar-center { order:3; width:100%; justify-content:center; }
+        }
+        @media(max-width:600px) {
+            .menu-title { font-size:1.8rem; }
+            .mode-cards { flex-direction:column; align-items:center; }
+            .role-cards { flex-direction:column; align-items:center; }
+            .scenario-grid { grid-template-columns:1fr; }
+            .phase-step span:not(.step-num) { display:none; }
+        }
+
+        /* Mobile tab switcher */
+        .mobile-tabs {
+            display:none; position:sticky; top:55px; z-index:99;
+            background:var(--bg-dark); border-bottom:1px solid var(--border);
+            padding:8px; gap:4px; justify-content:center;
+        }
+        @media(max-width:1024px) { .mobile-tabs { display:flex; } }
+        .mob-tab {
+            padding:8px 16px; border-radius:8px; font-size:.82rem; font-weight:600;
+            cursor:pointer; background:transparent; border:1px solid var(--border);
+            color:var(--text-secondary); transition:all .3s;
+        }
+        .mob-tab.active { background:var(--cyan-dim); color:var(--cyan); border-color:var(--cyan); }
+
+        /* Animations */
+        @keyframes fadeIn { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+        .fade-in { animation:fadeIn .4s ease-out; }
+        @keyframes slideUp { from{opacity:0;transform:translateY(40px)} to{opacity:1;transform:translateY(0)} }
+        .slide-up { animation:slideUp .5s ease-out; }
+        @keyframes glow { 0%,100%{box-shadow:0 0 5px var(--cyan-glow)} 50%{box-shadow:0 0 20px var(--cyan-glow)} }
+
+        /* Phase 1 specific */
+        .scope-item {
+            display:flex; align-items:center; gap:12px; padding:12px 16px;
+            background:var(--bg-card); border:1px solid var(--border); border-radius:10px;
+            margin-bottom:8px; cursor:pointer; transition:all .3s;
+        }
+        .scope-item:hover { border-color:rgba(255,255,255,0.15); }
+        .scope-item.checked { border-color:var(--accent-green); background:rgba(63,185,80,0.05); }
+        .scope-check {
+            width:22px; height:22px; border-radius:6px; border:2px solid var(--border);
+            display:flex; align-items:center; justify-content:center; transition:all .3s; flex-shrink:0;
+        }
+        .scope-item.checked .scope-check { background:var(--accent-green); border-color:var(--accent-green); color:#000; }
+        .scope-text { flex:1; }
+        .scope-text-title { font-weight:600; font-size:.9rem; }
+        .scope-text-desc { color:var(--text-secondary); font-size:.78rem; }
+
+        .hours-selector {
+            display:flex; gap:10px; flex-wrap:wrap; margin:12px 0;
+        }
+        .hours-opt {
+            padding:10px 16px; border-radius:10px; border:1px solid var(--border);
+            background:var(--bg-card); cursor:pointer; transition:all .3s; text-align:center;
+        }
+        .hours-opt:hover { border-color:var(--cyan); }
+        .hours-opt.selected { border-color:var(--accent-green); background:rgba(63,185,80,0.08); }
+        .hours-opt-title { font-weight:700; font-size:.9rem; }
+        .hours-opt-desc { color:var(--text-secondary); font-size:.75rem; }
+
+        /* Checklist progress */
+        .progress-bar { height:6px; background:#253049; border-radius:3px; margin:16px 0; overflow:hidden; }
+        .progress-fill { height:100%; background:linear-gradient(90deg,var(--gold),var(--cyan)); border-radius:3px; transition:width .4s; }
+
+        /* Error budget display */
+        .error-budget-box {
+            background:var(--bg-panel); border:1px solid var(--border); border-radius:12px;
+            padding:16px; margin:16px 0; text-align:center;
+        }
+        .eb-value { font-family:'Russo One',sans-serif; font-size:2rem; color:var(--cyan); }
+        .eb-label { font-size:.82rem; color:var(--text-secondary); }
+
+        /* Phase navigation footer */
+        .phase-footer {
+            display:flex; justify-content:space-between; align-items:center;
+            padding:16px 24px; border-top:1px solid var(--border);
+            background:rgba(10,14,23,0.95);
+        }
+
+        .section-divider {
+            font-family:'Russo One',sans-serif; font-size:.85rem; color:var(--text-muted);
+            margin:20px 0 12px; padding-bottom:6px; border-bottom:1px solid rgba(255,255,255,0.05);
+        }
+
+        /* Back link */
+        .back-link {
+            position:fixed; top:12px; left:12px; z-index:200;
+            color:var(--text-secondary); text-decoration:none; font-size:.85rem;
+            padding:6px 12px; border-radius:8px; background:rgba(10,14,23,0.8);
+            border:1px solid var(--border); transition:all .3s;
+        }
+        .back-link:hover { color:var(--text-primary); border-color:var(--cyan); }
+
+        /* Priority badges */
+        .priority-badge {
+            display:inline-flex; align-items:center; gap:4px;
+            padding:2px 8px; border-radius:6px; font-size:.72rem; font-weight:600;
+        }
+        .pri-critical { background:rgba(248,81,73,0.2); color:var(--accent-red); }
+        .pri-high { background:rgba(240,136,62,0.2); color:var(--accent-orange); }
+        .pri-medium { background:rgba(240,192,64,0.2); color:var(--gold); }
+
+        /* Toggle switch */
+        .toggle-row { display:flex; align-items:center; justify-content:space-between; padding:8px 0; }
+        .toggle-switch {
+            width:44px; height:24px; border-radius:12px; background:#253049;
+            cursor:pointer; position:relative; transition:background .3s;
+        }
+        .toggle-switch.on { background:var(--accent-green); }
+        .toggle-switch::after {
+            content:''; position:absolute; top:3px; left:3px;
+            width:18px; height:18px; border-radius:50%; background:#fff; transition:left .3s;
+        }
+        .toggle-switch.on::after { left:23px; }
+
+        /* Review table improvements */
+        .review-section { margin-bottom:24px; }
+        .review-section h3 {
+            font-family:'Russo One',sans-serif; font-size:1rem; margin-bottom:12px;
+            color:var(--cyan); display:flex; align-items:center; gap:8px;
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="back-link">< ITIL Games</a>
+
+    <!-- MENU SCREEN -->
+    <div id="screen-menu" class="screen active">
+        <div class="menu-logo">&#x1F4DD;</div>
+        <h1 class="menu-title">SLA Architect</h1>
+        <p class="menu-subtitle">Пошаговый симулятор переговоров по SLA</p>
+        <div class="mode-cards">
+            <div class="mode-card" onclick="selectMode('solo')">
+                <div class="mode-icon">&#x1F9D1;</div>
+                <div class="mode-name">Соло-обучение</div>
+                <div class="mode-desc">Пройдите обе роли с AI-подсказками оптимальных значений</div>
+                <span class="mode-badge badge-ready">ГОТОВО</span>
+            </div>
+            <div class="mode-card" onclick="selectMode('hotseat')">
+                <div class="mode-icon">&#x1F465;</div>
+                <div class="mode-name">Hot-Seat (2P)</div>
+                <div class="mode-desc">2 игрока за одним экраном, маскировка хода при передаче</div>
+                <span class="mode-badge badge-ready">ГОТОВО</span>
+            </div>
+            <div class="mode-card disabled">
+                <div class="mode-icon">&#x1F310;</div>
+                <div class="mode-name">Онлайн</div>
+                <div class="mode-desc">2 игрока на разных устройствах через WebSocket</div>
+                <span class="mode-badge badge-soon">СКОРО</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ROLE SELECT SCREEN -->
+    <div id="screen-role-select" class="screen">
+        <h2 class="phase-title" style="margin-bottom:8px;">Выберите роль</h2>
+        <p class="phase-desc" id="role-select-desc">Каждая роль имеет уникальные цели и карты аргументов</p>
+        <div class="role-cards">
+            <div class="role-card business" onclick="selectRole('business')" id="role-business">
+                <div class="role-emoji">&#x1F4BC;</div>
+                <div class="role-name" style="color:var(--gold)">Бизнес-заказчик</div>
+                <div class="role-desc">Защищайте интересы бизнеса: высокая доступность, быстрое восстановление, жёсткие SLO. Ваши карты: регуляторные требования, финансовые потери, конкурентное давление.</div>
+            </div>
+            <div class="role-card it" onclick="selectRole('it')" id="role-it">
+                <div class="role-emoji">&#x1F6E0;&#xFE0F;</div>
+                <div class="role-name" style="color:var(--cyan)">IT-провайдер</div>
+                <div class="role-desc">Обеспечьте реалистичные обязательства: экономика девяток, технические ограничения, ресурсы команды. Ваши карты: Error Budget, Graceful Degradation, вендорные зависимости.</div>
+            </div>
+        </div>
+        <button class="btn btn-cyan" id="btn-role-confirm" onclick="confirmRole()" disabled>Подтвердить выбор</button>
+    </div>
+
+    <!-- SCENARIO SELECT SCREEN -->
+    <div id="screen-scenario" class="screen">
+        <h2 class="phase-title">Выберите бизнес-сценарий</h2>
+        <p class="phase-desc">Каждый сценарий имеет уникальные требования и ограничения</p>
+        <div class="scenario-grid" id="scenario-grid"></div>
+        <button class="btn btn-gold" id="btn-scenario-confirm" onclick="confirmScenario()" disabled>Начать переговоры</button>
+    </div>
+
+    <!-- MAIN GAME SCREEN -->
+    <div id="screen-game" class="screen">
+        <div class="game-topbar">
+            <div class="topbar-left">
+                <span class="topbar-title" id="topbar-title">SLA Architect</span>
+                <span class="topbar-scenario" id="topbar-scenario"></span>
+            </div>
+            <div class="topbar-center" id="phase-stepper"></div>
+            <div class="topbar-right">
+                <div class="np-display np-biz"><span>&#x1F4BC;</span> NP: <strong id="np-biz-val">10</strong></div>
+                <div class="np-display np-it"><span>&#x1F6E0;&#xFE0F;</span> NP: <strong id="np-it-val">10</strong></div>
+            </div>
+        </div>
+        <div class="mobile-tabs" id="mobile-tabs">
+            <div class="mob-tab active" onclick="showMobilePanel('left')">&#x1F4BC; Бизнес</div>
+            <div class="mob-tab" onclick="showMobilePanel('center')">&#x1F91D; Переговоры</div>
+            <div class="mob-tab" onclick="showMobilePanel('right')">&#x1F6E0;&#xFE0F; IT</div>
+        </div>
+        <div class="game-body">
+            <div class="panel-left" id="panel-left">
+                <div class="panel-header biz-color">&#x1F4BC; Бизнес-заказчик</div>
+                <div id="biz-cards-container"></div>
+            </div>
+            <div class="panel-center" id="panel-center">
+                <div id="phase-content"></div>
+            </div>
+            <div class="panel-right" id="panel-right">
+                <div class="panel-header it-color">&#x1F6E0;&#xFE0F; IT-провайдер</div>
+                <div id="it-cards-container"></div>
+            </div>
+        </div>
+        <div class="phase-footer">
+            <button class="btn btn-outline btn-sm" id="btn-phase-back" onclick="prevPhase()">&#x25C0; Назад</button>
+            <div id="phase-progress-text" style="color:var(--text-secondary);font-size:.85rem;"></div>
+            <button class="btn btn-cyan btn-sm" id="btn-phase-next" onclick="nextPhase()">Далее &#x25B6;</button>
+        </div>
+    </div>
+
+    <!-- TURN OVERLAY (hot-seat) -->
+    <div class="turn-overlay" id="turn-overlay">
+        <h2 id="turn-overlay-title"></h2>
+        <p id="turn-overlay-text"></p>
+        <button class="btn btn-gold" onclick="dismissTurnOverlay()">Готов!</button>
+    </div>
+
+    <!-- RESULTS SCREEN -->
+    <div id="screen-results" class="screen">
+        <div class="results-container" id="results-container"></div>
+    </div>
+
+<script>
+// ============================================================
+// DATA: Scenarios, Metrics, Argument Cards, Penalty Templates
+// ============================================================
+
+const SCENARIOS = [
+    {
+        id: 'banking',
+        name: 'Онлайн-банкинг',
+        icon: '\u{1F3E6}',
+        desc: 'Крупный банк, 2M+ клиентов, мобильное приложение и интернет-банк. Регуляторные требования ЦБ, PCI DSS.',
+        criticality: 'critical',
+        critLabel: 'Critical 24/7',
+        tags: ['2M+ клиентов', 'PCI DSS', 'RPO=0', 'Регуляторы'],
+        context: {
+            users: '2 000 000+',
+            revenue_per_hour: '$50 000',
+            regulatory: 'ЦБ, PCI DSS, 152-ФЗ',
+            peak_hours: '09:00-21:00'
+        },
+        serviceScope: [
+            { id: 'web', name: 'Интернет-банк (веб)', desc: 'Полный функционал для клиентов через браузер', critical: true },
+            { id: 'mobile', name: 'Мобильное приложение', desc: 'iOS/Android — переводы, платежи, счета', critical: true },
+            { id: 'api', name: 'API для партнёров', desc: 'Open Banking API, интеграции с финтехом', critical: false },
+            { id: 'atm', name: 'Сеть банкоматов', desc: 'Интеграция с процессингом карт', critical: true },
+            { id: 'reports', name: 'Отчётность и аналитика', desc: 'Внутренние дашборды, регуляторная отчётность', critical: false }
+        ],
+        serviceHours: [
+            { id: '24x7', name: '24/7/365', desc: 'Круглосуточно без исключений', recommended: true },
+            { id: 'extended', name: '24/7 с окном обслуживания', desc: 'Плановое окно: вс 02:00-06:00', recommended: false },
+            { id: 'business', name: 'Бизнес-часы', desc: 'Пн-Пт 08:00-20:00', recommended: false }
+        ],
+        idealMetrics: {
+            availability: 99.95, response_time: 200, resolution_p1: 1, resolution_p2: 4,
+            throughput: 99.5, rpo: 0, rto: 0.25, csat: 95, change_success: 99, mtbf: 720
+        },
+        metricWeights: { availability: 10, response_time: 8, resolution_p1: 9, resolution_p2: 6, throughput: 7, rpo: 10, rto: 9, csat: 5, change_success: 7, mtbf: 6 }
+    },
+    {
+        id: 'hr',
+        name: 'Внутренняя HR-система',
+        icon: '\u{1F465}',
+        desc: 'Корпоративная HR-платформа на 5000 сотрудников. Зарплатный модуль, отпуска, KPI, рекрутинг.',
+        criticality: 'medium',
+        critLabel: 'Medium Пн-Пт',
+        tags: ['5000 сотрудников', 'Бизнес-часы', 'Низкий бюджет', 'SaaS'],
+        context: {
+            users: '5 000',
+            revenue_per_hour: '$500',
+            regulatory: 'ТК РФ, 152-ФЗ (персданные)',
+            peak_hours: '09:00-18:00 Пн-Пт'
+        },
+        serviceScope: [
+            { id: 'portal', name: 'HR-портал сотрудника', desc: 'Личный кабинет, отпуска, справки', critical: true },
+            { id: 'payroll', name: 'Зарплатный модуль', desc: 'Расчёт и начисление заработной платы', critical: true },
+            { id: 'recruit', name: 'Модуль рекрутинга', desc: 'Вакансии, кандидаты, воронка найма', critical: false },
+            { id: 'kpi', name: 'Оценка KPI', desc: 'Цели, оценки, 360-градусная обратная связь', critical: false },
+            { id: 'reports', name: 'HR-аналитика', desc: 'Отчёты по текучке, ФОТ, штатное расписание', critical: false }
+        ],
+        serviceHours: [
+            { id: '24x7', name: '24/7/365', desc: 'Круглосуточно без исключений', recommended: false },
+            { id: 'extended', name: 'Расширенные часы', desc: 'Пн-Пт 07:00-22:00', recommended: false },
+            { id: 'business', name: 'Бизнес-часы', desc: 'Пн-Пт 09:00-18:00', recommended: true }
+        ],
+        idealMetrics: {
+            availability: 99.5, response_time: 2000, resolution_p1: 4, resolution_p2: 24,
+            throughput: 95, rpo: 4, rto: 4, csat: 80, change_success: 95, mtbf: 168
+        },
+        metricWeights: { availability: 6, response_time: 4, resolution_p1: 5, resolution_p2: 4, throughput: 3, rpo: 7, rto: 5, csat: 6, change_success: 5, mtbf: 3 }
+    },
+    {
+        id: 'ecommerce',
+        name: 'E-commerce платформа',
+        icon: '\u{1F6D2}',
+        desc: 'Интернет-магазин: 500K посетителей/день, сезонные пики, интеграции с платёжными шлюзами.',
+        criticality: 'high',
+        critLabel: 'High 24/7',
+        tags: ['500K/день', 'Black Friday', 'Тиерный SLA', 'Платежи'],
+        context: {
+            users: '500 000/день',
+            revenue_per_hour: '$15 000',
+            regulatory: 'PCI DSS, 54-ФЗ (онлайн-кассы)',
+            peak_hours: 'Black Friday, Новый год, 8 марта'
+        },
+        serviceScope: [
+            { id: 'storefront', name: 'Витрина и каталог', desc: 'Страницы товаров, поиск, фильтры', critical: true },
+            { id: 'cart', name: 'Корзина и чекаут', desc: 'Оформление заказа, применение промокодов', critical: true },
+            { id: 'payment', name: 'Платёжный шлюз', desc: 'Интеграция с банками-эквайерами', critical: true },
+            { id: 'logistics', name: 'Логистика и отслеживание', desc: 'Статусы доставки, трекинг', critical: false },
+            { id: 'crm', name: 'CRM и маркетинг', desc: 'Email-рассылки, программа лояльности', critical: false }
+        ],
+        serviceHours: [
+            { id: '24x7', name: '24/7/365', desc: 'Круглосуточно без исключений', recommended: true },
+            { id: 'extended', name: '24/7 + усиленный пик', desc: 'Доп. команда в пиковые периоды', recommended: false },
+            { id: 'business', name: 'Бизнес-часы', desc: 'Пн-Пт 08:00-20:00', recommended: false }
+        ],
+        idealMetrics: {
+            availability: 99.9, response_time: 500, resolution_p1: 2, resolution_p2: 8,
+            throughput: 99, rpo: 1, rto: 1, csat: 90, change_success: 98, mtbf: 336
+        },
+        metricWeights: { availability: 9, response_time: 9, resolution_p1: 8, resolution_p2: 5, throughput: 8, rpo: 7, rto: 8, csat: 7, change_success: 6, mtbf: 5 }
+    },
+    {
+        id: 'email',
+        name: 'Облачная почта',
+        icon: '\u{2709}\u{FE0F}',
+        desc: 'Корпоративная почтовая система: 50K пользователей, зависимость от облачного вендора.',
+        criticality: 'high',
+        critLabel: 'High 24/7',
+        tags: ['50K пользователей', 'Вендор-зависимость', 'UC', 'Compliance'],
+        context: {
+            users: '50 000',
+            revenue_per_hour: '$5 000',
+            regulatory: '152-ФЗ, внутренний compliance',
+            peak_hours: '08:00-19:00 Пн-Пт'
+        },
+        serviceScope: [
+            { id: 'mailbox', name: 'Почтовые ящики', desc: 'Отправка/получение, 50GB на ящик', critical: true },
+            { id: 'calendar', name: 'Календарь и планирование', desc: 'Встречи, переговорные, напоминания', critical: true },
+            { id: 'collab', name: 'Совместная работа', desc: 'Общие документы, Teams/Chat', critical: false },
+            { id: 'archive', name: 'Архивирование', desc: 'Долгосрочное хранение, eDiscovery', critical: false },
+            { id: 'security', name: 'Защита почты', desc: 'Антиспам, антифишинг, DLP', critical: true }
+        ],
+        serviceHours: [
+            { id: '24x7', name: '24/7/365', desc: 'Круглосуточно без исключений', recommended: true },
+            { id: 'extended', name: 'Расширенные часы', desc: 'Пн-Вс 06:00-00:00', recommended: false },
+            { id: 'business', name: 'Бизнес-часы', desc: 'Пн-Пт 08:00-20:00', recommended: false }
+        ],
+        idealMetrics: {
+            availability: 99.9, response_time: 1000, resolution_p1: 2, resolution_p2: 8,
+            throughput: 98, rpo: 0.5, rto: 2, csat: 85, change_success: 97, mtbf: 480
+        },
+        metricWeights: { availability: 9, response_time: 5, resolution_p1: 7, resolution_p2: 5, throughput: 6, rpo: 8, rto: 7, csat: 6, change_success: 5, mtbf: 5 }
+    }
+];
+
+const METRICS_CATALOG = [
+    {
+        id: 'availability', name: 'Availability (%)', category: 'sli',
+        desc: 'Процент времени доступности сервиса в рамках согласованных часов обслуживания.',
+        unit: '%', min: 95, max: 99.999, step: 0.01, defaultBiz: 99.99, defaultIT: 99.5,
+        costCurve: 'exponential',
+        nines: [
+            { val: 99, downtime: '3д 15ч 36м/год', cost: 1 },
+            { val: 99.5, downtime: '1д 19ч 48м/год', cost: 1.5 },
+            { val: 99.9, downtime: '8ч 45м/год', cost: 3 },
+            { val: 99.95, downtime: '4ч 22м/год', cost: 5 },
+            { val: 99.99, downtime: '52м 33с/год', cost: 10 },
+            { val: 99.999, downtime: '5м 15с/год', cost: 50 }
+        ]
+    },
+    {
+        id: 'response_time', name: 'Response Time (мс)', category: 'sli',
+        desc: 'Среднее время отклика сервиса на запрос пользователя (P95).',
+        unit: 'мс', min: 50, max: 5000, step: 50, defaultBiz: 200, defaultIT: 1500,
+        costCurve: 'linear', invertSlider: true
+    },
+    {
+        id: 'resolution_p1', name: 'Resolution Time P1 (ч)', category: 'slo',
+        desc: 'Максимальное время разрешения инцидентов приоритета P1 (Critical).',
+        unit: 'ч', min: 0.25, max: 24, step: 0.25, defaultBiz: 1, defaultIT: 4,
+        costCurve: 'linear', invertSlider: true
+    },
+    {
+        id: 'resolution_p2', name: 'Resolution Time P2 (ч)', category: 'slo',
+        desc: 'Максимальное время разрешения инцидентов приоритета P2 (High).',
+        unit: 'ч', min: 1, max: 72, step: 1, defaultBiz: 4, defaultIT: 24,
+        costCurve: 'linear', invertSlider: true
+    },
+    {
+        id: 'throughput', name: 'Throughput (%)', category: 'sli',
+        desc: 'Процент успешно обработанных транзакций без ошибок.',
+        unit: '%', min: 90, max: 99.99, step: 0.1, defaultBiz: 99.9, defaultIT: 98,
+        costCurve: 'exponential'
+    },
+    {
+        id: 'rpo', name: 'RPO (ч)', category: 'slo',
+        desc: 'Recovery Point Objective — максимально допустимый объём потерянных данных (в часах).',
+        unit: 'ч', min: 0, max: 24, step: 0.25, defaultBiz: 0, defaultIT: 4,
+        costCurve: 'exponential', invertSlider: true
+    },
+    {
+        id: 'rto', name: 'RTO (ч)', category: 'slo',
+        desc: 'Recovery Time Objective — максимальное время восстановления сервиса после сбоя.',
+        unit: 'ч', min: 0.25, max: 24, step: 0.25, defaultBiz: 0.5, defaultIT: 4,
+        costCurve: 'linear', invertSlider: true
+    },
+    {
+        id: 'csat', name: 'CSAT (%)', category: 'sla',
+        desc: 'Customer Satisfaction Score — целевой уровень удовлетворённости пользователей.',
+        unit: '%', min: 50, max: 100, step: 1, defaultBiz: 95, defaultIT: 80,
+        costCurve: 'linear'
+    },
+    {
+        id: 'change_success', name: 'Change Success Rate (%)', category: 'sla',
+        desc: 'Процент успешных изменений без откатов и инцидентов.',
+        unit: '%', min: 80, max: 100, step: 1, defaultBiz: 99, defaultIT: 93,
+        costCurve: 'linear'
+    },
+    {
+        id: 'mtbf', name: 'MTBF (ч)', category: 'sla',
+        desc: 'Mean Time Between Failures — среднее время между сбоями.',
+        unit: 'ч', min: 24, max: 2160, step: 24, defaultBiz: 720, defaultIT: 168,
+        costCurve: 'linear'
+    }
+];
+
+const BIZ_CARDS = [
+    { id: 'regulatory', name: 'Регуляторные требования', desc: 'Ссылка на требования регуляторов (ЦБ, PCI DSS, GDPR). Метрика обязана быть не ниже стандарта.', cost: 2, power: 0.15, icon: '\u{1F4DC}' },
+    { id: 'financial', name: 'Финансовые потери', desc: 'Каждый час простоя стоит $X. Расчёт убытков убеждает IT инвестировать в надёжность.', cost: 2, power: 0.12, icon: '\u{1F4B0}' },
+    { id: 'competitive', name: 'Конкурентное давление', desc: 'Конкуренты предлагают лучший SLA. Потеря клиентов неизбежна при слабых показателях.', cost: 1, power: 0.08, icon: '\u{1F3C6}' },
+    { id: 'user_expect', name: 'Ожидания пользователей', desc: 'Исследования UX показывают: время отклика >Xms ведёт к оттоку пользователей.', cost: 1, power: 0.08, icon: '\u{1F464}' },
+    { id: 'sla_history', name: 'История нарушений SLA', desc: 'За прошлый год было N нарушений SLA. Необходимо ужесточить обязательства.', cost: 2, power: 0.12, icon: '\u{1F4CA}' },
+    { id: 'seasonal', name: 'Сезонные пики', desc: 'В пиковые периоды нагрузка растёт в 5x. SLA должен учитывать экстремальные сценарии.', cost: 2, power: 0.10, icon: '\u{1F4C8}' }
+];
+
+const IT_CARDS = [
+    { id: 'nines_economy', name: 'Экономика девяток', desc: 'Каждая дополнительная "девятка" стоит в 10x дороже. Показать кривую стоимости.', cost: 2, power: 0.15, icon: '\u{1F4B8}' },
+    { id: 'tech_limits', name: 'Технические ограничения', desc: 'Текущая архитектура имеет физические пределы. Нужна полная перестройка для лучших показателей.', cost: 2, power: 0.12, icon: '\u{2699}\u{FE0F}' },
+    { id: 'team_resources', name: 'Ресурсы команды', desc: 'Команда из N инженеров не может обеспечить 24/7 покрытие без расширения штата.', cost: 1, power: 0.08, icon: '\u{1F468}\u{200D}\u{1F4BB}' },
+    { id: 'vendor_dep', name: 'Зависимость от вендоров', desc: 'SLA облачного провайдера = 99.9%. Мы не можем обещать больше, чем даёт вендор.', cost: 2, power: 0.12, icon: '\u{1F517}' },
+    { id: 'error_budget', name: 'Error Budget подход', desc: 'Вместо жёсткого SLA — Error Budget. Баланс между надёжностью и скоростью релизов.', cost: 2, power: 0.10, icon: '\u{1F9EE}' },
+    { id: 'graceful', name: 'Graceful Degradation', desc: 'Вместо полного отказа — деградация: read-only, очередь, кэш. Пользователи получают базовый сервис.', cost: 1, power: 0.08, icon: '\u{1F6E1}\u{FE0F}' }
+];
+
+const PENALTY_TEMPLATES = [
+    { id: 'credit_tiered', name: 'Тиерные кредиты', desc: 'SLA < target: 5% кредит; <target-1%: 10%; <target-2%: 25%.', bizScore: 8, itScore: 6 },
+    { id: 'credit_linear', name: 'Линейные кредиты', desc: 'За каждый 0.1% ниже SLA — 2% кредит от месячной оплаты.', bizScore: 7, itScore: 7 },
+    { id: 'penalty_fixed', name: 'Фиксированный штраф', desc: 'За каждое нарушение SLA — фиксированная сумма штрафа.', bizScore: 9, itScore: 4 },
+    { id: 'penalty_cap', name: 'Штрафы с потолком', desc: 'Штрафы не превышают X% от месячного платежа.', bizScore: 5, itScore: 9 },
+    { id: 'termination', name: 'Право на расторжение', desc: 'При N нарушениях за квартал — право досрочного расторжения.', bizScore: 10, itScore: 3 }
+];
+
+const BONUS_TEMPLATES = [
+    { id: 'bonus_exceed', name: 'Бонус за превышение', desc: 'SLA > target+0.5%: бонус 3% от платежа.', bizScore: 5, itScore: 9 },
+    { id: 'bonus_innovate', name: 'Бонус за инновации', desc: 'Бонус за внедрение улучшений, снижающих инциденты.', bizScore: 7, itScore: 8 },
+    { id: 'bonus_csat', name: 'Бонус за CSAT', desc: 'При CSAT > target: дополнительное вознаграждение.', bizScore: 8, itScore: 6 },
+    { id: 'no_bonus', name: 'Без бонусов', desc: 'SLA — базовое обязательство, бонусы не предусмотрены.', bizScore: 8, itScore: 4 }
+];
+
+const PHASE_NAMES = ['Сервис', 'Метрики', 'Пороги', 'Штрафы', 'Обзор'];
+
+const EXPERT_FEEDBACK = {
+    balance: {
+        high: 'Отличный баланс между требованиями бизнеса и возможностями IT. SLA реалистичен и достижим.',
+        mid: 'Приемлемый баланс, но некоторые метрики смещены в одну сторону. Рекомендуется пересмотреть крайние значения.',
+        low: 'Значительный дисбаланс: одна сторона доминирует. Такой SLA приведёт к конфликтам при исполнении.'
+    },
+    coverage: {
+        high: 'Все критичные для сценария метрики включены. Покрытие рисков максимальное.',
+        mid: 'Основные метрики покрыты, но упущены некоторые важные показатели для данного сценария.',
+        low: 'Критические метрики отсутствуют. SLA не обеспечивает минимально необходимое покрытие.'
+    },
+    realism: {
+        high: 'Целевые значения реалистичны и достижимы при текущем уровне технологий и бюджете.',
+        mid: 'Большинство целей достижимы, но несколько метрик находятся на грани возможного.',
+        low: 'Ряд целевых значений нереалистичен. IT не сможет их выполнить, что подорвёт доверие.'
+    },
+    bizValue: {
+        high: 'Интересы бизнеса хорошо защищены. SLA обеспечивает необходимый уровень сервиса.',
+        mid: 'Базовые интересы бизнеса учтены, но есть пробелы в защите от критических сценариев.',
+        low: 'Бизнес-интересы слабо защищены. Высокий риск финансовых потерь при инцидентах.'
+    },
+    itFeasibility: {
+        high: 'IT-команда сможет выполнить обязательства без экстремальной нагрузки.',
+        mid: 'Выполнимо, но потребует значительных усилий и возможно расширения ресурсов.',
+        low: 'Обязательства превышают возможности IT. Высокий риск систематических нарушений SLA.'
+    },
+    itilCompliance: {
+        high: 'SLA полностью соответствует практикам ITIL 4 SLM: watermelon-эффект исключён, метрики измеримы.',
+        mid: 'В целом соответствует ITIL 4, но некоторые метрики не привязаны к бизнес-результатам.',
+        low: 'Слабое соответствие ITIL 4: не хватает привязки к ценности, нет Error Budget подхода.'
+    }
+};
+
+// ============================================================
+// GAME STATE
+// ============================================================
+
+let GS = {
+    mode: null,           // 'solo' | 'hotseat'
+    role: null,           // 'business' | 'it' (primary role in solo; first player in hotseat)
+    scenarioId: null,
+    scenario: null,
+    currentPhase: 0,      // 0-4
+    currentTurn: 'business', // whose turn in hotseat
+
+    // Phase 1
+    selectedScope: [],
+    selectedHours: null,
+    exclusions: '',
+
+    // Phase 2
+    selectedMetrics: [],
+
+    // Phase 3
+    metricValues: {},     // { metricId: { bizValue, itValue, agreedValue, status, rounds, cardsPlayed: [] } }
+    currentNegoMetric: null,
+    negoRound: 0,
+
+    // NP
+    npBiz: 10,
+    npIT: 10,
+
+    // Cards
+    bizCardsUsed: [],
+    itCardsUsed: [],
+
+    // Phase 4
+    selectedPenalty: null,
+    selectedBonus: null,
+    gracePeriod: 1,
+    reviewFrequency: 'monthly',
+
+    // Phase 5 / Results
+    scores: { balance: 0, coverage: 0, realism: 0, bizValue: 0, itFeasibility: 0, itilCompliance: 0 },
+    totalScore: 0,
+    verdict: ''
+};
+
+// ============================================================
+// UTILITY FUNCTIONS
+// ============================================================
+
+function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+}
+
+function clamp(val, min, max) { return Math.max(min, Math.min(max, val)); }
+
+function lerp(a, b, t) { return a + (b - a) * t; }
+
+function formatNum(n, decimals = 2) {
+    return Number(n).toFixed(decimals).replace(/\.?0+$/, '') || '0';
+}
+
+// ============================================================
+// SCREEN: MENU
+// ============================================================
+
+function selectMode(mode) {
+    if (mode === 'online') return;
+    GS.mode = mode;
+    if (mode === 'solo') {
+        document.getElementById('role-select-desc').textContent = 'В соло-режиме вы управляете обеими ролями. Выберите основную роль для первого хода.';
+    } else {
+        document.getElementById('role-select-desc').textContent = 'Игрок 1 выбирает роль. Игрок 2 получит вторую роль.';
+    }
+    showScreen('screen-role-select');
+}
+
+// ============================================================
+// SCREEN: ROLE SELECT
+// ============================================================
+
+function selectRole(role) {
+    GS.role = role;
+    document.getElementById('role-business').classList.toggle('selected', role === 'business');
+    document.getElementById('role-it').classList.toggle('selected', role === 'it');
+    document.getElementById('btn-role-confirm').disabled = false;
+}
+
+function confirmRole() {
+    if (!GS.role) return;
+    renderScenarioScreen();
+    showScreen('screen-scenario');
+}
+
+// ============================================================
+// SCREEN: SCENARIO SELECT
+// ============================================================
+
+function renderScenarioScreen() {
+    const grid = document.getElementById('scenario-grid');
+    grid.innerHTML = SCENARIOS.map(s => `
+        <div class="scenario-card" onclick="selectScenario('${s.id}')" id="sc-${s.id}">
+            <span class="scenario-badge badge-${s.criticality === 'critical' ? 'critical' : s.criticality === 'high' ? 'high' : 'medium'}">${s.critLabel}</span>
+            <div class="scenario-icon">${s.icon}</div>
+            <div class="scenario-name">${s.name}</div>
+            <div class="scenario-desc">${s.desc}</div>
+            <div class="scenario-tags">${s.tags.map(t => `<span class="stag">${t}</span>`).join('')}</div>
+        </div>
+    `).join('');
+}
+
+function selectScenario(id) {
+    GS.scenarioId = id;
+    GS.scenario = SCENARIOS.find(s => s.id === id);
+    document.querySelectorAll('.scenario-card').forEach(c => c.classList.remove('selected'));
+    document.getElementById('sc-' + id).classList.add('selected');
+    document.getElementById('btn-scenario-confirm').disabled = false;
+}
+
+function confirmScenario() {
+    if (!GS.scenario) return;
+    initGame();
+    showScreen('screen-game');
+    renderPhase();
+}
+
+// ============================================================
+// GAME INIT
+// ============================================================
+
+function initGame() {
+    GS.currentPhase = 0;
+    GS.currentTurn = 'business';
+    GS.selectedScope = [];
+    GS.selectedHours = null;
+    GS.exclusions = '';
+    GS.selectedMetrics = [];
+    GS.metricValues = {};
+    GS.currentNegoMetric = null;
+    GS.negoRound = 0;
+    GS.npBiz = 10;
+    GS.npIT = 10;
+    GS.bizCardsUsed = [];
+    GS.itCardsUsed = [];
+    GS.selectedPenalty = null;
+    GS.selectedBonus = null;
+    GS.gracePeriod = 1;
+    GS.reviewFrequency = 'monthly';
+    GS.scores = { balance: 0, coverage: 0, realism: 0, bizValue: 0, itFeasibility: 0, itilCompliance: 0 };
+    GS.totalScore = 0;
+    GS.verdict = '';
+
+    document.getElementById('topbar-scenario').textContent = GS.scenario.name;
+    updateNPDisplay();
+    renderPhaseStepper();
+    renderSideCards();
+}
+
+function updateNPDisplay() {
+    document.getElementById('np-biz-val').textContent = GS.npBiz;
+    document.getElementById('np-it-val').textContent = GS.npIT;
+}
+
+function renderPhaseStepper() {
+    const stepper = document.getElementById('phase-stepper');
+    stepper.innerHTML = PHASE_NAMES.map((name, i) => {
+        let cls = '';
+        if (i < GS.currentPhase) cls = 'done';
+        else if (i === GS.currentPhase) cls = 'active';
+        return `<div class="phase-step ${cls}"><span class="step-num">${i < GS.currentPhase ? '\u2713' : (i + 1)}</span><span>${name}</span></div>`;
+    }).join('');
+}
+
+function renderSideCards() {
+    const bizC = document.getElementById('biz-cards-container');
+    bizC.innerHTML = '<div style="font-size:.78rem;color:var(--text-secondary);margin-bottom:10px;">Карты аргументов:</div>' +
+        BIZ_CARDS.map(c => `
+            <div class="arg-card ${GS.bizCardsUsed.includes(c.id) ? 'used' : ''}" id="biz-card-${c.id}" onclick="selectArgCard('business','${c.id}')">
+                <div class="arg-card-name">${c.icon} ${c.name}</div>
+                <div class="arg-card-desc">${c.desc}</div>
+                <div class="arg-card-cost biz">NP: ${c.cost} | Сила: +${Math.round(c.power * 100)}%</div>
+            </div>
+        `).join('');
+
+    const itC = document.getElementById('it-cards-container');
+    itC.innerHTML = '<div style="font-size:.78rem;color:var(--text-secondary);margin-bottom:10px;">Карты аргументов:</div>' +
+        IT_CARDS.map(c => `
+            <div class="arg-card it-card ${GS.itCardsUsed.includes(c.id) ? 'used' : ''}" id="it-card-${c.id}" onclick="selectArgCard('it','${c.id}')">
+                <div class="arg-card-name">${c.icon} ${c.name}</div>
+                <div class="arg-card-desc">${c.desc}</div>
+                <div class="arg-card-cost it">NP: ${c.cost} | Сила: +${Math.round(c.power * 100)}%</div>
+            </div>
+        `).join('');
+}
+
+let selectedBizCard = null;
+let selectedITCard = null;
+
+function selectArgCard(side, cardId) {
+    if (GS.currentPhase !== 2) return; // only in Phase 3 (index 2)
+    const cards = side === 'business' ? BIZ_CARDS : IT_CARDS;
+    const used = side === 'business' ? GS.bizCardsUsed : GS.itCardsUsed;
+    if (used.includes(cardId)) return;
+
+    if (side === 'business') {
+        if (selectedBizCard === cardId) { selectedBizCard = null; } else { selectedBizCard = cardId; }
+        document.querySelectorAll('#biz-cards-container .arg-card').forEach(el => el.classList.remove('selected'));
+        if (selectedBizCard) document.getElementById('biz-card-' + selectedBizCard).classList.add('selected');
+    } else {
+        if (selectedITCard === cardId) { selectedITCard = null; } else { selectedITCard = cardId; }
+        document.querySelectorAll('#it-cards-container .arg-card').forEach(el => el.classList.remove('selected'));
+        if (selectedITCard) document.getElementById('it-card-' + selectedITCard).classList.add('selected');
+    }
+}
+
+// ============================================================
+// PHASE NAVIGATION
+// ============================================================
+
+function renderPhase() {
+    renderPhaseStepper();
+    const content = document.getElementById('phase-content');
+    document.getElementById('btn-phase-back').style.visibility = GS.currentPhase === 0 ? 'hidden' : 'visible';
+    document.getElementById('btn-phase-next').textContent = GS.currentPhase === 4 ? 'Завершить \u25B6' : 'Далее \u25B6';
+
+    switch (GS.currentPhase) {
+        case 0: renderPhase1(content); break;
+        case 1: renderPhase2(content); break;
+        case 2: renderPhase3(content); break;
+        case 3: renderPhase4(content); break;
+        case 4: renderPhase5(content); break;
+    }
+    updatePhaseProgress();
+}
+
+function nextPhase() {
+    if (GS.currentPhase === 4) {
+        finishGame();
+        return;
+    }
+    if (!validateCurrentPhase()) return;
+    GS.currentPhase++;
+    renderPhase();
+    document.getElementById('panel-center').scrollTop = 0;
+}
+
+function prevPhase() {
+    if (GS.currentPhase > 0) {
+        GS.currentPhase--;
+        renderPhase();
+        document.getElementById('panel-center').scrollTop = 0;
+    }
+}
+
+function validateCurrentPhase() {
+    switch (GS.currentPhase) {
+        case 0:
+            if (GS.selectedScope.length === 0) { alert('Выберите хотя бы один элемент scope сервиса.'); return false; }
+            if (!GS.selectedHours) { alert('Выберите часы обслуживания.'); return false; }
+            return true;
+        case 1:
+            if (GS.selectedMetrics.length < 3) { alert('Выберите минимум 3 метрики.'); return false; }
+            return true;
+        case 2:
+            const pending = GS.selectedMetrics.filter(mId => !GS.metricValues[mId] || GS.metricValues[mId].status !== 'agreed');
+            if (pending.length > 0) { alert('Согласуйте все метрики перед переходом.'); return false; }
+            return true;
+        case 3:
+            if (!GS.selectedPenalty) { alert('Выберите модель штрафов.'); return false; }
+            if (!GS.selectedBonus) { alert('Выберите модель бонусов.'); return false; }
+            return true;
+        case 4:
+            return true;
+    }
+    return true;
+}
+
+function updatePhaseProgress() {
+    const txt = document.getElementById('phase-progress-text');
+    switch (GS.currentPhase) {
+        case 0:
+            txt.textContent = `Scope: ${GS.selectedScope.length} | Часы: ${GS.selectedHours || '-'}`;
+            break;
+        case 1:
+            txt.textContent = `Метрик выбрано: ${GS.selectedMetrics.length}`;
+            break;
+        case 2:
+            const agreed = GS.selectedMetrics.filter(mId => GS.metricValues[mId] && GS.metricValues[mId].status === 'agreed').length;
+            txt.textContent = `Согласовано: ${agreed}/${GS.selectedMetrics.length}`;
+            break;
+        case 3:
+            txt.textContent = `Штрафы: ${GS.selectedPenalty ? '\u2713' : '-'} | Бонусы: ${GS.selectedBonus ? '\u2713' : '-'}`;
+            break;
+        case 4:
+            txt.textContent = 'Обзор SLA-документа';
+            break;
+    }
+}
+
+// Mobile panel switching
+function showMobilePanel(panel) {
+    const left = document.getElementById('panel-left');
+    const center = document.getElementById('panel-center');
+    const right = document.getElementById('panel-right');
+    left.style.display = panel === 'left' ? 'block' : 'none';
+    center.style.display = panel === 'center' ? 'block' : 'none';
+    right.style.display = panel === 'right' ? 'block' : 'none';
+    document.querySelectorAll('.mob-tab').forEach((t, i) => {
+        t.classList.toggle('active', (i === 0 && panel === 'left') || (i === 1 && panel === 'center') || (i === 2 && panel === 'right'));
+    });
+}
+
+// Turn overlay for hot-seat
+function showTurnOverlay(role) {
+    if (GS.mode !== 'hotseat') return;
+    const overlay = document.getElementById('turn-overlay');
+    const title = document.getElementById('turn-overlay-title');
+    const text = document.getElementById('turn-overlay-text');
+    if (role === 'business') {
+        title.innerHTML = '\u{1F4BC} Ход Бизнес-заказчика';
+        title.style.color = 'var(--gold)';
+        text.textContent = 'IT-провайдер, отвернитесь! Бизнес-заказчик делает свой выбор.';
+    } else {
+        title.innerHTML = '\u{1F6E0}\u{FE0F} Ход IT-провайдера';
+        title.style.color = 'var(--cyan)';
+        text.textContent = 'Бизнес-заказчик, отвернитесь! IT-провайдер делает свой выбор.';
+    }
+    overlay.classList.add('active');
+}
+
+function dismissTurnOverlay() {
+    document.getElementById('turn-overlay').classList.remove('active');
+}
+
+// ============================================================
+// PHASE 1: Service Definition
+// ============================================================
+
+function renderPhase1(el) {
+    const s = GS.scenario;
+    el.innerHTML = `
+        <div class="phase-content fade-in">
+            <div class="phase-title">Фаза 1: Определение сервиса</div>
+            <div class="phase-desc">Согласуйте scope сервиса, часы обслуживания и исключения.</div>
+
+            <div class="glass" style="margin-bottom:20px;">
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+                    <span style="font-size:2rem;">${s.icon}</span>
+                    <div>
+                        <div style="font-family:'Russo One',sans-serif;font-size:1.1rem;">${s.name}</div>
+                        <div style="color:var(--text-secondary);font-size:.85rem;">${s.desc}</div>
+                    </div>
+                </div>
+                <div style="display:flex;flex-wrap:wrap;gap:16px;font-size:.82rem;color:var(--text-secondary);">
+                    <div><strong style="color:var(--text-primary)">Пользователи:</strong> ${s.context.users}</div>
+                    <div><strong style="color:var(--text-primary)">Потери/час:</strong> ${s.context.revenue_per_hour}</div>
+                    <div><strong style="color:var(--text-primary)">Регуляторы:</strong> ${s.context.regulatory}</div>
+                </div>
+            </div>
+
+            <div class="section-divider">SCOPE СЕРВИСА</div>
+            <p style="color:var(--text-secondary);font-size:.85rem;margin-bottom:12px;">Выберите компоненты, входящие в SLA:</p>
+            <div id="scope-items">
+                ${s.serviceScope.map(item => `
+                    <div class="scope-item ${GS.selectedScope.includes(item.id) ? 'checked' : ''}" onclick="toggleScope('${item.id}')">
+                        <div class="scope-check">${GS.selectedScope.includes(item.id) ? '\u2713' : ''}</div>
+                        <div class="scope-text">
+                            <div class="scope-text-title">${item.name} ${item.critical ? '<span class="priority-badge pri-critical">Critical</span>' : ''}</div>
+                            <div class="scope-text-desc">${item.desc}</div>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+            ${GS.mode === 'solo' ? `<div style="margin-top:8px;padding:10px;background:rgba(0,212,255,0.08);border-radius:8px;font-size:.8rem;color:var(--cyan);">
+                \u{1F4A1} <strong>AI-подсказка:</strong> Рекомендуется включить все компоненты с меткой Critical. Некритичные можно обсудить.
+            </div>` : ''}
+
+            <div class="section-divider">ЧАСЫ ОБСЛУЖИВАНИЯ</div>
+            <div class="hours-selector" id="hours-selector">
+                ${s.serviceHours.map(h => `
+                    <div class="hours-opt ${GS.selectedHours === h.id ? 'selected' : ''}" onclick="selectHours('${h.id}')">
+                        <div class="hours-opt-title">${h.name} ${h.recommended ? '\u2B50' : ''}</div>
+                        <div class="hours-opt-desc">${h.desc}</div>
+                    </div>
+                `).join('')}
+            </div>
+
+            <div class="section-divider">ИСКЛЮЧЕНИЯ</div>
+            <p style="color:var(--text-secondary);font-size:.85rem;margin-bottom:8px;">Что не входит в SLA (форс-мажор, плановое обслуживание и т.д.):</p>
+            <textarea id="exclusions-text" rows="3"
+                style="width:100%;background:var(--bg-card);border:1px solid var(--border);border-radius:8px;color:var(--text-primary);padding:10px;font-family:'Exo 2',sans-serif;font-size:.85rem;resize:vertical;"
+                placeholder="Например: плановое обслуживание (с уведомлением за 48ч), DDoS-атаки, форс-мажор..."
+                oninput="GS.exclusions=this.value">${GS.exclusions}</textarea>
+
+            <div class="progress-bar" style="margin-top:20px;">
+                <div class="progress-fill" style="width:${getPhase1Progress()}%"></div>
+            </div>
+            <div style="font-size:.78rem;color:var(--text-secondary);text-align:center;">Прогресс фазы: ${getPhase1Progress()}%</div>
+        </div>
+    `;
+}
+
+function toggleScope(itemId) {
+    const idx = GS.selectedScope.indexOf(itemId);
+    if (idx >= 0) GS.selectedScope.splice(idx, 1);
+    else GS.selectedScope.push(itemId);
+    renderPhase1(document.getElementById('phase-content'));
+    updatePhaseProgress();
+}
+
+function selectHours(hoursId) {
+    GS.selectedHours = hoursId;
+    renderPhase1(document.getElementById('phase-content'));
+    updatePhaseProgress();
+}
+
+function getPhase1Progress() {
+    let p = 0;
+    if (GS.selectedScope.length > 0) p += 50;
+    if (GS.selectedHours) p += 40;
+    if (GS.exclusions.trim().length > 0) p += 10;
+    return Math.min(100, p);
+}
+
+// ============================================================
+// PHASE 2: Metrics Selection (SLI → SLO → SLA)
+// ============================================================
+
+function renderPhase2(el) {
+    const s = GS.scenario;
+    const catLabels = { sli: 'SLI (Service Level Indicators)', slo: 'SLO (Service Level Objectives)', sla: 'SLA (Service Level Agreements)' };
+    const categories = ['sli', 'slo', 'sla'];
+
+    let html = `
+        <div class="phase-content fade-in">
+            <div class="phase-title">Фаза 2: Выбор метрик</div>
+            <div class="phase-desc">Выберите метрики для SLA. Рекомендуется минимум 3-5 метрик, включая критичные для сценария.</div>
+    `;
+
+    for (const cat of categories) {
+        const metrics = METRICS_CATALOG.filter(m => m.category === cat);
+        html += `<div class="section-divider">${catLabels[cat]}</div>`;
+        for (const m of metrics) {
+            const weight = s.metricWeights[m.id] || 0;
+            const isSelected = GS.selectedMetrics.includes(m.id);
+            const isCritical = weight >= 8;
+            html += `
+                <div class="metric-item ${isSelected ? 'selected-metric' : ''}" onclick="toggleMetric('${m.id}')" style="cursor:pointer;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;">
+                        <div class="metric-name">${isSelected ? '\u2705' : '\u2B1C'} ${m.name}</div>
+                        <div>
+                            ${isCritical ? '<span class="priority-badge pri-critical">Критична</span>' : weight >= 6 ? '<span class="priority-badge pri-high">Важна</span>' : '<span class="priority-badge pri-medium">Опционально</span>'}
+                        </div>
+                    </div>
+                    <div class="metric-desc">${m.desc}</div>
+                    <div class="metric-tags">
+                        <span class="stag">Вес: ${weight}/10</span>
+                        <span class="stag">${m.unit}</span>
+                        <span class="stag">Диапазон: ${m.min}–${m.max}</span>
+                    </div>
+                </div>
+            `;
+        }
+    }
+
+    if (GS.mode === 'solo') {
+        const recommended = METRICS_CATALOG.filter(m => (s.metricWeights[m.id] || 0) >= 7).map(m => m.name).join(', ');
+        html += `<div style="margin-top:12px;padding:10px;background:rgba(0,212,255,0.08);border-radius:8px;font-size:.8rem;color:var(--cyan);">
+            \u{1F4A1} <strong>AI-подсказка:</strong> Для этого сценария рекомендуются: ${recommended}
+        </div>`;
+    }
+
+    html += `
+            <div class="progress-bar" style="margin-top:20px;">
+                <div class="progress-fill" style="width:${Math.min(100, GS.selectedMetrics.length * 20)}%"></div>
+            </div>
+            <div style="font-size:.78rem;color:var(--text-secondary);text-align:center;">Выбрано метрик: ${GS.selectedMetrics.length} (мин. 3)</div>
+        </div>
+    `;
+    el.innerHTML = html;
+}
+
+function toggleMetric(metricId) {
+    const idx = GS.selectedMetrics.indexOf(metricId);
+    if (idx >= 0) GS.selectedMetrics.splice(idx, 1);
+    else GS.selectedMetrics.push(metricId);
+    renderPhase2(document.getElementById('phase-content'));
+    updatePhaseProgress();
+}
+
+// ============================================================
+// PHASE 3: Thresholds + Negotiations
+// ============================================================
+
+function renderPhase3(el) {
+    const s = GS.scenario;
+    // Initialize metric values if not done
+    for (const mId of GS.selectedMetrics) {
+        if (!GS.metricValues[mId]) {
+            const m = METRICS_CATALOG.find(x => x.id === mId);
+            GS.metricValues[mId] = {
+                bizValue: m.invertSlider ? m.defaultBiz : m.defaultBiz,
+                itValue: m.invertSlider ? m.defaultIT : m.defaultIT,
+                agreedValue: null,
+                status: 'pending',
+                rounds: 0,
+                cardsPlayed: []
+            };
+        }
+    }
+
+    const agreed = GS.selectedMetrics.filter(mId => GS.metricValues[mId].status === 'agreed').length;
+
+    let html = `
+        <div class="phase-content fade-in">
+            <div class="phase-title">Фаза 3: Пороговые значения</div>
+            <div class="phase-desc">Бизнес и IT устанавливают свои предложения. Переговоры по каждой метрике.</div>
+
+            <div style="display:flex;gap:16px;margin-bottom:20px;flex-wrap:wrap;">
+                <div class="error-budget-box" style="flex:1;min-width:200px;">
+                    <div class="eb-label">Согласовано</div>
+                    <div class="eb-value">${agreed}/${GS.selectedMetrics.length}</div>
+                </div>
+                <div class="error-budget-box" style="flex:1;min-width:200px;">
+                    <div class="eb-label">NP Бизнес</div>
+                    <div class="eb-value" style="color:var(--gold);">${GS.npBiz}</div>
+                </div>
+                <div class="error-budget-box" style="flex:1;min-width:200px;">
+                    <div class="eb-label">NP IT</div>
+                    <div class="eb-value">${GS.npIT}</div>
+                </div>
+            </div>
+    `;
+
+    for (const mId of GS.selectedMetrics) {
+        const m = METRICS_CATALOG.find(x => x.id === mId);
+        const mv = GS.metricValues[mId];
+        const statusClass = mv.status === 'agreed' ? 'status-agreed' : mv.status === 'negotiating' ? 'status-negotiating' : 'status-pending';
+        const statusLabel = mv.status === 'agreed' ? '\u2705 Согласовано: ' + formatMetricVal(m, mv.agreedValue) : mv.status === 'negotiating' ? '\u{1F91D} В переговорах (раунд ' + mv.rounds + ')' : '\u23F3 Ожидает';
+
+        html += `
+            <div class="nego-metric" id="nego-${mId}">
+                <div class="nego-header">
+                    <div class="nego-title">${m.name}</div>
+                    <div class="nego-status ${statusClass}">${statusLabel}</div>
+                </div>
+        `;
+
+        if (mv.status === 'agreed') {
+            html += `<div style="text-align:center;padding:10px;color:var(--accent-green);font-weight:600;">
+                Согласованное значение: ${formatMetricVal(m, mv.agreedValue)}
+            </div>`;
+        } else {
+            // Business slider
+            html += `
+                <div class="slider-row">
+                    <div class="slider-label biz">\u{1F4BC} Бизнес</div>
+                    <div class="slider-wrap">
+                        <input type="range" class="biz-slider" min="${m.min}" max="${m.max}" step="${m.step}"
+                            value="${mv.bizValue}" oninput="onSliderChange('${mId}','biz',this.value)"
+                            ${mv.status === 'negotiating' && GS.mode === 'hotseat' && GS.currentTurn !== 'business' ? 'disabled' : ''}>
+                    </div>
+                    <div class="slider-value" style="color:var(--gold);" id="sv-biz-${mId}">${formatMetricVal(m, mv.bizValue)}</div>
+                </div>
+                <div class="slider-row">
+                    <div class="slider-label it">\u{1F6E0}\u{FE0F} IT</div>
+                    <div class="slider-wrap">
+                        <input type="range" class="it-slider" min="${m.min}" max="${m.max}" step="${m.step}"
+                            value="${mv.itValue}" oninput="onSliderChange('${mId}','it',this.value)"
+                            ${mv.status === 'negotiating' && GS.mode === 'hotseat' && GS.currentTurn !== 'it' ? 'disabled' : ''}>
+                    </div>
+                    <div class="slider-value" style="color:var(--cyan);" id="sv-it-${mId}">${formatMetricVal(m, mv.itValue)}</div>
+                </div>
+            `;
+
+            // Gap analysis
+            const gap = calcGap(m, mv.bizValue, mv.itValue);
+            const gapClass = gap <= 10 ? 'gap-small' : gap <= 25 ? 'gap-medium' : gap <= 50 ? 'gap-large' : 'gap-huge';
+            const gapLabel = gap <= 10 ? 'Малый разрыв (\u226410%) — автосогласование' : gap <= 25 ? 'Средний разрыв (10-25%) — 1 раунд аргументов' : gap <= 50 ? 'Большой разрыв (25-50%) — 2 раунда' : 'Критический разрыв (>50%) — 3 раунда';
+
+            html += `
+                <div class="gap-text">${gapLabel} | Разрыв: ${gap.toFixed(1)}%</div>
+                <div class="gap-bar"><div class="gap-fill ${gapClass}" style="width:${Math.min(100, gap * 2)}%"></div></div>
+            `;
+
+            // Cost visualization for availability
+            if (m.id === 'availability' && m.nines) {
+                html += renderCostChart(m, mv);
+            }
+
+            // Error Budget display
+            if (m.id === 'availability') {
+                const ebMinutes = calcErrorBudget(mv.bizValue);
+                html += `<div class="error-budget-box" style="margin-top:10px;">
+                    <div class="eb-label">Error Budget (при текущем значении бизнеса)</div>
+                    <div class="eb-value" style="font-size:1.3rem;">${ebMinutes}</div>
+                </div>`;
+            }
+
+            // Negotiate button
+            html += `
+                <div style="display:flex;gap:10px;margin-top:12px;justify-content:center;flex-wrap:wrap;">
+                    ${gap <= 10 ? `<button class="btn btn-sm btn-gold" onclick="autoAgree('${mId}')">Автосогласование</button>` : ''}
+                    ${gap > 10 ? `<button class="btn btn-sm btn-cyan" onclick="startNegotiation('${mId}')">Начать переговоры</button>` : ''}
+                    <button class="btn btn-sm btn-outline" onclick="manualAgree('${mId}')">Согласовать вручную</button>
+                </div>
+            `;
+        }
+
+        html += `</div>`;
+    }
+
+    if (GS.mode === 'solo') {
+        html += `<div style="margin-top:12px;padding:10px;background:rgba(0,212,255,0.08);border-radius:8px;font-size:.8rem;color:var(--cyan);">
+            \u{1F4A1} <strong>AI-подсказка:</strong> Идеальные значения для "${s.name}": ${
+                GS.selectedMetrics.slice(0, 3).map(mId => {
+                    const m = METRICS_CATALOG.find(x => x.id === mId);
+                    return m.name + ': ' + formatMetricVal(m, s.idealMetrics[mId]);
+                }).join(', ')
+            }...
+        </div>`;
+    }
+
+    html += `</div>`;
+    el.innerHTML = html;
+}
+
+function formatMetricVal(m, val) {
+    if (m.unit === '%') return formatNum(val) + '%';
+    if (m.unit === 'мс') return Math.round(val) + 'мс';
+    if (m.unit === 'ч') return formatNum(val, 2) + 'ч';
+    return formatNum(val);
+}
+
+function calcGap(m, bizVal, itVal) {
+    const range = m.max - m.min;
+    if (range === 0) return 0;
+    return Math.abs(bizVal - itVal) / range * 100;
+}
+
+function calcErrorBudget(availPercent) {
+    const minutesInMonth = 30 * 24 * 60;
+    const downMinutes = minutesInMonth * (1 - availPercent / 100);
+    if (downMinutes < 1) return formatNum(downMinutes * 60, 1) + ' сек/мес';
+    if (downMinutes < 60) return formatNum(downMinutes, 1) + ' мин/мес';
+    return formatNum(downMinutes / 60, 1) + ' ч/мес';
+}
+
+function renderCostChart(m, mv) {
+    const nines = m.nines;
+    const maxCost = nines[nines.length - 1].cost;
+    let html = '<div class="cost-chart"><div style="font-size:.82rem;font-weight:600;margin-bottom:8px;">Экономика девяток (относительная стоимость):</div>';
+    for (const n of nines) {
+        const pct = (n.cost / maxCost * 100);
+        const isActive = mv.bizValue >= n.val;
+        html += `<div class="cost-bar-row">
+            <div class="cost-label">${n.val}%</div>
+            <div class="cost-bar-bg"><div class="cost-bar-fill" style="width:${pct}%;background:${isActive ? 'var(--accent-orange)' : 'var(--border)'}"></div></div>
+            <div class="cost-val" style="color:${isActive ? 'var(--accent-orange)' : 'var(--text-muted)'};">${n.cost}x | ${n.downtime}</div>
+        </div>`;
+    }
+    html += '</div>';
+    return html;
+}
+
+function onSliderChange(mId, side, val) {
+    val = parseFloat(val);
+    const m = METRICS_CATALOG.find(x => x.id === mId);
+    const mv = GS.metricValues[mId];
+    if (side === 'biz') mv.bizValue = val;
+    else mv.itValue = val;
+
+    const svEl = document.getElementById(`sv-${side}-${mId}`);
+    if (svEl) svEl.textContent = formatMetricVal(m, val);
+
+    // Update gap display without full re-render
+    const negoEl = document.getElementById(`nego-${mId}`);
+    if (negoEl) {
+        const gap = calcGap(m, mv.bizValue, mv.itValue);
+        const gapText = negoEl.querySelector('.gap-text');
+        if (gapText) {
+            const gapLabel = gap <= 10 ? 'Малый разрыв (\u226410%) — автосогласование' : gap <= 25 ? 'Средний разрыв (10-25%) — 1 раунд аргументов' : gap <= 50 ? 'Большой разрыв (25-50%) — 2 раунда' : 'Критический разрыв (>50%) — 3 раунда';
+            gapText.textContent = `${gapLabel} | Разрыв: ${gap.toFixed(1)}%`;
+        }
+    }
+}
+
+function autoAgree(mId) {
+    const m = METRICS_CATALOG.find(x => x.id === mId);
+    const mv = GS.metricValues[mId];
+    mv.agreedValue = (mv.bizValue + mv.itValue) / 2;
+    mv.agreedValue = clamp(mv.agreedValue, m.min, m.max);
+    // Round to step
+    mv.agreedValue = Math.round(mv.agreedValue / m.step) * m.step;
+    mv.status = 'agreed';
+    renderPhase3(document.getElementById('phase-content'));
+    updatePhaseProgress();
+}
+
+function manualAgree(mId) {
+    const m = METRICS_CATALOG.find(x => x.id === mId);
+    const mv = GS.metricValues[mId];
+    const midVal = (mv.bizValue + mv.itValue) / 2;
+    const rounded = Math.round(midVal / m.step) * m.step;
+    const input = prompt(`Введите согласованное значение для ${m.name} (${m.min}–${m.max} ${m.unit}):`, formatNum(rounded));
+    if (input === null) return;
+    const val = parseFloat(input);
+    if (isNaN(val) || val < m.min || val > m.max) {
+        alert(`Значение должно быть от ${m.min} до ${m.max}.`);
+        return;
+    }
+    mv.agreedValue = val;
+    mv.status = 'agreed';
+    renderPhase3(document.getElementById('phase-content'));
+    updatePhaseProgress();
+}
+
+function startNegotiation(mId) {
+    const m = METRICS_CATALOG.find(x => x.id === mId);
+    const mv = GS.metricValues[mId];
+    const gap = calcGap(m, mv.bizValue, mv.itValue);
+    const maxRounds = gap <= 25 ? 1 : gap <= 50 ? 2 : 3;
+
+    mv.status = 'negotiating';
+    mv.rounds = 0;
+    GS.currentNegoMetric = mId;
+    GS.negoRound = 0;
+
+    showNegotiationDialog(mId, maxRounds);
+}
+
+function showNegotiationDialog(mId, maxRounds) {
+    const m = METRICS_CATALOG.find(x => x.id === mId);
+    const mv = GS.metricValues[mId];
+    const round = GS.negoRound + 1;
+
+    let bizShift = 0;
+    let itShift = 0;
+
+    // Create modal
+    let overlay = document.getElementById('nego-dialog');
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = 'nego-dialog';
+        overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(10,14,23,0.95);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;';
+        document.body.appendChild(overlay);
+    }
+
+    const remainBizCards = BIZ_CARDS.filter(c => !GS.bizCardsUsed.includes(c.id));
+    const remainITCards = IT_CARDS.filter(c => !GS.itCardsUsed.includes(c.id));
+
+    overlay.innerHTML = `
+        <div class="glass" style="max-width:700px;width:100%;max-height:90vh;overflow-y:auto;">
+            <div style="text-align:center;margin-bottom:20px;">
+                <div class="phase-title">Переговоры: ${m.name}</div>
+                <div style="color:var(--text-secondary);font-size:.9rem;">Раунд ${round} из ${maxRounds}</div>
+            </div>
+
+            <div style="display:flex;gap:16px;margin-bottom:20px;flex-wrap:wrap;">
+                <div style="flex:1;min-width:200px;text-align:center;">
+                    <div style="color:var(--gold);font-weight:700;margin-bottom:4px;">\u{1F4BC} Бизнес: ${formatMetricVal(m, mv.bizValue)}</div>
+                    <div style="font-size:.8rem;color:var(--text-secondary);">NP: ${GS.npBiz}</div>
+                </div>
+                <div style="flex:1;min-width:200px;text-align:center;">
+                    <div style="color:var(--cyan);font-weight:700;margin-bottom:4px;">\u{1F6E0}\u{FE0F} IT: ${formatMetricVal(m, mv.itValue)}</div>
+                    <div style="font-size:.8rem;color:var(--text-secondary);">NP: ${GS.npIT}</div>
+                </div>
+            </div>
+
+            <div class="section-divider" style="color:var(--gold);">\u{1F4BC} Бизнес выбирает карту аргумента</div>
+            <div id="nego-biz-cards" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;">
+                <div class="arg-card ${!window._negoBizCard ? 'selected' : ''}" onclick="negoSelectCard('biz',null)" style="flex:1;min-width:120px;">
+                    <div class="arg-card-name">Пропустить</div>
+                    <div class="arg-card-desc">Не играть карту</div>
+                </div>
+                ${remainBizCards.map(c => `
+                    <div class="arg-card ${window._negoBizCard === c.id ? 'selected' : ''}" onclick="negoSelectCard('biz','${c.id}')"
+                        style="flex:1;min-width:120px;${GS.npBiz < c.cost ? 'opacity:.4;pointer-events:none;' : ''}">
+                        <div class="arg-card-name">${c.icon} ${c.name}</div>
+                        <div class="arg-card-cost biz">NP: ${c.cost} | +${Math.round(c.power * 100)}%</div>
+                    </div>
+                `).join('')}
+            </div>
+
+            <div class="section-divider" style="color:var(--cyan);">\u{1F6E0}\u{FE0F} IT выбирает карту аргумента</div>
+            <div id="nego-it-cards" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px;">
+                <div class="arg-card it-card ${!window._negoITCard ? 'selected' : ''}" onclick="negoSelectCard('it',null)" style="flex:1;min-width:120px;">
+                    <div class="arg-card-name">Пропустить</div>
+                    <div class="arg-card-desc">Не играть карту</div>
+                </div>
+                ${remainITCards.map(c => `
+                    <div class="arg-card it-card ${window._negoITCard === c.id ? 'selected' : ''}" onclick="negoSelectCard('it','${c.id}')"
+                        style="flex:1;min-width:120px;${GS.npIT < c.cost ? 'opacity:.4;pointer-events:none;' : ''}">
+                        <div class="arg-card-name">${c.icon} ${c.name}</div>
+                        <div class="arg-card-cost it">NP: ${c.cost} | +${Math.round(c.power * 100)}%</div>
+                    </div>
+                `).join('')}
+            </div>
+
+            <div style="display:flex;gap:10px;justify-content:center;">
+                <button class="btn btn-gold" onclick="resolveNegoRound('${mId}', ${maxRounds})">Разыграть раунд</button>
+                <button class="btn btn-outline" onclick="closeNegoDialog()">Отмена</button>
+            </div>
+        </div>
+    `;
+}
+
+window._negoBizCard = null;
+window._negoITCard = null;
+
+function negoSelectCard(side, cardId) {
+    if (side === 'biz') window._negoBizCard = cardId;
+    else window._negoITCard = cardId;
+    // Re-render dialog without full reset
+    const mId = GS.currentNegoMetric;
+    const m = METRICS_CATALOG.find(x => x.id === mId);
+    const mv = GS.metricValues[mId];
+    const gap = calcGap(m, mv.bizValue, mv.itValue);
+    const maxRounds = gap <= 25 ? 1 : gap <= 50 ? 2 : 3;
+    showNegotiationDialog(mId, maxRounds);
+}
+
+function resolveNegoRound(mId, maxRounds) {
+    const m = METRICS_CATALOG.find(x => x.id === mId);
+    const mv = GS.metricValues[mId];
+
+    let bizPower = 0;
+    let itPower = 0;
+
+    // Apply business card
+    if (window._negoBizCard) {
+        const card = BIZ_CARDS.find(c => c.id === window._negoBizCard);
+        if (card && GS.npBiz >= card.cost) {
+            GS.npBiz -= card.cost;
+            GS.bizCardsUsed.push(card.id);
+            bizPower = card.power;
+            mv.cardsPlayed.push({ side: 'biz', cardId: card.id });
+        }
+    }
+
+    // Apply IT card
+    if (window._negoITCard) {
+        const card = IT_CARDS.find(c => c.id === window._negoITCard);
+        if (card && GS.npIT >= card.cost) {
+            GS.npIT -= card.cost;
+            GS.itCardsUsed.push(card.id);
+            itPower = card.power;
+            mv.cardsPlayed.push({ side: 'it', cardId: card.id });
+        }
+    }
+
+    window._negoBizCard = null;
+    window._negoITCard = null;
+
+    GS.negoRound++;
+    mv.rounds++;
+
+    // Calculate agreed value: start from midpoint, shift by card powers
+    const mid = (mv.bizValue + mv.itValue) / 2;
+    const range = Math.abs(mv.bizValue - mv.itValue);
+    const netPower = bizPower - itPower; // positive = towards business
+
+    // For metrics where lower is better for business (response time, resolution time, rpo, rto)
+    let agreed;
+    if (m.invertSlider) {
+        // Business wants lower, IT wants higher
+        agreed = mid - (netPower * range);
+    } else {
+        // Business wants higher, IT wants lower
+        agreed = mid + (netPower * range);
+    }
+    agreed = clamp(agreed, m.min, m.max);
+    agreed = Math.round(agreed / m.step) * m.step;
+
+    if (GS.negoRound >= maxRounds) {
+        // Final round - force agreement
+        mv.agreedValue = agreed;
+        mv.status = 'agreed';
+        closeNegoDialog();
+        updateNPDisplay();
+        renderSideCards();
+        renderPhase3(document.getElementById('phase-content'));
+        updatePhaseProgress();
+    } else {
+        // Shift values closer for next round
+        if (m.invertSlider) {
+            mv.bizValue = clamp(mv.bizValue + range * 0.15, m.min, m.max);
+            mv.itValue = clamp(mv.itValue - range * 0.15, m.min, m.max);
+        } else {
+            mv.bizValue = clamp(mv.bizValue - range * 0.15, m.min, m.max);
+            mv.itValue = clamp(mv.itValue + range * 0.15, m.min, m.max);
+        }
+        updateNPDisplay();
+        renderSideCards();
+        showNegotiationDialog(mId, maxRounds);
+    }
+}
+
+function closeNegoDialog() {
+    const dialog = document.getElementById('nego-dialog');
+    if (dialog) dialog.remove();
+    window._negoBizCard = null;
+    window._negoITCard = null;
+}
+
+// ============================================================
+// PHASE 4: Penalties and Bonuses
+// ============================================================
+
+function renderPhase4(el) {
+    let html = `
+        <div class="phase-content fade-in">
+            <div class="phase-title">Фаза 4: Штрафы и бонусы</div>
+            <div class="phase-desc">Определите финансовые последствия нарушений и поощрения за превышение SLA.</div>
+
+            <div class="section-divider">МОДЕЛЬ ШТРАФОВ</div>
+            <p style="color:var(--text-secondary);font-size:.85rem;margin-bottom:12px;">Выберите модель штрафных санкций за нарушение SLA:</p>
+            ${PENALTY_TEMPLATES.map(t => `
+                <div class="template-card ${GS.selectedPenalty === t.id ? 'selected' : ''}" onclick="selectPenalty('${t.id}')">
+                    <div style="display:flex;justify-content:space-between;align-items:center;">
+                        <div class="template-name">${GS.selectedPenalty === t.id ? '\u2705' : '\u2B1C'} ${t.name}</div>
+                        <div style="display:flex;gap:8px;">
+                            <span class="priority-badge" style="background:var(--gold-dim);color:var(--gold);">Бизнес: ${t.bizScore}/10</span>
+                            <span class="priority-badge" style="background:var(--cyan-dim);color:var(--cyan);">IT: ${t.itScore}/10</span>
+                        </div>
+                    </div>
+                    <div class="template-desc">${t.desc}</div>
+                </div>
+            `).join('')}
+
+            <div class="section-divider">МОДЕЛЬ БОНУСОВ</div>
+            <p style="color:var(--text-secondary);font-size:.85rem;margin-bottom:12px;">Выберите модель бонусов за превышение целевых показателей:</p>
+            ${BONUS_TEMPLATES.map(t => `
+                <div class="template-card ${GS.selectedBonus === t.id ? 'selected' : ''}" onclick="selectBonus('${t.id}')">
+                    <div style="display:flex;justify-content:space-between;align-items:center;">
+                        <div class="template-name">${GS.selectedBonus === t.id ? '\u2705' : '\u2B1C'} ${t.name}</div>
+                        <div style="display:flex;gap:8px;">
+                            <span class="priority-badge" style="background:var(--gold-dim);color:var(--gold);">Бизнес: ${t.bizScore}/10</span>
+                            <span class="priority-badge" style="background:var(--cyan-dim);color:var(--cyan);">IT: ${t.itScore}/10</span>
+                        </div>
+                    </div>
+                    <div class="template-desc">${t.desc}</div>
+                </div>
+            `).join('')}
+
+            <div class="section-divider">ДОПОЛНИТЕЛЬНЫЕ УСЛОВИЯ</div>
+
+            <div style="display:flex;gap:20px;flex-wrap:wrap;">
+                <div style="flex:1;min-width:200px;">
+                    <label style="font-size:.85rem;font-weight:600;display:block;margin-bottom:8px;">Grace Period (месяцы)</label>
+                    <div style="display:flex;gap:8px;">
+                        ${[0, 1, 2, 3].map(v => `
+                            <div class="hours-opt ${GS.gracePeriod === v ? 'selected' : ''}" onclick="setGracePeriod(${v})" style="flex:1;min-width:60px;">
+                                <div class="hours-opt-title">${v}</div>
+                                <div class="hours-opt-desc">${v === 0 ? 'Сразу' : v + ' мес'}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+
+                <div style="flex:1;min-width:200px;">
+                    <label style="font-size:.85rem;font-weight:600;display:block;margin-bottom:8px;">Частота пересмотра SLA</label>
+                    <div style="display:flex;gap:8px;">
+                        ${[{id:'monthly',label:'Месяц'},{id:'quarterly',label:'Квартал'},{id:'semi',label:'Полугодие'},{id:'annual',label:'Год'}].map(v => `
+                            <div class="hours-opt ${GS.reviewFrequency === v.id ? 'selected' : ''}" onclick="setReviewFreq('${v.id}')" style="flex:1;min-width:60px;">
+                                <div class="hours-opt-title">${v.label}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            </div>
+
+            ${GS.mode === 'solo' ? `<div style="margin-top:16px;padding:10px;background:rgba(0,212,255,0.08);border-radius:8px;font-size:.8rem;color:var(--cyan);">
+                \u{1F4A1} <strong>AI-подсказка:</strong> Для "${GS.scenario.name}" рекомендуются тиерные кредиты (баланс интересов), Grace Period 1 мес и ежеквартальный пересмотр.
+            </div>` : ''}
+
+            <div class="progress-bar" style="margin-top:20px;">
+                <div class="progress-fill" style="width:${getPhase4Progress()}%"></div>
+            </div>
+            <div style="font-size:.78rem;color:var(--text-secondary);text-align:center;">Прогресс фазы: ${getPhase4Progress()}%</div>
+        </div>
+    `;
+    el.innerHTML = html;
+}
+
+function selectPenalty(id) {
+    GS.selectedPenalty = id;
+    renderPhase4(document.getElementById('phase-content'));
+    updatePhaseProgress();
+}
+
+function selectBonus(id) {
+    GS.selectedBonus = id;
+    renderPhase4(document.getElementById('phase-content'));
+    updatePhaseProgress();
+}
+
+function setGracePeriod(v) {
+    GS.gracePeriod = v;
+    renderPhase4(document.getElementById('phase-content'));
+}
+
+function setReviewFreq(v) {
+    GS.reviewFrequency = v;
+    renderPhase4(document.getElementById('phase-content'));
+}
+
+function getPhase4Progress() {
+    let p = 0;
+    if (GS.selectedPenalty) p += 50;
+    if (GS.selectedBonus) p += 50;
+    return p;
+}
+
+// ============================================================
+// PHASE 5: Review & Sign
+// ============================================================
+
+function renderPhase5(el) {
+    const s = GS.scenario;
+    const penalty = PENALTY_TEMPLATES.find(t => t.id === GS.selectedPenalty);
+    const bonus = BONUS_TEMPLATES.find(t => t.id === GS.selectedBonus);
+    const hoursObj = s.serviceHours.find(h => h.id === GS.selectedHours);
+    const scopeNames = s.serviceScope.filter(x => GS.selectedScope.includes(x.id)).map(x => x.name);
+    const revLabels = { monthly: 'Ежемесячно', quarterly: 'Ежеквартально', semi: 'Раз в полгода', annual: 'Ежегодно' };
+
+    let metricsTableRows = '';
+    for (const mId of GS.selectedMetrics) {
+        const m = METRICS_CATALOG.find(x => x.id === mId);
+        const mv = GS.metricValues[mId];
+        const ideal = s.idealMetrics[mId];
+        metricsTableRows += `<tr>
+            <td>${m.name}</td>
+            <td>${formatMetricVal(m, mv.agreedValue)}</td>
+            <td style="color:var(--text-secondary);">${formatMetricVal(m, ideal)}</td>
+            <td>${mv.cardsPlayed.length > 0 ? mv.cardsPlayed.map(cp => {
+                const card = cp.side === 'biz' ? BIZ_CARDS.find(c => c.id === cp.cardId) : IT_CARDS.find(c => c.id === cp.cardId);
+                return card ? card.icon : '';
+            }).join(' ') : '-'}</td>
+        </tr>`;
+    }
+
+    el.innerHTML = `
+        <div class="phase-content fade-in">
+            <div class="phase-title">Фаза 5: Обзор SLA-документа</div>
+            <div class="phase-desc">Проверьте итоговый SLA перед подписанием.</div>
+
+            <div class="sla-doc">
+                <h3>SLA: ${s.name}</h3>
+
+                <div class="review-section">
+                    <h3>\u{1F4CB} Общая информация</h3>
+                    <table>
+                        <tr><td><strong>Сервис</strong></td><td>${s.name}</td></tr>
+                        <tr><td><strong>Scope</strong></td><td>${scopeNames.join(', ')}</td></tr>
+                        <tr><td><strong>Часы обслуживания</strong></td><td>${hoursObj ? hoursObj.name + ' — ' + hoursObj.desc : '-'}</td></tr>
+                        <tr><td><strong>Исключения</strong></td><td>${GS.exclusions || 'Не указаны'}</td></tr>
+                        <tr><td><strong>Пользователи</strong></td><td>${s.context.users}</td></tr>
+                    </table>
+                </div>
+
+                <div class="review-section">
+                    <h3>\u{1F4CA} Целевые метрики</h3>
+                    <table>
+                        <tr><th>Метрика</th><th>Согласовано</th><th>Бенчмарк</th><th>Аргументы</th></tr>
+                        ${metricsTableRows}
+                    </table>
+                </div>
+
+                <div class="review-section">
+                    <h3>\u{1F4B0} Штрафы и бонусы</h3>
+                    <table>
+                        <tr><td><strong>Модель штрафов</strong></td><td>${penalty ? penalty.name + ' — ' + penalty.desc : '-'}</td></tr>
+                        <tr><td><strong>Модель бонусов</strong></td><td>${bonus ? bonus.name + ' — ' + bonus.desc : '-'}</td></tr>
+                        <tr><td><strong>Grace Period</strong></td><td>${GS.gracePeriod} мес.</td></tr>
+                        <tr><td><strong>Частота пересмотра</strong></td><td>${revLabels[GS.reviewFrequency] || GS.reviewFrequency}</td></tr>
+                    </table>
+                </div>
+
+                <div class="review-section">
+                    <h3>\u{1F91D} Переговорная статистика</h3>
+                    <table>
+                        <tr><td><strong>NP Бизнес (осталось)</strong></td><td>${GS.npBiz} / 10</td></tr>
+                        <tr><td><strong>NP IT (осталось)</strong></td><td>${GS.npIT} / 10</td></tr>
+                        <tr><td><strong>Карт использовано (Бизнес)</strong></td><td>${GS.bizCardsUsed.length} / 6</td></tr>
+                        <tr><td><strong>Карт использовано (IT)</strong></td><td>${GS.itCardsUsed.length} / 6</td></tr>
+                    </table>
+                </div>
+            </div>
+
+            <div style="text-align:center;margin-top:20px;">
+                <p style="color:var(--text-secondary);margin-bottom:12px;">Подтвердите SLA для получения экспертной оценки.</p>
+            </div>
+        </div>
+    `;
+}
+
+// ============================================================
+// SCORING ENGINE
+// ============================================================
+
+function calculateScores() {
+    const s = GS.scenario;
+    const scores = { balance: 0, coverage: 0, realism: 0, bizValue: 0, itFeasibility: 0, itilCompliance: 0 };
+
+    // 1. BALANCE (20%) — closeness to ideal values
+    let balanceSum = 0;
+    let balanceCount = 0;
+    for (const mId of GS.selectedMetrics) {
+        const m = METRICS_CATALOG.find(x => x.id === mId);
+        const mv = GS.metricValues[mId];
+        if (!mv || mv.agreedValue === null) continue;
+        const ideal = s.idealMetrics[mId];
+        if (ideal === undefined) continue;
+        const range = m.max - m.min;
+        if (range === 0) continue;
+        const deviation = Math.abs(mv.agreedValue - ideal) / range;
+        balanceSum += Math.max(0, 1 - deviation * 3);
+        balanceCount++;
+    }
+    scores.balance = balanceCount > 0 ? Math.round((balanceSum / balanceCount) * 100) : 50;
+
+    // 2. COVERAGE (15%) — are critical metrics included?
+    const criticalMetrics = Object.entries(s.metricWeights).filter(([k, v]) => v >= 8).map(([k]) => k);
+    const coveredCritical = criticalMetrics.filter(mId => GS.selectedMetrics.includes(mId)).length;
+    const coverageRatio = criticalMetrics.length > 0 ? coveredCritical / criticalMetrics.length : 1;
+    const totalRatio = GS.selectedMetrics.length / 10;
+    scores.coverage = Math.round((coverageRatio * 0.7 + Math.min(1, totalRatio) * 0.3) * 100);
+
+    // 3. REALISM (20%) — achievability
+    let realismSum = 0;
+    let realismCount = 0;
+    for (const mId of GS.selectedMetrics) {
+        const m = METRICS_CATALOG.find(x => x.id === mId);
+        const mv = GS.metricValues[mId];
+        if (!mv || mv.agreedValue === null) continue;
+        const range = m.max - m.min;
+        if (range === 0) continue;
+        // How close to IT's comfortable zone
+        const itDefault = m.invertSlider ? m.defaultIT : m.defaultIT;
+        const deviation = Math.abs(mv.agreedValue - itDefault) / range;
+        // Being far from IT default = less realistic
+        realismSum += Math.max(0, 1 - deviation * 2);
+        realismCount++;
+    }
+    scores.realism = realismCount > 0 ? Math.round((realismSum / realismCount) * 100) : 50;
+
+    // 4. BIZ VALUE (15%) — protection of business interests
+    let bizSum = 0;
+    let bizCount = 0;
+    for (const mId of GS.selectedMetrics) {
+        const m = METRICS_CATALOG.find(x => x.id === mId);
+        const mv = GS.metricValues[mId];
+        if (!mv || mv.agreedValue === null) continue;
+        const range = m.max - m.min;
+        if (range === 0) continue;
+        const bizDefault = m.defaultBiz;
+        const deviation = Math.abs(mv.agreedValue - bizDefault) / range;
+        bizSum += Math.max(0, 1 - deviation * 2);
+        bizCount++;
+    }
+    const penaltyBonus = GS.selectedPenalty ? (PENALTY_TEMPLATES.find(t => t.id === GS.selectedPenalty).bizScore / 10) : 0;
+    scores.bizValue = bizCount > 0 ? Math.round(((bizSum / bizCount) * 0.7 + penaltyBonus * 0.3) * 100) : 50;
+
+    // 5. IT FEASIBILITY (15%)
+    let itSum = 0;
+    let itCount = 0;
+    for (const mId of GS.selectedMetrics) {
+        const m = METRICS_CATALOG.find(x => x.id === mId);
+        const mv = GS.metricValues[mId];
+        if (!mv || mv.agreedValue === null) continue;
+        const range = m.max - m.min;
+        if (range === 0) continue;
+        const itDefault = m.defaultIT;
+        const diff = m.invertSlider ? (mv.agreedValue - itDefault) : (itDefault - mv.agreedValue);
+        const normDiff = diff / range;
+        itSum += Math.max(0, 1 + normDiff * 2);
+        itCount++;
+    }
+    const itPenaltyBonus = GS.selectedPenalty ? (PENALTY_TEMPLATES.find(t => t.id === GS.selectedPenalty).itScore / 10) : 0;
+    scores.itFeasibility = itCount > 0 ? clamp(Math.round(((itSum / itCount) * 0.7 + itPenaltyBonus * 0.3) * 100), 0, 100) : 50;
+
+    // 6. ITIL COMPLIANCE (15%)
+    let itilScore = 50;
+    // Has enough metrics?
+    if (GS.selectedMetrics.length >= 5) itilScore += 10;
+    if (GS.selectedMetrics.length >= 7) itilScore += 5;
+    // Includes availability?
+    if (GS.selectedMetrics.includes('availability')) itilScore += 10;
+    // Includes CSAT (customer-centric)?
+    if (GS.selectedMetrics.includes('csat')) itilScore += 10;
+    // Has review frequency?
+    if (GS.reviewFrequency === 'quarterly' || GS.reviewFrequency === 'monthly') itilScore += 5;
+    // Grace period (best practice)
+    if (GS.gracePeriod >= 1) itilScore += 5;
+    // Error budget card used?
+    if (GS.itCardsUsed.includes('error_budget')) itilScore += 5;
+    scores.itilCompliance = clamp(itilScore, 0, 100);
+
+    // Clamp all
+    for (const k in scores) scores[k] = clamp(scores[k], 0, 100);
+
+    GS.scores = scores;
+
+    // Total weighted score
+    GS.totalScore = Math.round(
+        scores.balance * 0.20 +
+        scores.coverage * 0.15 +
+        scores.realism * 0.20 +
+        scores.bizValue * 0.15 +
+        scores.itFeasibility * 0.15 +
+        scores.itilCompliance * 0.15
+    );
+
+    // Verdict
+    if (GS.totalScore >= 85) GS.verdict = 'expert';
+    else if (GS.totalScore >= 70) GS.verdict = 'good';
+    else if (GS.totalScore >= 50) GS.verdict = 'basic';
+    else GS.verdict = 'needs_work';
+}
+
+// ============================================================
+// RADAR CHART (SVG)
+// ============================================================
+
+function renderRadarSVG(scores) {
+    const axes = [
+        { key: 'balance', label: 'Баланс' },
+        { key: 'coverage', label: 'Покрытие' },
+        { key: 'realism', label: 'Реализм' },
+        { key: 'bizValue', label: 'Бизнес' },
+        { key: 'itFeasibility', label: 'IT' },
+        { key: 'itilCompliance', label: 'ITIL' }
+    ];
+    const n = axes.length;
+    const cx = 200, cy = 200, r = 160;
+
+    function polarToCart(angle, radius) {
+        const a = angle - Math.PI / 2;
+        return { x: cx + radius * Math.cos(a), y: cy + radius * Math.sin(a) };
+    }
+
+    let svg = `<svg viewBox="0 0 400 400" width="360" height="360" xmlns="http://www.w3.org/2000/svg">`;
+
+    // Grid circles
+    for (let level = 1; level <= 5; level++) {
+        const gr = r * level / 5;
+        let points = [];
+        for (let i = 0; i < n; i++) {
+            const angle = (2 * Math.PI * i) / n;
+            const p = polarToCart(angle, gr);
+            points.push(`${p.x},${p.y}`);
+        }
+        svg += `<polygon points="${points.join(' ')}" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>`;
+    }
+
+    // Axis lines
+    for (let i = 0; i < n; i++) {
+        const angle = (2 * Math.PI * i) / n;
+        const p = polarToCart(angle, r);
+        svg += `<line x1="${cx}" y1="${cy}" x2="${p.x}" y2="${p.y}" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>`;
+    }
+
+    // Data polygon
+    let dataPoints = [];
+    for (let i = 0; i < n; i++) {
+        const angle = (2 * Math.PI * i) / n;
+        const val = scores[axes[i].key] / 100;
+        const p = polarToCart(angle, r * val);
+        dataPoints.push(`${p.x},${p.y}`);
+    }
+    svg += `<polygon points="${dataPoints.join(' ')}" fill="rgba(0,212,255,0.15)" stroke="var(--cyan)" stroke-width="2"/>`;
+
+    // Data points
+    for (let i = 0; i < n; i++) {
+        const angle = (2 * Math.PI * i) / n;
+        const val = scores[axes[i].key] / 100;
+        const p = polarToCart(angle, r * val);
+        svg += `<circle cx="${p.x}" cy="${p.y}" r="5" fill="var(--cyan)" stroke="#fff" stroke-width="1"/>`;
+    }
+
+    // Labels
+    for (let i = 0; i < n; i++) {
+        const angle = (2 * Math.PI * i) / n;
+        const p = polarToCart(angle, r + 28);
+        const anchor = p.x < cx - 10 ? 'end' : p.x > cx + 10 ? 'start' : 'middle';
+        svg += `<text x="${p.x}" y="${p.y}" text-anchor="${anchor}" dominant-baseline="middle"
+            fill="var(--text-secondary)" font-size="12" font-family="Exo 2">${axes[i].label}</text>`;
+        svg += `<text x="${p.x}" y="${p.y + 14}" text-anchor="${anchor}" dominant-baseline="middle"
+            fill="var(--cyan)" font-size="11" font-family="Russo One" font-weight="400">${scores[axes[i].key]}</text>`;
+    }
+
+    svg += `</svg>`;
+    return svg;
+}
+
+// ============================================================
+// RESULTS SCREEN
+// ============================================================
+
+function finishGame() {
+    calculateScores();
+    showScreen('screen-results');
+    renderResults();
+}
+
+function renderResults() {
+    const s = GS.scenario;
+    const verdictColors = { expert: 'var(--accent-green)', good: 'var(--cyan)', basic: 'var(--gold)', needs_work: 'var(--accent-red)' };
+    const verdictLabels = { expert: 'Эксперт SLA', good: 'Хороший результат', basic: 'Базовый уровень', needs_work: 'Нужна доработка' };
+    const verdictBg = { expert: 'rgba(63,185,80,0.1)', good: 'rgba(0,212,255,0.1)', basic: 'rgba(240,192,64,0.1)', needs_work: 'rgba(248,81,73,0.1)' };
+
+    const axes = [
+        { key: 'balance', label: 'Баланс', weight: '20%', feedbackKey: 'balance' },
+        { key: 'coverage', label: 'Покрытие метрик', weight: '15%', feedbackKey: 'coverage' },
+        { key: 'realism', label: 'Реализм', weight: '20%', feedbackKey: 'realism' },
+        { key: 'bizValue', label: 'Бизнес-ценность', weight: '15%', feedbackKey: 'bizValue' },
+        { key: 'itFeasibility', label: 'IT-реализуемость', weight: '15%', feedbackKey: 'itFeasibility' },
+        { key: 'itilCompliance', label: 'ITIL-соответствие', weight: '15%', feedbackKey: 'itilCompliance' }
+    ];
+
+    let expertHTML = '';
+    for (const ax of axes) {
+        const score = GS.scores[ax.key];
+        const level = score >= 75 ? 'high' : score >= 50 ? 'mid' : 'low';
+        const fb = EXPERT_FEEDBACK[ax.feedbackKey];
+        const text = fb ? fb[level] : '';
+        const scoreColor = score >= 75 ? 'var(--accent-green)' : score >= 50 ? 'var(--gold)' : 'var(--accent-red)';
+        expertHTML += `
+            <div class="expert-card">
+                <div class="expert-axis">${ax.label} (${ax.weight}) <span class="expert-score-inline" style="color:${scoreColor}">${score}/100</span></div>
+                <div class="expert-text">${text}</div>
+            </div>
+        `;
+    }
+
+    // Metrics comparison
+    let metricsCompHTML = '';
+    for (const mId of GS.selectedMetrics) {
+        const m = METRICS_CATALOG.find(x => x.id === mId);
+        const mv = GS.metricValues[mId];
+        const ideal = s.idealMetrics[mId];
+        const diff = ideal !== undefined ? mv.agreedValue - ideal : 0;
+        const diffStr = diff === 0 ? '=' : (diff > 0 ? '+' : '') + formatNum(diff);
+        metricsCompHTML += `
+            <tr>
+                <td>${m.name}</td>
+                <td style="font-weight:700;">${formatMetricVal(m, mv.agreedValue)}</td>
+                <td style="color:var(--text-secondary);">${ideal !== undefined ? formatMetricVal(m, ideal) : '-'}</td>
+                <td style="color:${Math.abs(diff) < (m.max - m.min) * 0.05 ? 'var(--accent-green)' : 'var(--accent-orange)'};">${diffStr}</td>
+            </tr>
+        `;
+    }
+
+    const container = document.getElementById('results-container');
+    container.innerHTML = `
+        <div class="fade-in" style="text-align:center;">
+            <div style="font-size:3rem;margin-bottom:10px;">\u{1F4DD}</div>
+            <div class="phase-title" style="font-size:2rem;">SLA Architect: Результаты</div>
+            <div style="color:var(--text-secondary);margin-bottom:20px;">${s.icon} ${s.name} | Режим: ${GS.mode === 'solo' ? 'Соло' : 'Hot-Seat'}</div>
+        </div>
+
+        <div class="verdict-box" style="background:${verdictBg[GS.verdict]};border:1px solid ${verdictColors[GS.verdict]}30;">
+            <div class="verdict-score" style="color:${verdictColors[GS.verdict]};">${GS.totalScore}</div>
+            <div class="verdict-label" style="color:${verdictColors[GS.verdict]};">${verdictLabels[GS.verdict]}</div>
+            <div style="color:var(--text-secondary);font-size:.85rem;margin-top:8px;">
+                ${GS.totalScore >= 85 ? 'Превосходный SLA! Вы учли интересы обеих сторон.' :
+                  GS.totalScore >= 70 ? 'Добротный SLA с хорошим балансом.' :
+                  GS.totalScore >= 50 ? 'SLA работоспособный, но есть пробелы.' :
+                  'SLA требует серьёзной доработки по нескольким осям.'}
+            </div>
+        </div>
+
+        <div class="radar-container">${renderRadarSVG(GS.scores)}</div>
+
+        <div class="expert-section">
+            <div class="section-divider">ЭКСПЕРТНАЯ ОЦЕНКА ПО ОСЯМ</div>
+            ${expertHTML}
+        </div>
+
+        <div class="sla-doc" style="margin-top:24px;">
+            <h3>Сравнение с бенчмарками</h3>
+            <table>
+                <tr><th>Метрика</th><th>Согласовано</th><th>Бенчмарк</th><th>Отклонение</th></tr>
+                ${metricsCompHTML}
+            </table>
+        </div>
+
+        <div style="text-align:center;margin-top:30px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+            <button class="btn btn-gold" onclick="restartGame()">Новая игра</button>
+            <button class="btn btn-outline" onclick="showScreen('screen-menu')">В меню</button>
+        </div>
+    `;
+}
+
+function restartGame() {
+    GS = {
+        mode: null, role: null, scenarioId: null, scenario: null,
+        currentPhase: 0, currentTurn: 'business',
+        selectedScope: [], selectedHours: null, exclusions: '',
+        selectedMetrics: [], metricValues: {}, currentNegoMetric: null, negoRound: 0,
+        npBiz: 10, npIT: 10, bizCardsUsed: [], itCardsUsed: [],
+        selectedPenalty: null, selectedBonus: null, gracePeriod: 1, reviewFrequency: 'monthly',
+        scores: { balance: 0, coverage: 0, realism: 0, bizValue: 0, itFeasibility: 0, itilCompliance: 0 },
+        totalScore: 0, verdict: ''
+    };
+    showScreen('screen-menu');
+}
+</script>
+</body>
+</html>
