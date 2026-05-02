@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sprint Backlog Simulator — Планирование спринта</title>
+    <link href="https://fonts.googleapis.com/css2?family=Russo+One&family=Exo+2:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0d1117; --bg-card: #161b22; --bg-column: #21262d;
+            --text-primary: #c9d1d9; --text-secondary: #8b949e;
+            --accent-green: #238636; --accent-blue: #1f6feb; --accent-purple: #8957e5;
+            --accent-orange: #d29922; --accent-red: #da3633; --accent-cyan: #39c5cf;
+            --accent-yellow: #f0c000;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Exo 2', sans-serif; background: var(--bg-dark); color: var(--text-primary); min-height: 100vh; }
+
+        .app { max-width: 1100px; margin: 0 auto; padding: 20px; }
+
+        /* Header */
+        .header { text-align: center; padding: 20px 0 10px; }
+        .header-title { font-family: 'Russo One', sans-serif; font-size: 1.8em;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .header-sub { color: var(--text-secondary); font-size: 0.95em; margin-top: 4px; }
+
+        /* Stats bar */
+        .stats-bar { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin: 18px 0; }
+        .stat { background: var(--bg-card); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 10px 18px; text-align: center; min-width: 110px; }
+        .stat-value { font-size: 1.5em; font-weight: 700; }
+        .stat-label { font-size: 0.72em; color: var(--text-secondary); margin-top: 2px; }
+        .stat-green .stat-value { color: var(--accent-green); }
+        .stat-blue .stat-value { color: var(--accent-blue); }
+        .stat-orange .stat-value { color: var(--accent-orange); }
+        .stat-red .stat-value { color: var(--accent-red); }
+        .stat-cyan .stat-value { color: var(--accent-cyan); }
+        .stat-purple .stat-value { color: var(--accent-purple); }
+
+        /* Controls */
+        .controls { display: flex; gap: 10px; justify-content: center; margin-bottom: 18px; flex-wrap: wrap; }
+        .btn { padding: 10px 22px; border: none; border-radius: 8px; font-family: 'Exo 2', sans-serif;
+            font-weight: 600; cursor: pointer; transition: all 0.2s; font-size: 0.95em; }
+        .btn:hover:not(:disabled) { transform: translateY(-2px); filter: brightness(1.15); }
+        .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        .btn-primary { background: var(--accent-blue); color: #fff; }
+        .btn-green { background: var(--accent-green); color: #fff; }
+        .btn-orange { background: var(--accent-orange); color: #fff; }
+        .btn-red { background: var(--accent-red); color: #fff; }
+        .btn-purple { background: var(--accent-purple); color: #fff; }
+        .btn-cyan { background: var(--accent-cyan); color: #fff; }
+        .btn-reset { background: var(--bg-column); color: var(--text-secondary); border: 1px solid rgba(255,255,255,0.1); }
+
+        /* Phase indicator */
+        .phase-bar { display: flex; gap: 4px; margin-bottom: 20px; }
+        .phase-step { flex: 1; height: 6px; border-radius: 3px; background: var(--bg-column); transition: background 0.4s; }
+        .phase-step.active { background: var(--accent-blue); }
+        .phase-step.done { background: var(--accent-green); }
+
+        .phase-labels { display: flex; gap: 4px; margin-bottom: 20px; }
+        .phase-label { flex: 1; text-align: center; font-size: 0.7em; color: var(--text-secondary); transition: color 0.3s; }
+        .phase-label.active { color: var(--accent-blue); font-weight: 600; }
+        .phase-label.done { color: var(--accent-green); }
+
+        /* Cards / panels */
+        .panel { background: var(--bg-card); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 24px; margin-bottom: 18px; }
+        .panel-title { font-family: 'Russo One', sans-serif; font-size: 1.15em; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+
+        /* Story cards */
+        .stories-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
+        .story-card { background: var(--bg-column); border: 2px solid transparent; border-radius: 10px; padding: 14px; cursor: pointer; transition: all 0.2s; position: relative; }
+        .story-card:hover { border-color: var(--accent-blue); }
+        .story-card.selected { border-color: var(--accent-cyan); background: rgba(57,197,207,0.08); }
+        .story-card.refined { border-color: var(--accent-green); background: rgba(35,134,54,0.08); }
+        .story-card.committed { border-color: var(--accent-purple); background: rgba(137,87,229,0.08); }
+        .story-card.disabled { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
+        .story-id { font-size: 0.75em; color: var(--text-secondary); margin-bottom: 4px; }
+        .story-title { font-weight: 600; font-size: 0.95em; margin-bottom: 6px; }
+        .story-estimate { font-size: 0.85em; margin-bottom: 4px; }
+        .story-badge { position: absolute; top: 8px; right: 8px; padding: 2px 8px; border-radius: 6px; font-size: 0.7em; font-weight: 600; }
+        .badge-unknown { background: rgba(255,255,255,0.1); color: var(--text-secondary); }
+        .badge-rough { background: rgba(240,192,0,0.2); color: var(--accent-yellow); }
+        .badge-refined { background: rgba(35,134,54,0.2); color: var(--accent-green); }
+        .badge-committed { background: rgba(137,87,229,0.2); color: var(--accent-purple); }
+
+        .story-tags { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 6px; }
+        .story-tag { font-size: 0.68em; padding: 2px 6px; border-radius: 4px; background: rgba(255,255,255,0.06); color: var(--text-secondary); }
+
+        /* Slider */
+        .slider-group { display: flex; align-items: center; gap: 14px; margin: 14px 0; }
+        .slider-group input[type=range] { flex: 1; accent-color: var(--accent-blue); }
+        .slider-value { font-size: 1.3em; font-weight: 700; min-width: 40px; text-align: center; color: var(--accent-cyan); }
+
+        /* Result / summary blocks */
+        .summary-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .summary-row:last-child { border-bottom: none; }
+        .summary-label { color: var(--text-secondary); }
+        .summary-val { font-weight: 600; }
+        .summary-val.good { color: var(--accent-green); }
+        .summary-val.warn { color: var(--accent-orange); }
+        .summary-val.bad { color: var(--accent-red); }
+
+        /* Log / events */
+        .log { background: var(--bg-column); border-radius: 8px; padding: 14px; max-height: 260px; overflow-y: auto; font-size: 0.88em; line-height: 1.7; }
+        .log-entry { padding: 2px 0; }
+        .log-entry .icon { margin-right: 6px; }
+
+        /* Sprint board */
+        .sprint-board { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+        .sprint-col { background: var(--bg-column); border-radius: 10px; padding: 12px; min-height: 120px; }
+        .sprint-col-title { font-size: 0.8em; font-weight: 600; color: var(--text-secondary); margin-bottom: 8px; text-align: center;
+            padding-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+        .sprint-col .story-card { margin-bottom: 8px; cursor: default; }
+
+        /* Outcome */
+        .outcome { text-align: center; padding: 30px; }
+        .outcome-icon { font-size: 4em; margin-bottom: 14px; }
+        .outcome-title { font-family: 'Russo One', sans-serif; font-size: 1.6em; margin-bottom: 8px; }
+        .outcome-text { color: var(--text-secondary); font-size: 1em; line-height: 1.6; max-width: 600px; margin: 0 auto; }
+        .outcome-score { font-size: 2em; font-weight: 700; margin: 14px 0; }
+
+        /* Tooltip */
+        .tip { background: rgba(31,111,235,0.1); border-left: 3px solid var(--accent-blue); border-radius: 0 8px 8px 0; padding: 12px 16px; margin: 12px 0; font-size: 0.9em; line-height: 1.5; }
+        .tip strong { color: var(--accent-cyan); }
+
+        /* Rules modal */
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 100; align-items: center; justify-content: center; }
+        .modal-overlay.show { display: flex; }
+        .modal { background: var(--bg-card); border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; padding: 30px; max-width: 650px; width: 90%; max-height: 85vh; overflow-y: auto; }
+        .modal h2 { font-family: 'Russo One', sans-serif; margin-bottom: 16px; }
+        .modal h3 { color: var(--accent-cyan); margin: 14px 0 6px; font-size: 1em; }
+        .modal p, .modal li { font-size: 0.92em; line-height: 1.6; color: var(--text-secondary); }
+        .modal ul { padding-left: 20px; }
+        .modal .close-btn { margin-top: 16px; }
+
+        /* Responsive */
+        @media (max-width: 700px) {
+            .sprint-board { grid-template-columns: 1fr 1fr; }
+            .stories-grid { grid-template-columns: 1fr; }
+            .stats-bar { gap: 6px; }
+            .stat { min-width: 80px; padding: 8px 10px; }
+        }
+    </style>
+</head>
+<body>
+<div class="app">
+    <div class="header">
+        <div class="header-title">🏃 Sprint Backlog Simulator</div>
+        <div class="header-sub">Планирование спринта: PBR → оценка → коммит → выполнение</div>
+    </div>
+
+    <div class="stats-bar">
+        <div class="stat stat-cyan"><div class="stat-value" id="statCapacity">40</div><div class="stat-label">Capacity (SP)</div></div>
+        <div class="stat stat-orange"><div class="stat-value" id="statPbrCost">0</div><div class="stat-label">Потрачено на PBR</div></div>
+        <div class="stat stat-blue"><div class="stat-value" id="statRemaining">40</div><div class="stat-label">Осталось SP</div></div>
+        <div class="stat stat-purple"><div class="stat-value" id="statCommitted">0</div><div class="stat-label">Committed SP</div></div>
+        <div class="stat stat-green"><div class="stat-value" id="statSprint">—</div><div class="stat-label">Спринт</div></div>
+    </div>
+
+    <div class="phase-bar">
+        <div class="phase-step" id="ps0"></div>
+        <div class="phase-step" id="ps1"></div>
+        <div class="phase-step" id="ps2"></div>
+        <div class="phase-step" id="ps3"></div>
+        <div class="phase-step" id="ps4"></div>
+        <div class="phase-step" id="ps5"></div>
+    </div>
+    <div class="phase-labels">
+        <div class="phase-label" id="pl0">Выбор историй</div>
+        <div class="phase-label" id="pl1">Грубая оценка</div>
+        <div class="phase-label" id="pl2">PBR</div>
+        <div class="phase-label" id="pl3">Результат PBR</div>
+        <div class="phase-label" id="pl4">Коммит в спринт</div>
+        <div class="phase-label" id="pl5">Итоги</div>
+    </div>
+
+    <div class="controls">
+        <button class="btn btn-purple" onclick="showRules()">📖 Правила</button>
+        <button class="btn btn-reset" onclick="resetGame()">🔄 Заново</button>
+    </div>
+
+    <div id="gameArea"></div>
+</div>
+
+<!-- Rules modal -->
+<div class="modal-overlay" id="rulesModal">
+    <div class="modal">
+        <h2>📖 Правила игры</h2>
+        <h3>🎯 Цель</h3>
+        <p>Спланировать спринт так, чтобы максимально эффективно использовать capacity команды, не перегрузив спринт и не оставив команду без работы.</p>
+        <h3>📋 Фазы игры</h3>
+        <ul>
+            <li><strong>Выбор историй</strong> — вы видите Product Backlog с непроработанными историями. Выберите, сколько историй взять на рассмотрение.</li>
+            <li><strong>Грубая оценка</strong> — вы видите предварительные оценки выбранных историй (T-shirt sizing). На основе этих оценок решите, сколько историй отправить на PBR.</li>
+            <li><strong>PBR (Product Backlog Refinement)</strong> — команда тратит SP на проработку историй. Каждая история стоит ~4 SP на PBR.</li>
+            <li><strong>Результат PBR</strong> — вы видите уточнённые оценки. Некоторые истории оказались сложнее/проще, чем казалось. Оставшийся capacity = Total − PBR cost.</li>
+            <li><strong>Коммит в спринт</strong> — из проработанных историй выберите, какие взять в спринт, не превышая оставшийся capacity.</li>
+            <li><strong>Итоги</strong> — спринт выполняется, и вы видите результат: сколько историй завершено, были ли проблемы.</li>
+        </ul>
+        <h3>⚡ Подсказки</h3>
+        <ul>
+            <li>Больше историй на PBR = больше выбор, но меньше capacity на реализацию.</li>
+            <li>Меньше историй на PBR = меньше затрат, но и меньше выбор (можете не набрать на спринт).</li>
+            <li>Перегруженный спринт → часть историй не завершится.</li>
+            <li>Недогруженный спринт → команда простаивает, stakeholders недовольны.</li>
+        </ul>
+        <h3>🏆 Очки</h3>
+        <p>Очки начисляются за: завершённые истории, оптимальную загрузку (80-100% capacity), отсутствие spillover. Штрафы за: перегрузку, spillover, простой.</p>
+        <button class="btn btn-primary close-btn" onclick="closeRules()">Понятно!</button>
+    </div>
+</div>
+
+<script>
+// ============================================================
+// DATA
+// ============================================================
+const STORIES_POOL = [
+    { id: 'US-101', title: 'Авторизация через SSO', tags: ['backend','security'], roughSP: 8, trueSP: 10, risk: 'Интеграция с IdP оказалась сложнее' },
+    { id: 'US-102', title: 'Дашборд аналитики', tags: ['frontend','charts'], roughSP: 13, trueSP: 8, risk: 'Библиотека графиков упростила задачу' },
+    { id: 'US-103', title: 'Экспорт отчётов в PDF', tags: ['backend','pdf'], roughSP: 5, trueSP: 5, risk: '' },
+    { id: 'US-104', title: 'Push-уведомления', tags: ['mobile','backend'], roughSP: 8, trueSP: 13, risk: 'iOS и Android требуют разных подходов' },
+    { id: 'US-105', title: 'Поиск по каталогу услуг', tags: ['search','backend'], roughSP: 5, trueSP: 3, risk: 'Elasticsearch уже настроен' },
+    { id: 'US-106', title: 'Интеграция с Jira', tags: ['integration','api'], roughSP: 8, trueSP: 8, risk: '' },
+    { id: 'US-107', title: 'Кэширование API', tags: ['backend','performance'], roughSP: 3, trueSP: 5, risk: 'Инвалидация кэша — нетривиальная задача' },
+    { id: 'US-108', title: 'Страница профиля', tags: ['frontend','ux'], roughSP: 3, trueSP: 2, risk: 'Есть готовый компонент' },
+    { id: 'US-109', title: 'Миграция БД на PostgreSQL', tags: ['database','devops'], roughSP: 13, trueSP: 21, risk: 'Обнаружены несовместимые запросы' },
+    { id: 'US-110', title: 'Онбординг-визард', tags: ['frontend','ux'], roughSP: 5, trueSP: 5, risk: '' },
+    { id: 'US-111', title: 'Rate limiting API', tags: ['backend','security'], roughSP: 3, trueSP: 3, risk: '' },
+    { id: 'US-112', title: 'Мультиязычность (i18n)', tags: ['frontend','i18n'], roughSP: 8, trueSP: 13, risk: 'Много hardcoded строк в коде' },
+    { id: 'US-113', title: 'Аудит-лог действий', tags: ['backend','compliance'], roughSP: 5, trueSP: 8, risk: 'Требования compliance шире, чем ожидалось' },
+    { id: 'US-114', title: 'Dark mode', tags: ['frontend','ux'], roughSP: 3, trueSP: 2, risk: 'CSS variables уже в проекте' },
+    { id: 'US-115', title: 'WebSocket-уведомления', tags: ['backend','realtime'], roughSP: 8, trueSP: 8, risk: '' },
+    { id: 'US-116', title: 'Импорт данных из CSV', tags: ['backend','data'], roughSP: 5, trueSP: 3, risk: 'Стандартный формат, быстрый парсинг' },
+    { id: 'US-117', title: 'Двухфакторная аутентификация', tags: ['security','backend'], roughSP: 8, trueSP: 13, risk: 'TOTP + SMS — два потока' },
+    { id: 'US-118', title: 'Настройка CI/CD pipeline', tags: ['devops','ci'], roughSP: 5, trueSP: 5, risk: '' },
+];
+
+const PBR_COST_PER_STORY = 4; // SP на проработку одной истории
+const TEAM_CAPACITY = 40;     // SP за спринт
+
+// ============================================================
+// STATE
+// ============================================================
+let state = {
+    phase: 0, // 0-select, 1-rough, 2-pbr, 3-pbrResult, 4-commit, 5-outcome
+    backlog: [],          // shuffled stories for this game
+    selectedCount: 0,     // how many stories selected from backlog (phase 0)
+    selectedStories: [],  // stories picked from backlog
+    pbrCount: 0,          // how many stories to send to PBR (decided in phase 1)
+    pbrStories: [],       // stories that went through PBR
+    pbrCost: 0,
+    committedStories: [], // stories committed to sprint
+    committedSP: 0,
+    remainingCapacity: TEAM_CAPACITY,
+    score: 0,
+    sprintNumber: 1,
+};
+
+function init() {
+    // shuffle and pick 10 stories as backlog
+    const shuffled = [...STORIES_POOL].sort(() => Math.random() - 0.5);
+    state.backlog = shuffled.slice(0, 10).map(s => ({...s}));
+    state.phase = 0;
+    state.selectedCount = 0;
+    state.selectedStories = [];
+    state.pbrCount = 0;
+    state.pbrStories = [];
+    state.pbrCost = 0;
+    state.committedStories = [];
+    state.committedSP = 0;
+    state.remainingCapacity = TEAM_CAPACITY;
+    state.score = 0;
+    render();
+}
+
+function resetGame() {
+    state.sprintNumber++;
+    init();
+}
+
+// ============================================================
+// RENDER
+// ============================================================
+function render() {
+    updateStats();
+    updatePhaseBar();
+    const area = document.getElementById('gameArea');
+
+    switch (state.phase) {
+        case 0: area.innerHTML = renderPhase0(); break;
+        case 1: area.innerHTML = renderPhase1(); break;
+        case 2: area.innerHTML = renderPhase2(); break;
+        case 3: area.innerHTML = renderPhase3(); break;
+        case 4: area.innerHTML = renderPhase4(); break;
+        case 5: area.innerHTML = renderPhase5(); break;
+    }
+}
+
+function updateStats() {
+    document.getElementById('statCapacity').textContent = TEAM_CAPACITY;
+    document.getElementById('statPbrCost').textContent = state.pbrCost;
+    document.getElementById('statRemaining').textContent = state.remainingCapacity;
+    document.getElementById('statCommitted').textContent = state.committedSP;
+    document.getElementById('statSprint').textContent = '#' + state.sprintNumber;
+}
+
+function updatePhaseBar() {
+    for (let i = 0; i < 6; i++) {
+        const step = document.getElementById('ps' + i);
+        const label = document.getElementById('pl' + i);
+        step.className = 'phase-step';
+        label.className = 'phase-label';
+        if (i < state.phase) { step.classList.add('done'); label.classList.add('done'); }
+        else if (i === state.phase) { step.classList.add('active'); label.classList.add('active'); }
+    }
+}
+
+// ---- Phase 0: Select stories from backlog ----
+function renderPhase0() {
+    return `
+        <div class="panel">
+            <div class="panel-title">📦 Product Backlog — выберите количество историй для рассмотрения</div>
+            <div class="tip">
+                Перед вами <strong>${state.backlog.length} непроработанных историй</strong> из Product Backlog.
+                Выберите, сколько из них вы хотите рассмотреть для следующего спринта.
+                Чем больше выберете — тем больше будет выбор, но и больше времени уйдёт на PBR.
+            </div>
+            <div class="slider-group">
+                <span>2</span>
+                <input type="range" min="2" max="${state.backlog.length}" value="4" id="selectSlider" oninput="updateSelectSlider()">
+                <span>${state.backlog.length}</span>
+                <div class="slider-value" id="selectSliderVal">4</div>
+            </div>
+            <div class="stories-grid" id="backlogPreview">
+                ${state.backlog.map((s, i) => `
+                    <div class="story-card ${i < 4 ? 'selected' : ''}" id="backlogCard${i}">
+                        <span class="story-badge badge-unknown">❓ Не оценена</span>
+                        <div class="story-id">${s.id}</div>
+                        <div class="story-title">${s.title}</div>
+                        <div class="story-tags">${s.tags.map(t => `<span class="story-tag">${t}</span>`).join('')}</div>
+                    </div>
+                `).join('')}
+            </div>
+            <div style="text-align:center;margin-top:18px;">
+                <button class="btn btn-primary" onclick="confirmSelect()">Выбрать истории →</button>
+            </div>
+        </div>
+    `;
+}
+
+function updateSelectSlider() {
+    const val = parseInt(document.getElementById('selectSlider').value);
+    document.getElementById('selectSliderVal').textContent = val;
+    state.backlog.forEach((_, i) => {
+        const card = document.getElementById('backlogCard' + i);
+        if (card) {
+            card.className = 'story-card' + (i < val ? ' selected' : '');
+        }
+    });
+}
+
+function confirmSelect() {
+    const val = parseInt(document.getElementById('selectSlider').value);
+    state.selectedCount = val;
+    state.selectedStories = state.backlog.slice(0, val).map(s => ({...s}));
+    state.phase = 1;
+    render();
+}
+
+// ---- Phase 1: Rough estimates — decide PBR count ----
+function renderPhase1() {
+    const totalRough = state.selectedStories.reduce((sum, s) => sum + s.roughSP, 0);
+    return `
+        <div class="panel">
+            <div class="panel-title">📐 Грубая оценка выбранных историй (T-shirt → SP)</div>
+            <div class="tip">
+                Вы видите <strong>предварительные оценки</strong> ${state.selectedStories.length} историй.
+                Общая грубая оценка: <strong>${totalRough} SP</strong>. Capacity команды: <strong>${TEAM_CAPACITY} SP</strong>.<br>
+                Теперь решите, сколько историй отправить на <strong>PBR</strong> (Product Backlog Refinement).
+                Каждая история стоит <strong>${PBR_COST_PER_STORY} SP</strong> на проработку.
+            </div>
+            <div class="stories-grid">
+                ${state.selectedStories.map((s, i) => `
+                    <div class="story-card" id="roughCard${i}">
+                        <span class="story-badge badge-rough">~${s.roughSP} SP</span>
+                        <div class="story-id">${s.id}</div>
+                        <div class="story-title">${s.title}</div>
+                        <div class="story-estimate">Грубая оценка: <strong>${s.roughSP} SP</strong></div>
+                        <div class="story-tags">${s.tags.map(t => `<span class="story-tag">${t}</span>`).join('')}</div>
+                    </div>
+                `).join('')}
+            </div>
+
+            <div class="panel" style="margin-top:18px; background: var(--bg-column);">
+                <div class="panel-title">🔍 Сколько историй отправить на PBR?</div>
+                <div class="slider-group">
+                    <span>1</span>
+                    <input type="range" min="1" max="${state.selectedStories.length}" value="${Math.min(3, state.selectedStories.length)}" id="pbrSlider" oninput="updatePbrSlider()">
+                    <span>${state.selectedStories.length}</span>
+                    <div class="slider-value" id="pbrSliderVal">${Math.min(3, state.selectedStories.length)}</div>
+                </div>
+                <div id="pbrCostPreview" style="color: var(--text-secondary); font-size: 0.9em;"></div>
+            </div>
+            <div style="text-align:center;margin-top:18px;">
+                <button class="btn btn-orange" onclick="confirmPbr()">Запустить PBR →</button>
+            </div>
+        </div>
+    `;
+    setTimeout(() => updatePbrSlider(), 0);
+}
+
+function updatePbrSlider() {
+    const val = parseInt(document.getElementById('pbrSlider').value);
+    document.getElementById('pbrSliderVal').textContent = val;
+    const cost = val * PBR_COST_PER_STORY;
+    const remaining = TEAM_CAPACITY - cost;
+    const preview = document.getElementById('pbrCostPreview');
+    if (preview) {
+        preview.innerHTML = `Стоимость PBR: <strong style="color:var(--accent-orange)">${cost} SP</strong> · Останется на реализацию: <strong style="color:${remaining < 15 ? 'var(--accent-red)' : 'var(--accent-green)'}">${remaining} SP</strong>`;
+    }
+    // Highlight selected stories
+    state.selectedStories.forEach((_, i) => {
+        const card = document.getElementById('roughCard' + i);
+        if (card) card.className = 'story-card' + (i < val ? ' selected' : '');
+    });
+}
+
+function confirmPbr() {
+    const val = parseInt(document.getElementById('pbrSlider').value);
+    state.pbrCount = val;
+    state.pbrStories = state.selectedStories.slice(0, val).map(s => ({...s}));
+    state.pbrCost = val * PBR_COST_PER_STORY;
+    state.remainingCapacity = TEAM_CAPACITY - state.pbrCost;
+    state.phase = 2;
+    render();
+}
+
+// ---- Phase 2: PBR in progress (animation) ----
+function renderPhase2() {
+    setTimeout(() => {
+        state.phase = 3;
+        render();
+    }, 2000);
+
+    return `
+        <div class="panel" style="text-align:center; padding:50px;">
+            <div style="font-size:3em; margin-bottom:16px;">🔍</div>
+            <div class="panel-title" style="justify-content:center;">Команда проводит PBR...</div>
+            <p style="color:var(--text-secondary);">Прорабатываем ${state.pbrCount} истори${state.pbrCount === 1 ? 'ю' : state.pbrCount < 5 ? 'и' : 'й'}. Затраты: ${state.pbrCost} SP</p>
+            <div style="margin-top:20px;">
+                <div style="background:var(--bg-column);border-radius:8px;height:8px;overflow:hidden;">
+                    <div style="background:var(--accent-orange);height:100%;width:0%;border-radius:8px;animation:pbrProgress 1.8s ease-in-out forwards;"></div>
+                </div>
+            </div>
+        </div>
+        <style>@keyframes pbrProgress { to { width: 100%; } }</style>
+    `;
+}
+
+// ---- Phase 3: PBR results — see refined estimates ----
+function renderPhase3() {
+    const totalRefined = state.pbrStories.reduce((sum, s) => sum + s.trueSP, 0);
+    const totalRough = state.pbrStories.reduce((sum, s) => sum + s.roughSP, 0);
+    const diff = totalRefined - totalRough;
+
+    return `
+        <div class="panel">
+            <div class="panel-title">✅ Результаты PBR</div>
+            <div class="tip">
+                Команда потратила <strong>${state.pbrCost} SP</strong> на проработку ${state.pbrCount} историй.
+                Оставшийся capacity: <strong>${state.remainingCapacity} SP</strong> на реализацию.<br>
+                ${diff > 0 ? '⚠️ Уточнённые оценки <strong>выше</strong> грубых на ' + diff + ' SP — истории оказались сложнее!'
+                : diff < 0 ? '✨ Уточнённые оценки <strong>ниже</strong> грубых на ' + Math.abs(diff) + ' SP — приятный сюрприз!'
+                : '📊 Уточнённые оценки совпали с грубыми.'}
+            </div>
+
+            <div class="stories-grid">
+                ${state.pbrStories.map(s => {
+                    const delta = s.trueSP - s.roughSP;
+                    const deltaStr = delta > 0 ? `+${delta}` : delta < 0 ? `${delta}` : '±0';
+                    const deltaColor = delta > 0 ? 'var(--accent-red)' : delta < 0 ? 'var(--accent-green)' : 'var(--text-secondary)';
+                    return `
+                    <div class="story-card refined">
+                        <span class="story-badge badge-refined">${s.trueSP} SP</span>
+                        <div class="story-id">${s.id}</div>
+                        <div class="story-title">${s.title}</div>
+                        <div class="story-estimate">
+                            Было: ${s.roughSP} SP → Стало: <strong>${s.trueSP} SP</strong>
+                            <span style="color:${deltaColor};margin-left:6px;">(${deltaStr})</span>
+                        </div>
+                        ${s.risk ? `<div style="font-size:0.8em;color:var(--accent-orange);margin-top:4px;">💡 ${s.risk}</div>` : ''}
+                        <div class="story-tags">${s.tags.map(t => `<span class="story-tag">${t}</span>`).join('')}</div>
+                    </div>`;
+                }).join('')}
+            </div>
+
+            <div class="panel" style="margin-top:18px; background: var(--bg-column);">
+                <div class="summary-row">
+                    <span class="summary-label">Грубая оценка (было)</span>
+                    <span class="summary-val">${totalRough} SP</span>
+                </div>
+                <div class="summary-row">
+                    <span class="summary-label">Уточнённая оценка</span>
+                    <span class="summary-val ${diff > 0 ? 'bad' : diff < 0 ? 'good' : ''}">${totalRefined} SP (${diff > 0 ? '+' : ''}${diff})</span>
+                </div>
+                <div class="summary-row">
+                    <span class="summary-label">Потрачено на PBR</span>
+                    <span class="summary-val warn">${state.pbrCost} SP</span>
+                </div>
+                <div class="summary-row">
+                    <span class="summary-label">Осталось на реализацию</span>
+                    <span class="summary-val ${state.remainingCapacity >= totalRefined ? 'good' : 'warn'}">${state.remainingCapacity} SP</span>
+                </div>
+            </div>
+
+            <div style="text-align:center;margin-top:18px;">
+                <button class="btn btn-purple" onclick="goToCommit()">Выбрать истории для спринта →</button>
+            </div>
+        </div>
+    `;
+}
+
+function goToCommit() {
+    state.phase = 4;
+    render();
+}
+
+// ---- Phase 4: Commit stories to sprint ----
+function renderPhase4() {
+    // Track which stories are toggled for commit
+    if (!state._commitSelection) {
+        state._commitSelection = state.pbrStories.map(() => false);
+    }
+
+    const selectedSP = state.pbrStories.reduce((sum, s, i) => sum + (state._commitSelection[i] ? s.trueSP : 0), 0);
+    const overloaded = selectedSP > state.remainingCapacity;
+    const loadPct = Math.round((selectedSP / state.remainingCapacity) * 100);
+
+    return `
+        <div class="panel">
+            <div class="panel-title">🎯 Коммит в спринт</div>
+            <div class="tip">
+                У вас <strong>${state.remainingCapacity} SP</strong> на реализацию.
+                Выберите истории для спринта. Кликайте на карточки для выбора/отмены.
+            </div>
+
+            <div class="stories-grid">
+                ${state.pbrStories.map((s, i) => `
+                    <div class="story-card ${state._commitSelection[i] ? 'committed' : ''}" onclick="toggleCommit(${i})" id="commitCard${i}">
+                        <span class="story-badge ${state._commitSelection[i] ? 'badge-committed' : 'badge-refined'}">${s.trueSP} SP</span>
+                        <div class="story-id">${s.id}</div>
+                        <div class="story-title">${s.title}</div>
+                        <div class="story-estimate">Оценка: <strong>${s.trueSP} SP</strong></div>
+                        <div class="story-tags">${s.tags.map(t => `<span class="story-tag">${t}</span>`).join('')}</div>
+                    </div>
+                `).join('')}
+            </div>
+
+            <div class="panel" style="margin-top:18px; background: var(--bg-column);">
+                <div class="summary-row">
+                    <span class="summary-label">Capacity на реализацию</span>
+                    <span class="summary-val">${state.remainingCapacity} SP</span>
+                </div>
+                <div class="summary-row">
+                    <span class="summary-label">Выбрано к коммиту</span>
+                    <span class="summary-val ${overloaded ? 'bad' : selectedSP > 0 ? 'good' : ''}">${selectedSP} SP</span>
+                </div>
+                <div class="summary-row">
+                    <span class="summary-label">Загрузка</span>
+                    <span class="summary-val ${overloaded ? 'bad' : loadPct >= 80 ? 'good' : 'warn'}">${selectedSP > 0 ? loadPct + '%' : '—'}</span>
+                </div>
+                ${overloaded ? '<div style="color:var(--accent-red);font-size:0.9em;margin-top:8px;">⚠️ Перегрузка! Вы выбрали больше SP, чем есть capacity. Часть историй не будет завершена.</div>' : ''}
+            </div>
+
+            <div style="text-align:center;margin-top:18px;">
+                <button class="btn btn-green" onclick="confirmCommit()" ${selectedSP === 0 ? 'disabled' : ''}>🚀 Запустить спринт →</button>
+            </div>
+        </div>
+    `;
+}
+
+function toggleCommit(idx) {
+    state._commitSelection[idx] = !state._commitSelection[idx];
+    render();
+}
+
+function confirmCommit() {
+    state.committedStories = state.pbrStories.filter((_, i) => state._commitSelection[i]);
+    state.committedSP = state.committedStories.reduce((sum, s) => sum + s.trueSP, 0);
+    state._commitSelection = null;
+    state.phase = 5;
+    render();
+}
+
+// ---- Phase 5: Sprint outcome ----
+function renderPhase5() {
+    const capacity = state.remainingCapacity;
+    const committed = state.committedSP;
+    const overloaded = committed > capacity;
+    const loadPct = Math.round((committed / capacity) * 100);
+
+    // Simulate sprint
+    let completedStories = [];
+    let spilloverStories = [];
+    let spUsed = 0;
+
+    // Shuffle committed stories to add randomness to completion order
+    const shuffled = [...state.committedStories].sort(() => Math.random() - 0.5);
+    for (const s of shuffled) {
+        if (spUsed + s.trueSP <= capacity) {
+            completedStories.push(s);
+            spUsed += s.trueSP;
+        } else {
+            spilloverStories.push(s);
+        }
+    }
+
+    // Score calculation
+    let score = 0;
+    score += completedStories.length * 100; // per completed story
+    if (loadPct >= 80 && loadPct <= 100) score += 200; // optimal load bonus
+    else if (loadPct >= 60 && loadPct < 80) score += 100;
+    if (spilloverStories.length > 0) score -= spilloverStories.length * 50;
+    if (loadPct < 50 && committed > 0) score -= 100; // underload penalty
+    if (loadPct > 120) score -= 150; // severe overload
+    state.score = Math.max(0, score);
+
+    // Determine outcome
+    let outcomeIcon, outcomeTitle, outcomeClass;
+    if (spilloverStories.length === 0 && loadPct >= 80) {
+        outcomeIcon = '🏆'; outcomeTitle = 'Отличный спринт!'; outcomeClass = 'good';
+    } else if (spilloverStories.length === 0 && loadPct >= 60) {
+        outcomeIcon = '👍'; outcomeTitle = 'Хороший спринт'; outcomeClass = 'good';
+    } else if (spilloverStories.length === 0 && loadPct < 60) {
+        outcomeIcon = '😐'; outcomeTitle = 'Спринт недогружен'; outcomeClass = 'warn';
+    } else {
+        outcomeIcon = '⚠️'; outcomeTitle = 'Spillover!'; outcomeClass = 'bad';
+    }
+
+    // Unrefined stories that weren't PBR'd
+    const skippedStories = state.selectedStories.slice(state.pbrCount);
+
+    return `
+        <div class="panel">
+            <div class="outcome">
+                <div class="outcome-icon">${outcomeIcon}</div>
+                <div class="outcome-title">${outcomeTitle}</div>
+                <div class="outcome-score ${outcomeClass}" style="color: var(--accent-${outcomeClass === 'good' ? 'green' : outcomeClass === 'warn' ? 'orange' : 'red'})">${state.score} очков</div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">📊 Итоги спринта</div>
+            <div class="summary-row">
+                <span class="summary-label">Capacity команды</span>
+                <span class="summary-val">${TEAM_CAPACITY} SP</span>
+            </div>
+            <div class="summary-row">
+                <span class="summary-label">Потрачено на PBR (${state.pbrCount} историй)</span>
+                <span class="summary-val warn">${state.pbrCost} SP</span>
+            </div>
+            <div class="summary-row">
+                <span class="summary-label">Capacity на реализацию</span>
+                <span class="summary-val">${capacity} SP</span>
+            </div>
+            <div class="summary-row">
+                <span class="summary-label">Committed</span>
+                <span class="summary-val ${overloaded ? 'bad' : 'good'}">${committed} SP</span>
+            </div>
+            <div class="summary-row">
+                <span class="summary-label">Использовано</span>
+                <span class="summary-val good">${spUsed} SP</span>
+            </div>
+            <div class="summary-row">
+                <span class="summary-label">Загрузка</span>
+                <span class="summary-val ${loadPct > 100 ? 'bad' : loadPct >= 80 ? 'good' : 'warn'}">${loadPct}%</span>
+            </div>
+            <div class="summary-row">
+                <span class="summary-label">Завершено историй</span>
+                <span class="summary-val good">${completedStories.length}</span>
+            </div>
+            ${spilloverStories.length > 0 ? `
+            <div class="summary-row">
+                <span class="summary-label">Spillover</span>
+                <span class="summary-val bad">${spilloverStories.length} истори${spilloverStories.length === 1 ? 'я' : spilloverStories.length < 5 ? 'и' : 'й'}</span>
+            </div>` : ''}
+        </div>
+
+        <div class="sprint-board">
+            <div class="sprint-col">
+                <div class="sprint-col-title">✅ Завершено (${completedStories.length})</div>
+                ${completedStories.map(s => `
+                    <div class="story-card" style="border-color:var(--accent-green);cursor:default;">
+                        <div class="story-id">${s.id}</div>
+                        <div class="story-title">${s.title}</div>
+                        <div class="story-estimate" style="color:var(--accent-green);">${s.trueSP} SP ✓</div>
+                    </div>
+                `).join('')}
+            </div>
+            <div class="sprint-col">
+                <div class="sprint-col-title">🔴 Spillover (${spilloverStories.length})</div>
+                ${spilloverStories.map(s => `
+                    <div class="story-card" style="border-color:var(--accent-red);cursor:default;">
+                        <div class="story-id">${s.id}</div>
+                        <div class="story-title">${s.title}</div>
+                        <div class="story-estimate" style="color:var(--accent-red);">${s.trueSP} SP ✗</div>
+                    </div>
+                `).join('')}
+            </div>
+            <div class="sprint-col">
+                <div class="sprint-col-title">🔍 Проработаны, не взяты (${state.pbrStories.filter(s => !state.committedStories.includes(s)).length})</div>
+                ${state.pbrStories.filter(s => !state.committedStories.includes(s)).map(s => `
+                    <div class="story-card" style="border-color:var(--accent-orange);cursor:default;">
+                        <div class="story-id">${s.id}</div>
+                        <div class="story-title">${s.title}</div>
+                        <div class="story-estimate" style="color:var(--accent-orange);">${s.trueSP} SP</div>
+                    </div>
+                `).join('')}
+            </div>
+            <div class="sprint-col">
+                <div class="sprint-col-title">❓ Не проработаны (${skippedStories.length})</div>
+                ${skippedStories.map(s => `
+                    <div class="story-card" style="border-color:var(--bg-column);cursor:default;opacity:0.6;">
+                        <div class="story-id">${s.id}</div>
+                        <div class="story-title">${s.title}</div>
+                        <div class="story-estimate" style="color:var(--text-secondary);">~${s.roughSP} SP</div>
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+
+        <div class="panel" style="margin-top:18px;">
+            <div class="panel-title">💡 Выводы</div>
+            <div class="log">
+                ${completedStories.length > 0 ? `<div class="log-entry"><span class="icon">✅</span> Завершено ${completedStories.length} истори${completedStories.length === 1 ? 'я' : completedStories.length < 5 ? 'и' : 'й'} (${spUsed} SP)</div>` : ''}
+                ${spilloverStories.length > 0 ? `<div class="log-entry"><span class="icon">⚠️</span> ${spilloverStories.length} истори${spilloverStories.length === 1 ? 'я' : spilloverStories.length < 5 ? 'и' : 'й'} не завершен${spilloverStories.length === 1 ? 'а' : 'ы'} — spillover в следующий спринт</div>` : ''}
+                ${loadPct < 60 ? `<div class="log-entry"><span class="icon">📉</span> Загрузка ${loadPct}% — команда простаивала. Стоило взять больше историй или проработать меньше.</div>` : ''}
+                ${loadPct >= 80 && loadPct <= 100 ? `<div class="log-entry"><span class="icon">🎯</span> Загрузка ${loadPct}% — оптимальный баланс!</div>` : ''}
+                ${loadPct > 100 ? `<div class="log-entry"><span class="icon">🔥</span> Перегрузка ${loadPct}% — команда не справилась со всеми задачами. Нужно быть консервативнее.</div>` : ''}
+                <div class="log-entry"><span class="icon">📊</span> PBR стоил ${state.pbrCost} SP (${Math.round(state.pbrCost / TEAM_CAPACITY * 100)}% capacity) за ${state.pbrCount} историй.</div>
+                ${state.pbrCount > state.committedStories.length + 1 ? `<div class="log-entry"><span class="icon">💡</span> Проработано больше историй, чем взято — это нормально, запас для будущих спринтов.</div>` : ''}
+            </div>
+        </div>
+
+        <div style="text-align:center;margin-top:18px;">
+            <button class="btn btn-primary" onclick="resetGame()">🔄 Новый спринт</button>
+        </div>
+    `;
+}
+
+// ============================================================
+// RULES MODAL
+// ============================================================
+function showRules() { document.getElementById('rulesModal').classList.add('show'); }
+function closeRules() { document.getElementById('rulesModal').classList.remove('show'); }
+document.getElementById('rulesModal').addEventListener('click', (e) => {
+    if (e.target === e.currentTarget) closeRules();
+});
+
+// ============================================================
+// INIT
+// ============================================================
+init();
+
+// Fix: ensure phase 1 slider initializes
+const origRender = render;
+render = function() {
+    origRender();
+    if (state.phase === 1) {
+        setTimeout(() => updatePbrSlider(), 10);
+    }
+};
+</script>
+</body>
+</html>
